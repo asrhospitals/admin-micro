@@ -20,10 +20,15 @@ jobs:
 
      
       - name: Deploy via SSH
-  run: |
-    ssh -o StrictHostKeyChecking=no root@213.210.37.3 '
-      cd /root/admin-micro &&
-      git reset --hard &&
-      git clean -fd &&
-      git pull origin main
-    '
+        run: |
+         ssh -o StrictHostKeyChecking=no root@213.210.37.3 'cd /root/admin-micro && git pull origin main'
+      
+      - name: Deploy via SSH
+        run: |
+         ssh -o StrictHostKeyChecking=no root@213.210.37.3 '
+         cd /root/admin-micro &&
+         git reset --hard &&
+         git clean -fd &&
+         git pull origin main
+         '
+
