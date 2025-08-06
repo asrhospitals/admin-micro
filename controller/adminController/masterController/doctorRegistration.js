@@ -3,7 +3,7 @@ const Doctor = require("../../../model/adminModel/masterModel/doctorRegistration
 // A. Add Doctor
 const addDoctor = async (req, res) => {
   try {
-    const doctor = await Doctor.create(req.body);
+    const doctor = await Doctor.create({...req.body});
     res.status(201).json(doctor);
   } catch (e) {
     res.status(400).json({ message: `Something went wrong ${e}` });
