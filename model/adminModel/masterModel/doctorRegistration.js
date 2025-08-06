@@ -50,6 +50,11 @@ const Doctor = sequilize.define(
     dditsig: {
       type: DataTypes.STRING,
     },
+    dstatus: {
+      type: DataTypes.ENUM,
+      values: ["active", "pending"],
+      defaultValue: "pending",
+    },
   },
   { timestamps: false }
 );

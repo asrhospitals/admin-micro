@@ -111,9 +111,6 @@ const addPatientTest = async (req, res) => {
 };
 
 
-
-
-
 ///B. Get All Patient Tests along with Patient details and Hospital name
 
 const getPatientTest = async (req, res) => {

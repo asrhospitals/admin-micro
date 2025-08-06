@@ -58,7 +58,7 @@ app.get('/',async (req,res) => {
 const server=async()=>{
     try {
         await sequelize.authenticate().then(()=>{console.log("Database Connected");}).catch(()=>{console.log("Database Connection Fail");});
-        // await sequelize.sync();
+        await sequelize.sync();
         app.listen(PORT,()=>{ console.log(`${PORT} port is Connected`);});
     } catch (error) {
         console.log(error)
