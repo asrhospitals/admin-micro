@@ -14,7 +14,10 @@ const addDoctor = async (req, res) => {
 
 const getDoctor = async (req, res) => {
   try {
-    const doctor = await Doctor.findAll();
+    const doctor = await Doctor.findAll({
+      attributes: { exclude: [] } // or just omit this entirely
+    });
+    
     res.status(200).json(doctor);
   } catch (e) {
     res.status(400).json({ message: `Something went wrong ${e}` });
