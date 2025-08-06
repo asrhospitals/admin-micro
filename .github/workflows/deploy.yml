@@ -18,6 +18,10 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.SSH_KEY }}
 
+      - name: Discard local changes and clean working directory
+        run: |
+         git reset --hard
+         git clean -fd
       - name: Deploy via SSH
         run: |
          ssh -o StrictHostKeyChecking=no root@213.210.37.3 'cd /root/admin-micro && git pull origin main'
