@@ -17,7 +17,7 @@ const { addRefDoctor, getRefDoc, updateRefDoc } = require('../../controller/admi
 const { addProfile, getProfile, updateProfile } = require('../../controller/adminController/masterController/profileentrymaster');
 const { addReport, getReport, updateReport } = require('../../controller/adminController/masterController/reportTypeMaster');
 const { addSpecimen, getSpecimen, updateSpecimen } = require('../../controller/adminController/masterController/specimenMaster');
-const { addTest, getTest, updateTest } = require('../../controller/adminController/masterController/testMaster');
+const { addTest, getTest, updateNormalValues, updateInvestigation, updateResults } = require('../../controller/adminController/masterController/testMaster');
 const { addReagent, getReagent, updateReagent } = require('../../controller/adminController/masterController/reagentMaster');
 const { addDocAuth, getDocAuth, updateDocAuth } = require('../../controller/adminController/masterController/doctorAuthMaster');
 const { addColor, getColor, updateColors } = require('../../controller/adminController/masterController/colormaster');
@@ -127,7 +127,10 @@ router.route('/update-reg/:id').put(updateReagent);
 ///----------- Investigation Master----------
 router.route('/add-test').post(addTest);
 router.route('/get-test').get(getTest);
-router.route('/update-test/:id').put(updateTest);
+router.route('/update-test/:id').put(updateInvestigation);
+router.route('/update/:id/results').put(updateResults);
+router.route('/update-result/:id/normal-values').put(updateNormalValues);
+
 
 
 ///------------Specimen Type Master------------

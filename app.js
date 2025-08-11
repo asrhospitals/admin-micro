@@ -2,7 +2,7 @@ require("dotenv").config();
 const express = require("express");
 const app = express();
 const cors = require("cors");
-const PORT = 3001;
+const PORT = 2000;
 const MasterRoutes = require("./routes/adminRoutes/masterRoute");
 const AuthRoutes = require("./routes/authRoutes/authenticationRoute");
 const PatientImageUploader = require("./controller/commonImageUploader/patientImage");
