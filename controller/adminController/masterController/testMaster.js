@@ -2,7 +2,7 @@ const Investigation = require("../../../model/adminModel/masterModel/investigati
 const InvestigationResult=require('../../../model/adminModel/masterModel/investigationResult');
 const NormalValue=require('../../../model/adminModel/masterModel/normalValue');
 
-/// Add Test
+// 1. Add Test
 
 const addTest=async (req,res) => {
     const t = await Investigation.sequelize.transaction();
@@ -41,7 +41,7 @@ const addTest=async (req,res) => {
 }
 
 
-//Get Test
+// 2. Get Test
 
 const getTest = async (req, res) => {
   try {
@@ -65,7 +65,9 @@ const getTest = async (req, res) => {
   }
 };
 
-//Get Test By Test Code
+
+
+// 3. Get Test By Test Code
 
 const getTestByCode = async (req, res) => {
   try {
@@ -85,7 +87,9 @@ const getTestByCode = async (req, res) => {
   }
 };
 
-/// Update Investigation
+
+
+// 4. Update Investigation
 const updateInvestigation = async (req, res) => {
   const t = await Investigation.sequelize.transaction();
   try {
@@ -117,7 +121,9 @@ const updateInvestigation = async (req, res) => {
   }
 };
 
-// Update Results
+
+
+// 5. Update Results
 const updateResults = async (req, res) => {
   const t = await InvestigationResult.sequelize.transaction();
   try {
@@ -181,20 +187,7 @@ const updateResults = async (req, res) => {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-// Update NormalValues of the Result
+// 6. Update NormalValues of the Result
 
 const updateNormalValues = async (req, res) => {
   const t = await NormalValue.sequelize.transaction();
