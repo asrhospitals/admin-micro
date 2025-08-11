@@ -127,7 +127,7 @@ router.route('/update-reg/:id').put(updateReagent);
 ///----------- Investigation Master----------
 router.route('/add-test').post(addTest);
 router.route('/get-test').get(getTest);
-router.route('/update-test/:id').put(updateInvestigation);
+router.route('/update-investigations/:id').put(updateInvestigation);
 router.route('/update/:id/results').put(updateResults);
 router.route('/update-result/:id/normal-values').put(updateNormalValues);
 
