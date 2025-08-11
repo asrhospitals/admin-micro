@@ -202,9 +202,6 @@ const updateNormalValues = async (req, res) => {
           where: { id: normal.id },
           transaction: t,
         });
-      } else {
-        // 2. Add new
-        await NormalValue.create({ ...normal, resultId }, { transaction: t });
       }
     }
 
