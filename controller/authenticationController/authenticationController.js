@@ -8,6 +8,8 @@ const {
 const OTP = require("../../model/authModel/authenticationModel/otpModel");
 const Hospital = require("../../model/adminModel/masterModel/hospitalMaster");
 const Nodal = require("../../model/adminModel/masterModel/nodalMaster");
+const Doctor = require("../../model/adminModel/masterModel/doctorRegistration");
+const Phlebotomist = require("../../model/adminModel/masterModel/phlebotomistMaster");
 
 ///////////////////------------------------------- Register user----------------------////////////////
 
@@ -22,7 +24,10 @@ const registration = async (req, res) => {
       module,
       firstName,
       lastname,
-      menuexpand,
+      doctor_id,
+      technician_id,
+      reception_id,
+      phlebotomist_id,
       isactive,
     } = req.body;
 
@@ -55,7 +60,10 @@ const registration = async (req, res) => {
       module,
       firstName,
       lastname,
-      menuexpand,
+      doctor_id: role === "doctor" ? doctor_id : null,
+      technician_id: role === "technician" ? technician_id : null,
+      reception_id: role === "reception" ? reception_id : null,
+      phlebotomist_id: role === "phlebotomist" ? phlebotomist_id : null,
       isactive,
     });
 
@@ -80,11 +88,23 @@ const login = async (req, res) => {
       include: [
         {
           model: Hospital,
+          as: "hospital",
           attributes: ["id", "hospitalname"],
         },
         {
           model: Nodal,
+          as: "nodal",
           attributes: ["id", "nodalname"],
+        },
+        {
+          model: Doctor,
+          as: "doctor",
+          attributes: ["dname", "dditsig", "dphoto"],
+        },
+        {
+          model: Phlebotomist,
+          as: "phlebotomist",
+          attributes: ["phleboname"],
         },
       ],
     });
@@ -104,14 +124,12 @@ const login = async (req, res) => {
         expires_at: new Date(Date.now() + 10 * 60 * 1000),
       });
       await sendOtp(process.env.PREDEFINED_EMAIL, otp);
-      return res
-        .status(200)
-        .json({
-          message: "OTP sent to email",
-          id: user.user_id,
-          otp,
-          role: user.role,
-        });
+      return res.status(200).json({
+        message: "OTP sent to email",
+        id: user.user_id,
+        otp,
+        role: user.role,
+      });
     }
 
     //5. Handle Login plebotomist users
@@ -133,6 +151,15 @@ const login = async (req, res) => {
         // { expiresIn: '1h' }
       );
 
+       // Safely access included phleb object
+       const phlebotomistData = user.phlebotomist
+       ? {
+           name: user.phlebotomist.phleboname,
+         }
+       : {};
+
+      
+
       return res.status(200).json({
         success: true,
         token,
@@ -141,14 +168,13 @@ const login = async (req, res) => {
         hospitalid: user.hospitalid,
         nodalid: user.nodalid,
         //Need to Get Hospital Name as per Hospital ID
-        hospital_name: user.hospitalmaster
+        hospitalname: user.hospitalmaster
           ? user.hospitalmaster.hospitalname
           : "Unknown Hospital",
         // Nodal Data
         nodalname: user.nodal ? user.nodal.nodalname : "Unknown Nodal",
+        username:phlebotomistData.name
 
-        //Need to Get User Name as per User ID
-        username: user.firstName + " " + user.lastname,
       });
     }
 
@@ -161,6 +187,16 @@ const login = async (req, res) => {
         // { expiresIn: '1h' }
       );
 
+      // Safely access included doctor object
+      const doctorData = user.doctor
+        ? {
+            name: user.doctor.dname,
+            signature: user.doctor.dditsig,
+            profileImage: user.doctor.dphoto,
+            email: user.doctor.demail,
+          }
+        : {};
+
       return res.status(200).json({
         success: true,
         token,
@@ -170,6 +206,7 @@ const login = async (req, res) => {
         hospitalid: user.hospitalid,
         //Need to Get User Name as per User ID
         username: user.firstName + " " + user.lastname,
+        doctor: doctorData,
       });
     }
 

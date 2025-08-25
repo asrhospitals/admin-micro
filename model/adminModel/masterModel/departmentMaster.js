@@ -1,7 +1,7 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../../../db/connectDB');
 
-const DeparmentMaster = sequelize.define('departmentmaster', {
+const DeparmentMaster = sequelize.define('department', {
 
   id:{
     type: DataTypes.INTEGER,
@@ -16,7 +16,8 @@ const DeparmentMaster = sequelize.define('departmentmaster', {
   isactive: {
     type: DataTypes.BOOLEAN,
     allowNull: false,
+    defaultValue:true
   },
-});
+},{timestamps:false});
 
 module.exports = DeparmentMaster;

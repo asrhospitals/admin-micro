@@ -1,24 +1,76 @@
-const NodalHospital = require("../../../model/adminModel/masterModel/attachNodalHospitalMaster");
+const sequelize = require("../../../db/connectDB");
 const {
   Nodal,
   Hospital,
+  NodalHospital,
 } = require("../../../model/associatemodels/associatemodel");
 
-/// Add Nodal
+// 1. Add Nodal
 const addNodalHospital = async (req, res) => {
+  const transaction = await sequelize.transaction();
   try {
-    const newAttachNodalHospital = req.body;
-    const createNodal = await NodalHospital.create(newAttachNodalHospital);
-    res.status(201).json(createNodal);
+    const create_nodal_hospital = await NodalHospital.create(req.body, { transaction });
+    await transaction.commit();
+    res.status(201).json(create_nodal_hospital);
   } catch (error) {
+    await transaction.rollback();
+    res.status(400).send({ message: `Something went wrong ${error}` });
+  }
+};
+
+// 2. Get Nodal
+const getNodalHospital = async (req, res) => {
+  try {
+
+    let page=Number(req.query.page)||1;
+    let limit =Number(req.query.limit)||10;
+    let offset = (page - 1) * limit;
+
+    const {count,rows} = await NodalHospital.findAndCountAll({
+      include: [
+        {
+          model: Nodal,
+          as: "nodal",
+          attributes: ["nodalname"],
+        },
+        {
+          model: Hospital,
+          as: "hospital",
+          attributes: ["hospitalname"],
+        },
+      ],
+      limit : limit,
+      offset : offset,
+    });
+
+    const totalPages = Math.ceil(count / limit);
+
+    if(!rows){
+      return res.status(200).json({ message: "No records found" });
+    }
+
+    const formattedData = rows.map((record) => ({
+      nodalName: record.nodal?.nodalname,
+      hospitalName: record.hospital?.hospitalname,
+      isactive: record.isactive,
+    }));
+    res.status(200).json({ data: formattedData,
+      meta: {
+        totalItems: count,
+        itemsPerPage: limit,
+        currentPage: page,
+        totalPages: totalPages
+      },});
+  } catch (e) {
     res.status(400).send({ message: `Something went wrong ${e}` });
   }
 };
 
-/// Get Nodal
-const getNodalHospital = async (req, res) => {
+// 3. Get Attached Nodal Hospital By Id
+const getNodalHospitalById = async (req, res) => {
   try {
-    const findNodal = await NodalHospital.findAll({
+
+    const findNodal = await NodalHospital.findByPk(req.params.id, {
       include: [
         {
           model: Nodal,
@@ -32,32 +84,48 @@ const getNodalHospital = async (req, res) => {
         },
       ],
     });
-    
-    const formattedData = findNodal.map((record) => ({
-      nodalName: record.nodal?.nodalname,
-      hospitalName: record.hospital?.hospitalname,
-      isactive: record.isactive,
-    }));
-    res.status(200).json(formattedData);
+
+    if (!findNodal) {
+      return res.status(404).json({ message: "NodalHospital not found" });
+    }
+
+    const formattedData = {
+      nodalName: findNodal.nodal?.nodalname,
+      hospitalName: findNodal.hospital?.hospitalname,
+      isactive: findNodal.isactive,
+    };
+   return res.status(200).json(formattedData);
   } catch (e) {
-    res.status(400).send({ message: `Something went wrong ${e}` });
+    res.status(400).json({ message: `Something went wrong ${e}` });
   }
 };
 
-/// Update Nodal
+// 4. Update Attach Nodal
 const updateNodalHospital = async (req, res) => {
+  const transaction =await sequelize.transaction();
   try {
-    const { id } = req.params;
-    const updatenodal = await NodalHospital.findByPk(id);
+   
+    const updatenodal = await NodalHospital.findByPk(req.params.id);
     if (!updatenodal)
       return res
         .status(200)
         .json({ message: "NodalHospital record not found" });
-    await updatenodal.update(req.body);
-    res.status(200).json(updatenodal);
+    await updatenodal.update(req.body,{transaction});
+    await transaction.commit();
+    res.status(200).json({message: " Attached nodal update sucessfully"});
   } catch (e) {
+    await transaction.rollback();
     res.status(400).send({ message: `Something went wrong ${e}` });
   }
 };
 
-module.exports = { addNodalHospital, getNodalHospital, updateNodalHospital };
+module.exports = { addNodalHospital, getNodalHospital,getNodalHospitalById, updateNodalHospital };
+
+
+
+
+
+
+
+
+

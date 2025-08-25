@@ -1,14 +1,14 @@
 const Router=require('express');
 const router=Router();
-const { addDepartment, getDepartment, updateDepartment } = require('../../controller/adminController/masterController/departmentMaster');
-const { addSubDepartment, getSubDepartment, updateSubDepartment } = require('../../controller/adminController/masterController/subdepartmentMaster');
-const { addhsptltype, gethsptltype, updatehsptltype } = require('../../controller/adminController/masterController/hospitaltypeMaster');
-const { addhospital, gethospital, updatehospital } = require('../../controller/adminController/masterController/hospitalMaster');
-const { addNodal, getNodal, updateNodal } = require('../../controller/adminController/masterController/nodalMaster');
+const { addDepartment, getDepartment, updateDepartment, getDepartmentById } = require('../../controller/adminController/masterController/departmentMaster');
+const { addSubDepartment, getSubDepartment, updateSubDepartment, getById } = require('../../controller/adminController/masterController/subdepartmentMaster');
+const { addhsptltype, gethsptltype, updatehsptltype, getHospitalTypeById } = require('../../controller/adminController/masterController/hospitaltypeMaster');
+const { addhospital, gethospital, updatehospital, getHospitalById } = require('../../controller/adminController/masterController/hospitalMaster');
+const { addNodal, getNodal, updateNodal, getNodalById } = require('../../controller/adminController/masterController/nodalMaster');
 const { addRole, getRole, updateRole } = require('../../controller/adminController/masterController/roletypeMaster');
 const { addPhlebo, getPhlebo, updatePhlebo } = require('../../controller/adminController/masterController/phlebotomistMaster');
 const { addReception, getReception, updateReception } = require('../../controller/adminController/masterController/receptionMaster');
-const { addNodalHospital, getNodalHospital, updateNodalHospital } = require('../../controller/adminController/masterController/attachNodalHospital');
+const { addNodalHospital, getNodalHospital, updateNodalHospital, getNodalHospitalById } = require('../../controller/adminController/masterController/attachNodalHospital');
 const { addlabtolab, getlabtolab, updatelabtolab } = require('../../controller/adminController/masterController/labtolabMaster');
 const { addInstrument, getIntrument, updateIntrument } = require('../../controller/adminController/masterController/instrumentMaster');
 const { addNodalInstrument, getNodalInstrument, updateNodalInstrument } = require('../../controller/adminController/masterController/attachedNodalInstrumentMaster');
@@ -29,39 +29,72 @@ const { addDoctor, getDoctor, updateDoctor } = require('../../controller/adminCo
 
 
 /// ---------Department Master--------------
+// 1. Add Department
 router.route('/add-department').post(addDepartment);
+// 2. Get Department
 router.route('/get-department').get(getDepartment);
+// 3. Get Department By Id
+router.route('/get-department/:id').get(getDepartmentById);
+// 4. Update Department
 router.route('/update-department/:id').put(updateDepartment);
 
 ///---------- Subdepartment Master--------------
+// 5. Add Sub Department
 router.route('/add-subdepartment').post(addSubDepartment);
+// 6. Get Sub Department
 router.route('/get-subdepartment').get(getSubDepartment);
+// 7. Get Sub Department By Id
+router.route('/get-subdepartment/:id').get(getById); 
+// 8. Update Sub Department
 router.route('/update-subdepartment/:id').put(updateSubDepartment);
 
 ///------------ Hospital Type Master----------------
+// 9. Add Hospital Type
 router.route('/add-hsptltype').post(addhsptltype);
+// 10. Get Hospital type
 router.route('/get-hsptltype').get(gethsptltype);
+// 11. Get Hospital Type By Id
+router.route('/get-hsptltype/:id').get(getHospitalTypeById);
+// 12. Update Hospital Type
 router.route('/update-hsptltype/:id').put(updatehsptltype);
 
 ///----------- Hospital Master---------------
+// 13. Add Hospital
 router.route('/add-hospital').post(addhospital);
+// 14. Get Hospital
 router.route('/get-hospital').get(gethospital);
+// 15. Get hospital By Id
+router.route('/get-hospital/:id').get(getHospitalById);
+// 16. Update Hospital
 router.route('/update-hospital/:id').put(updatehospital);
 
 ///--------------- Nodal Master--------------
+// 17. Add Nodal
 router.route('/add-nodal').post(addNodal);
+// 18. Get Nodal
 router.route('/get-nodal').get(getNodal);
+// 19. Get Nodal By Id
+router.route('/get-nodal/:id').get(getNodalById);
+// 20. Update Nodal
 router.route('/update-nodal/:id').put(updateNodal);
+
+/// --------------Attach Nodal Hospital------------
+// 21. Add Nodal Hospitals
+router.route('/add-nodalhospital').post(addNodalHospital);
+// 22. Get Nodal Hospitals
+router.route('/get-nodalhospital').get(getNodalHospital);
+// 23. Get Nodal Hospitals By Id
+router.route('/get-nodalhospital/:id').get(getNodalHospitalById);
+// 24. Update Nodal Hospitals
+router.route('/update-nodalhospital/:id').put(updateNodalHospital);
+
 
 /// ------------Lab to Lab Master-----------
 router.route('/add-labtolab').post(addlabtolab);
 router.route('/get-labtolab').get(getlabtolab);
 router.route('/update-labtolab/:id').put(updatelabtolab);
 
-/// --------------Attach Nodal Hospital------------
-router.route('/add-nodalhospital').post(addNodalHospital);
-router.route('/get-nodalhospital').get(getNodalHospital);
-router.route('/update-nodalhospital/:id').put(updateNodalHospital);
+
 
 ///---------------- Lab Instrument Master-----------
 router.route('/add-instrument').post(addInstrument);

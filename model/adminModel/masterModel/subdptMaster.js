@@ -1,10 +1,12 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../../../db/connectDB');
 
-const SubdepartmentMaster=sequelize.define('subdepartment',{
-    dptname:{
-        type:DataTypes.STRING,
-        allowNull:false,
+const Subdepartment=sequelize.define('subdepartment',{
+
+    id:{
+        type:DataTypes.INTEGER,
+        primaryKey:true,
+        autoIncrement:true
     },
     subdptname:{
         type:DataTypes.STRING,
@@ -14,7 +16,16 @@ const SubdepartmentMaster=sequelize.define('subdepartment',{
     isactive:{
         type:DataTypes.BOOLEAN,
         allowNull:false
-    }
-});
+    },
+    department_id:{
+        type:DataTypes.INTEGER,
+        allowNull:false,
+        references:{
+            model:'departments',
+            key:'id'
+        }
+    },
 
-module.exports=SubdepartmentMaster;
+},{timestamps:false});
+
+module.exports=Subdepartment;
