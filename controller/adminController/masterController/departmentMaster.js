@@ -6,7 +6,7 @@ const addDepartment = async (req, res) => {
   const transaction = await sequelize.transaction();
   try {
     const add_department = req.body;
-    const create_department = await Deparment.create(add_department, {
+    const create_department = await Department.create(add_department, {
       transaction,
     });
     await transaction.commit();
