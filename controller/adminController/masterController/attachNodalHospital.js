@@ -110,6 +110,10 @@ const updateNodalHospital = async (req, res) => {
       return res
         .status(200)
         .json({ message: "NodalHospital record not found" });
+    
+        if (Object.keys(req.body).length === 0) {
+      return res.status(400).json({ message: "Updated data not provided" });
+    }
     await updatenodal.update(req.body,{transaction});
     await transaction.commit();
     res.status(200).json({message: " Attached nodal update sucessfully"});

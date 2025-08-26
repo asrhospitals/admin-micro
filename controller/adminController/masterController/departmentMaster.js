@@ -73,6 +73,11 @@ const updateDepartment = async (req, res) => {
     if (!updateDepartment) {
       return res.status(200).json({ message: "Department not found" });
     }
+
+    if (Object.keys(req.body).length === 0) {
+      return res.status(400).json({ message: "Updated data not provided" });
+    }
+
     await updateDepartment.update(req.body, {
       transaction,
     });

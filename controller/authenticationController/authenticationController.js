@@ -19,8 +19,8 @@ const registration = async (req, res) => {
       username,
       password,
       role,
-      hospitalid,
-      nodalid,
+      hospital_id,
+      nodal_id,
       module,
       firstName,
       lastname,
@@ -38,13 +38,14 @@ const registration = async (req, res) => {
       role !== "technician" &&
       role !== "doctor"
     ) {
-      const hospital = await Hospital.findOne({ where: { id: hospitalid } });
+      const hospital = await Hospital.findOne({ where: { id: hospital_id } });
       if (!hospital) {
         return res
           .status(404)
           .json({ message: "Hospital ID is required for this role" });
       }
     }
+
 
     // Hash the password
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -54,9 +55,9 @@ const registration = async (req, res) => {
       username,
       password: hashedPassword,
       role,
-      hospitalid:
-        role !== "admin" && "reception" && "technician" ? hospitalid : null,
-      nodalid: role !== "admin" ? nodalid : null,
+      hospital_id:
+        role !== "admin" && "reception" && "technician" ? hospital_id : null,
+      nodal_id: role !== "admin" ? nodal_id : null,
       module,
       firstName,
       lastname,
@@ -135,7 +136,7 @@ const login = async (req, res) => {
     //5. Handle Login plebotomist users
     if (user.role === "phlebotomist") {
       // Require hospital and Nodal verification for phlebotomists
-      if (!user.hospitalid && !user.nodalid) {
+      if (!user.hospital_id && !user.nodal_id) {
         return res
           .status(403)
           .json({ message: "Access denied: No hospital or Nodal assigned" });
@@ -144,8 +145,8 @@ const login = async (req, res) => {
         {
           id: user.user_id,
           role: user.role,
-          hospitalid: user.hospitalid,
-          nodalid: user.nodalid,
+          hospital_id: user.hospital_id,
+          nodal_id: user.nodal_id,
         },
         process.env.JWT_SECRET
         // { expiresIn: '1h' }
@@ -165,8 +166,8 @@ const login = async (req, res) => {
         token,
         id: user.user_id,
         role: user.role,
-        hospitalid: user.hospitalid,
-        nodalid: user.nodalid,
+        hospital_id: user.hospital_id,
+        nodal_id: user.nodal_id,
         //Need to Get Hospital Name as per Hospital ID
         hospitalname: user.hospitalmaster
           ? user.hospitalmaster.hospitalname

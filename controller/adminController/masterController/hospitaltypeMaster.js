@@ -81,8 +81,12 @@ const updatehsptltype = async (req, res) => {
     if (!updateHospitalType) {
       return res
         .status(400)
-        .json({ message: "No hospital type found by this id" });}
+        .json({ message: `No hospital type found by this id ${req.params.id}` });
+    }
 
+    if (Object.keys(req.body).length === 0) {
+      return res.status(400).json({ message: "Updated data not provided" });
+    }
       await updateHospitalType.update(req.body);
       await transaction.commit();
       res.status(200).json(updateHospitalType);

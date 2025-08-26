@@ -103,6 +103,9 @@ const updateSubDepartment = async (req, res) => {
     if (!updateSub) {
       return res.status(200).json({ message: "Subdepartment not found" });
     }
+      if (Object.keys(req.body).length === 0) {
+      return res.status(400).json({ message: "Updated data not provided" });
+    }
    await updateSub.update(req.body,{transaction});
    await transaction.commit();
    res.status(200).json({

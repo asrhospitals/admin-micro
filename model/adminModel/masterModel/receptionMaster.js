@@ -11,7 +11,7 @@ const Reception = sequialize.define(
       autoIncrement:true,
       primaryKey:true
     },
-    receptionistName: {
+    receptionistname: {
       type: DataTypes.STRING,
       allowNull: false,
     },

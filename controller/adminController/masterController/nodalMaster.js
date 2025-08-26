@@ -73,6 +73,10 @@ const updateNodal = async (req, res) => {
         .status(200)
         .json({ message: `Not found any nodal for this id ${req.params.id}` });
     }
+    
+    if (Object.keys(req.body).length === 0) {
+      return res.status(400).json({ message: "Updated data not provided" });
+    }
 
     await updatenodal.update(req.body, { transaction });
     await transaction.commit();

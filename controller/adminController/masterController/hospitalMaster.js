@@ -2,7 +2,6 @@ const Hospital = require("../../../model/adminModel/masterModel/hospitalMaster")
 const sequelize = require("../../../db/connectDB");
 const HospipatlType = require("../../../model/adminModel/masterModel/hospitalTypeMaster");
 
-
 // 1. Add Hospital
 const addhospital = async (req, res) => {
   const transaction = await sequelize.transaction();
@@ -31,9 +30,9 @@ const gethospital = async (req, res) => {
       limit: limit,
       offset: offset,
       order: [["hospitalname", "ASC"]],
-      include:[
-        {model:HospipatlType,as:'hospitalType' ,attributes:['hsptltype'] }
-      ]
+      include: [
+        { model: HospipatlType, as: "hospitalType", attributes: ["hsptltype"] },
+      ],
     });
 
     // count total pages
@@ -67,7 +66,9 @@ const getHospitalById = async (req, res) => {
     if (!get_hospital) {
       return res
         .status(200)
-        .json({ message: `Not found any hospital for this id ${req.params.id}` });
+        .json({
+          message: `Not found any hospital for this id ${req.params.id}`,
+        });
     }
     res.status(200).json(get_hospital);
   } catch (error) {
@@ -81,11 +82,12 @@ const updatehospital = async (req, res) => {
   try {
     const update_hospital = await Hospital.findByPk(req.params.id);
     if (!update_hospital) {
-      return res
-        .status(200)
-        .json({
-          message: `Not found any hospital for this id ${req.params.id}`,
-        });
+      return res.status(200).json({
+        message: `Not found any hospital for this id ${req.params.id}`,
+      });
+    }
+    if (Object.keys(req.body).length === 0) {
+      return res.status(400).json({ message: "Updated data not provided" });
     }
     await update_hospital.update(req.body, { transaction });
     await transaction.commit();
