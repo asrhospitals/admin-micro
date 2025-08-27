@@ -119,7 +119,6 @@ router.route('/get-phlebo/:id').get(getPhleboById);
 router.route('/update-phlebo/:id').put(updatePhlebo);
 
 //-----------Doctor Registration Master--------------
-
 router.route('/add-doctor').post(addDoctor);
 router.route('/get-doctor').get(getDoctor);
 router.route('/update-doctor/:id').put(updateDoctor);

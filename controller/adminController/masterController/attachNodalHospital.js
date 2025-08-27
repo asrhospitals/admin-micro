@@ -50,6 +50,7 @@ const getNodalHospital = async (req, res) => {
     }
 
     const formattedData = rows.map((record) => ({
+      id:record.id,
       nodalName: record.nodal?.nodalname,
       hospitalName: record.hospital?.hospitalname,
       isactive: record.isactive,
