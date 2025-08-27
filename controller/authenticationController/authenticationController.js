@@ -169,8 +169,8 @@ const login = async (req, res) => {
         hospital_id: user.hospital_id,
         nodal_id: user.nodal_id,
         //Need to Get Hospital Name as per Hospital ID
-        hospitalname: user.hospitalmaster
-          ? user.hospitalmaster.hospitalname
+        hospitalname: user.hospital
+          ? user.hospital.hospitalname
           : "Unknown Hospital",
         // Nodal Data
         nodalname: user.nodal ? user.nodal.nodalname : "Unknown Nodal",
