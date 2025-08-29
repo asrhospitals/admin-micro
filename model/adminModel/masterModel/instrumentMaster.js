@@ -1,7 +1,12 @@
 const { DataTypes } = require('sequelize');
 const sequalize=require('../../../db/connectDB');
 
-const InstrumentMaster=sequalize.define('instrumentmaster',{
+const InstrumentMaster=sequalize.define('instrument',{
+    id:{
+        type:DataTypes.INTEGER,
+        autoIncrement:true,
+        primaryKey:true 
+    },
     instrumentname:{
         type:DataTypes.STRING,
         allowNull:false,

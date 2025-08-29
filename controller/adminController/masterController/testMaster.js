@@ -1,17 +1,19 @@
+const sequelize = require("../../../db/connectDB");
 const Investigation = require("../../../model/adminModel/masterModel/investigation");
-const InvestigationResult=require('../../../model/adminModel/masterModel/investigationResult');
-const NormalValue=require('../../../model/adminModel/masterModel/normalValue');
+const InvestigationResult = require("../../../model/adminModel/masterModel/investigationResult");
+const NormalValue = require("../../../model/adminModel/masterModel/normalValue");
 
 // 1. Add Test
 
-const addTest=async (req,res) => {
-    const t = await Investigation.sequelize.transaction();
+const addTest = async (req, res) => {
+  const transaction = await sequelize.transaction();
   try {
     const { results, ...investigationData } = req.body;
 
-
     // 1. Create The Investigation
-    const investigation = await Investigation.create(investigationData, { transaction: t });
+    const investigation = await Investigation.create(investigationData, {
+      transaction,
+    });
 
     // Step 2: Add Investigation Results
     for (const result of results) {
@@ -19,84 +21,115 @@ const addTest=async (req,res) => {
 
       const resultRecord = await InvestigationResult.create(
         { ...resultData, investigationId: investigation.id },
-        { transaction: t }
+        { transaction }
       );
-
 
       // Step 3: Add Normal Values
       if (normalValues?.length) {
-        const enriched = normalValues.map(nv => ({ ...nv, resultId: resultRecord.id }));
-        await NormalValue.bulkCreate(enriched, { transaction: t });
+        const enriched = normalValues.map((nv) => ({
+          ...nv,
+          resultId: resultRecord.id,
+        }));
+        await NormalValue.bulkCreate(enriched, { transaction });
       }
     }
 
-    await t.commit();
+    await transaction.commit();
     res.status(201).json({ message: "Investigation created successfully" });
   } catch (err) {
-    await t.rollback();
-    console.error(err);
+    await transaction.rollback();
     res.status(500).json({ message: `Error creating investigation ${err}` });
   }
-  
-}
-
+};
 
 // 2. Get Test
 
 const getTest = async (req, res) => {
   try {
-    const newTest = await Investigation.findAll({
-      include:[
-        {
-          model:InvestigationResult,
-          as:"results",
-          include:[
-            {
-                model: NormalValue, as: "normalValues" ,
-            }
-          ]
+    let page = Number(req.query.page) || 1;
+    let limit = Number(req.query.limit) || 10;
+    let offset = (page - 1) * limit;
 
-        }
-      ]
+    const { count, rows } = await Investigation.findAndCountAll({
+      include: [
+        {
+          model: InvestigationResult,
+          as: "results",
+          include: [
+            {
+              model: NormalValue,
+              as: "normalValues",
+            },
+          ],
+        },
+      ],
+      limit: limit,
+      offset: offset,
+      distinct: true,
+      col: "id",
+      order: [["id", "ASC"]],
     });
-    res.status(200).json(newTest);
+
+    const totalPages = Math.ceil(count / limit);
+
+    if (!rows) {
+      return res.status(200).json({ message: "No records found" });
+    }
+
+    res.status(200).json({
+      data: rows,
+      meta: {
+        totalItems: count,
+        itemsPerPage: limit,
+        currentPage: page,
+        totalPages: totalPages,
+      },
+    });
   } catch (error) {
     res.status(400).send({ message: `Something went wrong ${error}` });
   }
 };
 
+// 3. Get Test By Test by Id
 
-
-// 3. Get Test By Test Code
-
-const getTestByCode = async (req, res) => {
+const getTestById = async (req, res) => {
   try {
-    const testCode = req.params.testcode;
-    if (!testCode) {
-      return res.status(400).json({ message: "Test code is required" });
+    const testId = req.params.id;
+    if (!testId) {
+      return res.status(400).json({ message: "Test ID is required" });
     }
-    const newTest = await Investigation.findOne({
-      where: { testcode: testCode },
+
+    const test = await Investigation.findByPk(testId, {
+      include: [
+        {
+          model: InvestigationResult,
+          as: "results",
+          include: [
+            {
+              model: NormalValue,
+              as: "normalValues",
+            },
+          ],
+        },
+      ],
     });
-    if (!newTest) {
+
+    if (!test) {
       return res.status(404).json({ message: "Test not found" });
     }
-    res.status(200).json(newTest);
+
+    res.status(200).json(test);
   } catch (error) {
     res.status(400).send({ message: `Something went wrong ${error}` });
   }
 };
-
-
 
 // 4. Update Investigation
 const updateInvestigation = async (req, res) => {
   const t = await Investigation.sequelize.transaction();
   try {
     const { id } = req.params;
-  
 
-    // Validate investigation ID
     if (!id) {
       await t.rollback();
       return res.status(400).json({ message: "Investigation ID is required" });
@@ -108,112 +141,92 @@ const updateInvestigation = async (req, res) => {
       transaction: t,
     });
     await t.commit();
-    res.status(200).json({ 
+    res.status(200).json({
       message: "Investigation updated successfully",
-      investigationId: id
     });
-
   } catch (err) {
     await t.rollback();
-    res.status(500).json({ 
-      message: `Error updating investigation: ${err}`
+    res.status(500).json({
+      message: `Error updating investigation: ${err}`,
     });
   }
 };
 
-
-
 // 5. Update Results
-const updateResults = async (req, res) => {
-  const t = await InvestigationResult.sequelize.transaction();
+// Route: PUT /investigations/:investigationId/results/:resultId
+const updateSingleResult = async (req, res) => {
+  const transaction = await sequelize.transaction();
   try {
-    const { id: investigationId } = req.params; // Get investigation ID from URL
-    const { results = [] } = req.body;
+    const { investigationId, resultId } = req.params;
+    const updateData = req.body; // No ID needed in body
 
-    // Validate investigation ID
-    if (!investigationId) {
-      await t.rollback();
-      return res.status(400).json({ message: "Investigation ID is required" });
-    }
-
-    if (!Array.isArray(results) || results.length === 0) {
-      await t.rollback();
-      return res.status(400).json({ message: "Results array is required" });
-    }
-
-    // Verify investigation exists
-    const investigation = await Investigation.findByPk(investigationId, { transaction: t });
+    const investigation = await Investigation.findByPk(investigationId, { transaction });
     if (!investigation) {
-      await t.rollback();
+      await transaction.rollback();
       return res.status(404).json({ message: "Investigation not found" });
     }
 
-  
+    const [updatedRowsCount] = await InvestigationResult.update(updateData, {
+      where: {
+        id: resultId,
+        investigationId: investigationId,
+      },
+      transaction,
+    });
 
-    // Process each result
-    for (const result of results) {
-      const { id: resultId, ...resultData } = result;
-      
-      if (resultId) {
-        console.log(`Updating Result ID: ${resultId} for Investigation: ${investigationId}`);
-        
-        // Update result only if it belongs to this investigation
-         await InvestigationResult.update(resultData, {
-          where: { 
-            id: resultId,
-            investigationId: investigationId // Ensure result belongs to this investigation
-          },
-          transaction: t,
-        });
-        
-       
-      } 
+    if (updatedRowsCount === 0) {
+      await transaction.rollback();
+      return res.status(404).json({ message: "Result not found" });
     }
 
-    await t.commit();
-    res.status(200).json({ 
-      message: "Results updated successfully",
-     
-    });
-
+    await transaction.commit();
+    res.status(200).json({ message: "Result updated successfully" });
+    
   } catch (err) {
-    await t.rollback();
-    console.error('Error updating results:', err);
-    res.status(500).json({ 
-      message: `Error updating results: ${err.message}`
-    });
+    await transaction.rollback();
+    res.status(500).json({ message: "Failed to update result" });
   }
 };
 
-
-
-// 6. Update NormalValues of the Result
+// 7. Update NormalValues of the Result
 
 const updateNormalValues = async (req, res) => {
-  const t = await NormalValue.sequelize.transaction();
+  const transaction = await sequelize.transaction();
   try {
-    const { id: resultId } = req.params;
-    const { normalValues } = req.body;
+    const { resultId, normalValueId } = req.params;
+    const updateData = req.body;
 
-    for (const normal of normalValues) {
-      if (normal.id) {
-        // 1. Update existing
-        await NormalValue.update(normal, {
-          where: { id: normal.id },
-          transaction: t,
-        });
-      }
+      const result = await InvestigationResult.findByPk(resultId, { transaction });
+    if (!result) {
+      await transaction.rollback();
+      return res.status(404).json({ message: "Result not found" });
     }
 
-    await t.commit();
+     const [updatedRowsCount] = await NormalValue.update(updateData, {
+      where: {
+        id: normalValueId,
+        resultId: resultId,
+      },
+      transaction,
+    });
+
+     if (updatedRowsCount === 0) {
+      await transaction.rollback();
+      return res.status(404).json({ message: "Normal value not found" });
+    }
+    await transaction.commit();
     res.status(200).json({ message: "Normal values update successfully" });
   } catch (err) {
-    await t.rollback();
-    console.error(err);
+    await transaction.rollback();
     res.status(500).json({ message: `Error saving normal values ${err}` });
   }
 };
 
-
-
-module.exports = { addTest, getTest, updateInvestigation, updateNormalValues,getTestByCode,updateResults };
+module.exports = {
+  addTest,
+  getTest,
+  getTestById,
+  updateInvestigation,
+  updateNormalValues,
+  updateSingleResult,
+};

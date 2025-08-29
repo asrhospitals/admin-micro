@@ -9,22 +9,22 @@ const { addRole, getRole, updateRole } = require('../../controller/adminControll
 const { addPhlebo, getPhlebo, updatePhlebo, getPhleboById } = require('../../controller/adminController/masterController/phlebotomistMaster');
 const { addReception, getReception, updateReception, getReceptionById } = require('../../controller/adminController/masterController/receptionMaster');
 const { addNodalHospital, getNodalHospital, updateNodalHospital, getNodalHospitalById } = require('../../controller/adminController/masterController/attachNodalHospital');
-const { addlabtolab, getlabtolab, updatelabtolab } = require('../../controller/adminController/masterController/labtolabMaster');
-const { addInstrument, getIntrument, updateIntrument } = require('../../controller/adminController/masterController/instrumentMaster');
+const { addlabtolab, getlabtolab, updatelabtolab, getLabById } = require('../../controller/adminController/masterController/labtolabMaster');
+const { addInstrument, getInstrument, updateInstrument, getInstrumentById } = require('../../controller/adminController/masterController/instrumentMaster');
 const { addNodalInstrument, getNodalInstrument, updateNodalInstrument } = require('../../controller/adminController/masterController/attachedNodalInstrumentMaster');
 const { addTechnician, getTechnician, updateTechnician, getTechnicianById } = require('../../controller/adminController/masterController/technicianMaster');
 const { addRefDoctor, getRefDoc, updateRefDoc } = require('../../controller/adminController/masterController/referralMaster');
 const { addProfile, getProfile, updateProfile } = require('../../controller/adminController/masterController/profileentrymaster');
 const { addReport, getReport, updateReport } = require('../../controller/adminController/masterController/reportTypeMaster');
 const { addSpecimen, getSpecimen, updateSpecimen } = require('../../controller/adminController/masterController/specimenMaster');
-const { addTest, getTest, updateNormalValues, updateInvestigation, updateResults } = require('../../controller/adminController/masterController/testMaster');
+const { addTest, getTest, updateNormalValues, updateInvestigation, updateResults, getTestById, updateSingleResult } = require('../../controller/adminController/masterController/testMaster');
 const { addReagent, getReagent, updateReagent } = require('../../controller/adminController/masterController/reagentMaster');
 const { addDocAuth, getDocAuth, updateDocAuth } = require('../../controller/adminController/masterController/doctorAuthMaster');
 const { addColor, getColor, updateColors } = require('../../controller/adminController/masterController/colormaster');
 const { addKit, getKit, updateKit } = require('../../controller/adminController/masterController/kitmaster');
 const { addReportDoctor, getReportDoctor, updateReportDoctor } = require('../../controller/adminController/masterController/reportDoctor');
 const { createProfile, fetchProfile, updateProfiles } = require('../../controller/adminController/masterController/profileMaster');
-const { addDoctor, getDoctor, updateDoctor } = require('../../controller/adminController/masterController/doctorRegistration');
+const { addDoctor, getDoctor, updateDoctor, getDoctorById } = require('../../controller/adminController/masterController/doctorRegistration');
 
 
 
@@ -119,29 +119,58 @@ router.route('/get-phlebo/:id').get(getPhleboById);
 router.route('/update-phlebo/:id').put(updatePhlebo);
 
 //-----------Doctor Registration Master--------------
+// 40. Add Doctor
 router.route('/add-doctor').post(addDoctor);
+// 41. Get Doctor
 router.route('/get-doctor').get(getDoctor);
+// 42. Get Doctor By Id
+router.route('/get-doctor/:id').get(getDoctorById);
+// 43. Update Doctor
 router.route('/update-doctor/:id').put(updateDoctor);
 
-
-
-
-
-
-
-
+///----------- Investigation Master----------
+// 44. Add Investigation
+router.route('/add-test').post(addTest);
+// 45. Get Investigation
+router.route('/get-test').get(getTest);
+// 46. Get Investigation By Id
+router.route('/get-test/:id').get(getTestById);
+// 47. Update Investigation 
+router.route('/update-investigations/:id').put(updateInvestigation);
+// 48. Update Investigation Results
+router.route('/update/:investigationId/results/:resultId').put(updateSingleResult);
+// 49. Update Investigation Normal Values
+router.route('/update-normal/:resultId/normal-values/:normalValueId').put(updateNormalValues);
 
 /// ------------Lab to Lab Master-----------
+// 50. Add Lab to Lab
 router.route('/add-labtolab').post(addlabtolab);
+// 51. Get Lab to Lab
 router.route('/get-labtolab').get(getlabtolab);
+// 52. Get Lab to Lab By Id
+router.route('/get-labtolab/:id').get(getLabById);
+// 53. Update Lab to Lab    
 router.route('/update-labtolab/:id').put(updatelabtolab);
 
-
-
 ///---------------- Lab Instrument Master-----------
+// 54. Add Lab Instrument
 router.route('/add-instrument').post(addInstrument);
-router.route('/get-instrument').get(getIntrument);
-router.route('/update-instrument/:id').put(updateIntrument);
+// 55. Get Lab Instrument
+router.route('/get-instrument').get(getInstrument);
+// 56. Get Lab Instrument By Id
+router.route('/get-instrument/:id').get(getInstrumentById);
+// 57. Update Lab Instrument
+router.route('/update-instrument/:id').put(updateInstrument);
+
+
+
+
+
+
+
+
+
+
 
 /// ---------------Attach Nodal Instrument Master--------------
 router.route('/add-nodalinstrument').post(addNodalInstrument);
@@ -190,12 +219,7 @@ router.route('/add-reg').post(addReagent);
 router.route('/get-reg').get(getReagent);
 router.route('/update-reg/:id').put(updateReagent);
 
-///----------- Investigation Master----------
-router.route('/add-test').post(addTest);
-router.route('/get-test').get(getTest);
-router.route('/update-investigations/:id').put(updateInvestigation);
-router.route('/update/:id/results').put(updateResults);
-router.route('/update-result/:id/normal-values').put(updateNormalValues);
+
 
 
 

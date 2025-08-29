@@ -18,6 +18,7 @@ const Investigation = sequelize.define("investigation", {
   testname: {
     type: DataTypes.STRING,
     allowNull: false,
+    unique:true,
   },
   testcategory: {
     type: DataTypes.STRING,
@@ -28,6 +29,7 @@ const Investigation = sequelize.define("investigation", {
   },
   shortcode: {
     type: DataTypes.INTEGER,
+    unique:true
   },
   department: {
     type: DataTypes.STRING,

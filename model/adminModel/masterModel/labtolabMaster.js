@@ -1,7 +1,7 @@
 const { DataTypes } = require("sequelize");
 const sequalize = require("../../../db/connectDB");
 
-const LabtoLab = sequalize.define("labtolab", {
+const LabtoLab = sequalize.define("lab", {
   id:{
     type: DataTypes.INTEGER,
     primaryKey: true,
@@ -44,6 +44,6 @@ const LabtoLab = sequalize.define("labtolab", {
     type: DataTypes.BOOLEAN,
     allowNull: false,
   },
-});
+},{timestamps:false});
 
 module.exports=LabtoLab;

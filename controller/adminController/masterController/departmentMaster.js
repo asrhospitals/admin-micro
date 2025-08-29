@@ -27,13 +27,13 @@ const getDepartment = async (req, res) => {
     let limit = Number(req.query.limit) || 10;
     let offset = (page - 1) * limit;
 
-    const { count,rows } = await Department.findAndCountAll({
+    const { count, rows } = await Department.findAndCountAll({
       limit: limit,
       offset: offset,
-      order:[['dptname','ASC']]
+      order: [["dptname", "ASC"]],
     });
 
-    const totalPages = Math.ceil(count/limit);
+    const totalPages = Math.ceil(count / limit);
 
     if (!rows) {
       return res.status(404).json({ message: "No department found" });
@@ -44,7 +44,7 @@ const getDepartment = async (req, res) => {
         totalItems: count,
         itemsPerPage: limit,
         currentPage: page,
-        totalPages: totalPages
+        totalPages: totalPages,
       },
     });
   } catch (e) {
