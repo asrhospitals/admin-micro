@@ -47,7 +47,6 @@ const registration = async (req, res) => {
       }
     }
 
-
     // Hash the password
     const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -112,7 +111,7 @@ const login = async (req, res) => {
           model: Technician,
           as: "technician",
           attributes: ["technicianname"],
-        }
+        },
       ],
     });
     if (!user) return res.status(404).json({ message: "No User found" });
@@ -158,14 +157,12 @@ const login = async (req, res) => {
         // { expiresIn: '1h' }
       );
 
-       // Safely access included phleb object
-       const phlebotomistData = user.phlebotomist
-       ? {
-           name: user.phlebotomist.phleboname,
-         }
-       : {};
-
-      
+      // Safely access included phleb object
+      const phlebotomistData = user.phlebotomist
+        ? {
+            name: user.phlebotomist.phleboname,
+          }
+        : {};
 
       return res.status(200).json({
         success: true,
@@ -180,8 +177,7 @@ const login = async (req, res) => {
           : "Unknown Hospital",
         // Nodal Data
         nodalname: user.nodal ? user.nodal.nodalname : "Unknown Nodal",
-        username:phlebotomistData.name
-
+        username: phlebotomistData.name,
       });
     }
 
@@ -219,47 +215,48 @@ const login = async (req, res) => {
 
     //7. Handle Login Receptionist roles,Technician roles
     // Receptionist , Technician Not Belong to any Hospital
-    if (!user.nodal_id) {
-      return res
-        .status(403)
-        .json({ message: "Access denied: User Belong to the Nodal" });
-    }
-    // Generate JWT token
-    const token = jwt.sign(
-      {
+    if (user.role === "technician") {
+
+      // Verify that the technician belongs to the nodal
+      if (!user.nodal_id) {
+        return res
+          .status(403)
+          .json({ message: "Access denied: User Belong to the Nodal" });
+      }
+
+      // Generate JWT token
+      const token = jwt.sign(
+        {
+          id: user.user_id,
+          role: user.role,
+          nodal_id: user.nodal_id,
+          module: user.module,
+        },
+        process.env.JWT_SECRET
+        // { expiresIn: '1h' }
+      );
+
+      // Safely access included phleb object
+      const technicianData = user.technician
+        ? {
+            name: user.technician.technicianname,
+          }
+        : {};
+
+      // Send response with token and user details
+      return res.status(200).json({
+        success: true,
+        token,
         id: user.user_id,
         role: user.role,
         nodal_id: user.nodal_id,
         module: user.module,
-      },
-      process.env.JWT_SECRET
-      // { expiresIn: '1h' }
-    );
-
-           // Safely access included phleb object
-           const technicianData = user.technician
-           ? {
-               name: user.technician.technicianname,
-             }
-           : {};
-
-
-
-
-
-    // Send response with token and user details
-    return res.status(200).json({
-      success: true,
-      token,
-      id: user.user_id,
-      role: user.role,
-      nodal_id: user.nodal_id,
-      module: user.module,
-      // Nodal Data
-      nodalname: user.nodal ? user.nodal.nodalname : "Unknown Nodal",
-      //Need to Get User Name as per User ID
-      username: technicianData.name,
-    });
+        // Nodal Data
+        nodalname: user.nodal ? user.nodal.nodalname : "Unknown Nodal",
+        //Need to Get User Name as per User ID
+        username: technicianData.name,
+      });
+    }
   } catch (e) {
     return res.status(403).json({
       success: false,
