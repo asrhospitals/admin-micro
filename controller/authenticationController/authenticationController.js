@@ -11,6 +11,7 @@ const Nodal = require("../../model/adminModel/masterModel/nodalMaster");
 const Doctor = require("../../model/adminModel/masterModel/doctorRegistration");
 const Phlebotomist = require("../../model/adminModel/masterModel/phlebotomistMaster");
 const Technician = require("../../model/adminModel/masterModel/technicianMaster");
+const Reception = require("../../model/adminModel/masterModel/receptionMaster");
 
 ///////////////////------------------------------- Register user----------------------////////////////
 
@@ -112,6 +113,11 @@ const login = async (req, res) => {
           as: "technician",
           attributes: ["technicianname"],
         },
+        {
+          model: Reception,
+          as: "reception",
+          attributes: ["receptionistname"],
+        }
       ],
     });
     if (!user) return res.status(404).json({ message: "No User found" });
@@ -213,8 +219,8 @@ const login = async (req, res) => {
       });
     }
 
-    //7. Handle Login Receptionist roles,Technician roles
-    // Receptionist , Technician Not Belong to any Hospital
+    
+    // 7. Technician Not Belong to any Hospital
     if (user.role === "technician") {
 
       // Verify that the technician belongs to the nodal
@@ -257,6 +263,52 @@ const login = async (req, res) => {
         username: technicianData.name,
       });
     }
+
+    // 8. Receptionist Not Belong to any Hospital
+    if (user.role === "reception") {
+
+      // Verify that the technician belongs to the nodal
+      if (!user.nodal_id) {
+        return res
+          .status(403)
+          .json({ message: "Access denied: User Belong to the Nodal" });
+      }
+
+      // Generate JWT token
+      const token = jwt.sign(
+        {
+          id: user.user_id,
+          role: user.role,
+          nodal_id: user.nodal_id,
+          module: user.module,
+        },
+        process.env.JWT_SECRET
+        // { expiresIn: '1h' }
+      );
+
+      // Safely access included phleb object
+      const receptionistData = user.reception
+        ? {
+            name: user.reception.receptionistname,
+          }
+        : {};
+
+      // Send response with token and user details
+      return res.status(200).json({
+        success: true,
+        token,
+        id: user.user_id,
+        role: user.role,
+        nodal_id: user.nodal_id,
+        module: user.module,
+        // Nodal Data
+        nodalname: user.nodal ? user.nodal.nodalname : "Unknown Nodal",
+        //Need to Get User Name as per User ID
+        username: receptionistData.name,
+      });
+    }
+
+
   } catch (e) {
     return res.status(403).json({
       success: false,
