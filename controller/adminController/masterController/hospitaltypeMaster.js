@@ -6,14 +6,27 @@ const addhsptltype = async (req, res) => {
   const transaction = await sequelize.transaction();
 
   try {
-    const add_hospital = req.body;
-    const addhsptltype = await HospipatlType.create(add_hospital, {
+    const { hsptltype, hsptldsc, isactive } = req.body;
+
+    const check = await HospipatlType.findOne({
+      where: { hsptltype },
+      transaction,
+    });
+
+    if (check) {
+      await transaction.rollback();
+      return res.status(409).json({
+        message: "Hospital Type with this name already exists",
+        error: "DUPLICATE_HOSPITAL_TYPE",
+      });
+    }
+
+    await HospipatlType.create(req.body, {
       transaction,
     });
     await transaction.commit();
     res.status(201).json({
       message: "Hospital type created successfully",
-      data: addhsptltype,
     });
   } catch (error) {
     await transaction.rollback();
@@ -64,7 +77,7 @@ const getHospitalTypeById = async (req, res) => {
   try {
     const get_by_id = await HospipatlType.findByPk(req.params.id);
     if (!get_by_id) {
-      return res.status(200).json({ message: "No hsopital type found" });
+      return res.status(404).json({ message: "No hsopital type found" });
     }
     res.status(200).json(get_by_id);
   } catch (error) {
@@ -81,17 +94,18 @@ const updatehsptltype = async (req, res) => {
     if (!updateHospitalType) {
       return res
         .status(400)
-        .json({ message: `No hospital type found by this id ${req.params.id}` });
+        .json({
+          message: `No hospital type found by this id ${req.params.id}`,
+        });
     }
 
     if (Object.keys(req.body).length === 0) {
       return res.status(400).json({ message: "Updated data not provided" });
     }
-      await updateHospitalType.update(req.body);
-      await transaction.commit();
-      res.status(200).json(updateHospitalType);
-    }
-   catch (error) {
+    await updateHospitalType.update(req.body);
+    await transaction.commit();
+    res.status(200).json({message:"Hospital Type update successfully"});
+  } catch (error) {
     await transaction.rollback();
     res.status(400).send({ message: `Something went wrong ${error}` });
   }

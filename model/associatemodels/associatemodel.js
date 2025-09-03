@@ -14,6 +14,8 @@ const User = require("../authModel/authenticationModel/userModel");
 const Department=require('../adminModel/masterModel/departmentMaster');
 const Subdepartment=require('../adminModel/masterModel/subdptMaster');
 const HospitalType=require('../adminModel/masterModel/hospitalTypeMaster');
+const Mandatory=require('../adminModel/masterModel/mandatory');
+const ReflexTest=require('../adminModel/masterModel/reflexTest');
 
 // Associations
 
@@ -35,6 +37,28 @@ InvestigationResult.hasMany(NormalValue, {
   onDelete: "CASCADE",
 });
 NormalValue.belongsTo(InvestigationResult, {
+  foreignKey: "resultId",
+  as: "result",
+});
+
+// 3.InvestigationResult → Mandatory
+InvestigationResult.hasMany(Mandatory, {
+  foreignKey: "resultId",
+  as: "mandatories",
+  onDelete: "CASCADE",
+});
+Mandatory.belongsTo(InvestigationResult, {
+  foreignKey: "resultId",
+  as: "result",
+});
+
+// 4.InvestigationResult → ReflexTest
+InvestigationResult.hasMany(ReflexTest, {
+  foreignKey: "resultId",
+  as: "reflexTests",
+  onDelete: "CASCADE",
+});
+ReflexTest.belongsTo(InvestigationResult, {
   foreignKey: "resultId",
   as: "result",
 });

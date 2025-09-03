@@ -2,6 +2,11 @@ const { DataTypes } = require('sequelize');
 const sequalize=require('../../../db/connectDB');
 
 const SpecimenTypeMaster=sequalize.define('specimen',{
+    id:{
+        type:DataTypes.INTEGER,
+        primaryKey:true,
+        autoIncrement:true
+    },
     specimenname:{
         type:DataTypes.STRING,
         allowNull:false,

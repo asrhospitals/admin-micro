@@ -2,7 +2,7 @@ const { DataTypes } = require("sequelize");
 const sequilize = require("../../../db/connectDB");
 
 const NormalValue = sequilize.define(
-  "normalvalue",
+  "inv_normalvalue",
   {
     gender: DataTypes.STRING,
     ageMin: DataTypes.INTEGER,

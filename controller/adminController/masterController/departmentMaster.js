@@ -5,14 +5,25 @@ const sequelize = require("../../../db/connectDB");
 const addDepartment = async (req, res) => {
   const transaction = await sequelize.transaction();
   try {
-    const add_department = req.body;
-    const create_department = await Department.create(add_department, {
+    const { dptname, isactive } = req.body;
+    const existingDpt = await Department.findOne({
+      where: { dptname },
+      transaction,
+    });
+    if (existingDpt) {
+      await transaction.rollback();
+      return res.status(409).json({
+        message: "Department with this name already exists",
+        error: "DUPLICATE_DEPARTMENT_NAME",
+      });
+    }
+
+    await Department.create(req.body, {
       transaction,
     });
     await transaction.commit();
     res.status(201).json({
       message: "Department added successfully",
-      data: create_department,
     });
   } catch (e) {
     await transaction.rollback();

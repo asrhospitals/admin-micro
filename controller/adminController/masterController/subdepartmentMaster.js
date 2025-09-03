@@ -8,24 +8,35 @@ const sequelize = require("../../../db/connectDB");
 const addSubDepartment = async (req, res) => {
   const transaction = await sequelize.transaction();
   try {
-    const add_subdpt = req.body;
+    const { subdptname, department_id, isactive } = req.body;
 
     // Check that department actually exists
-    const departmentExists = await Department.findByPk(
-      add_subdpt.department_id,
-      { transaction }
-    );
+    const departmentExists = await Department.findByPk(department_id, {
+      transaction,
+    });
     if (!departmentExists) {
       await transaction.rollback();
       return res.status(404).json({ message: "Parent department not found." });
     }
-    const create_subdpt = await Subdepartment.create(add_subdpt, {
+
+    const existingSubDpt = await Subdepartment.findOne({
+      where: { subdptname },
+      transaction,
+    });
+
+    if (existingSubDpt) {
+      await transaction.rollback();
+      return res.status(409).json({
+        message: "Sub Department with this name already exists",
+        error: "DUPLICATE_SUBDEPARTMENT_NAME",
+      });
+    }
+
+    await Subdepartment.create(req.body, {
       transaction,
     });
     await transaction.commit();
-    res
-      .status(201)
-      .json({ message: "Created successfully", data: create_subdpt });
+    res.status(201).json({ message: "Sub Department created successfully" });
   } catch (e) {
     await transaction.rollback();
     res.status(400).send({ message: `Something went wrong ${e}` });
@@ -93,24 +104,22 @@ const getById = async (req, res) => {
   }
 };
 
-
 // 4. Update Department
 const updateSubDepartment = async (req, res) => {
   const transaction = await sequelize.transaction();
   try {
-  
     const updateSub = await Subdepartment.findByPk(req.params.id);
     if (!updateSub) {
       return res.status(200).json({ message: "Subdepartment not found" });
     }
-      if (Object.keys(req.body).length === 0) {
+    if (Object.keys(req.body).length === 0) {
       return res.status(400).json({ message: "Updated data not provided" });
     }
-   await updateSub.update(req.body,{transaction});
-   await transaction.commit();
-   res.status(200).json({
-    message: "Subdepartment updated successfully",
-  });
+    await updateSub.update(req.body, { transaction });
+    await transaction.commit();
+    res.status(200).json({
+      message: "Subdepartment updated successfully",
+    });
   } catch (error) {
     await transaction.rollback();
     res.status(400).send({ message: `Something went wrong ${e}` });

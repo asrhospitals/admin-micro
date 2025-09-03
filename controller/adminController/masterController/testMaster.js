@@ -2,13 +2,28 @@ const sequelize = require("../../../db/connectDB");
 const Investigation = require("../../../model/adminModel/masterModel/investigation");
 const InvestigationResult = require("../../../model/adminModel/masterModel/investigationResult");
 const NormalValue = require("../../../model/adminModel/masterModel/normalValue");
+const Mandatory = require("../../../model/adminModel/masterModel/mandatory");
+const ReflexTest = require("../../../model/adminModel/masterModel/reflexTest");
 
 // 1. Add Test
-
 const addTest = async (req, res) => {
   const transaction = await sequelize.transaction();
   try {
     const { results, ...investigationData } = req.body;
+
+       // Check if test with same name already exists
+    const existingTest = await Investigation.findOne({
+      where: { testname: investigationData.testname },
+      transaction
+    });
+
+    if (existingTest) {
+      await transaction.rollback();
+      return res.status(409).json({
+        message: 'Test with this name already exists',
+        error: 'DUPLICATE_TEST_NAME'
+      });
+    }
 
     // 1. Create The Investigation
     const investigation = await Investigation.create(investigationData, {
@@ -17,20 +32,39 @@ const addTest = async (req, res) => {
 
     // Step 2: Add Investigation Results
     for (const result of results) {
-      const { normalValues, ...resultData } = result;
+      const { normalValues, mandatories, reflexTests, ...resultData } = result;
 
+      // Create investigation result
       const resultRecord = await InvestigationResult.create(
         { ...resultData, investigationId: investigation.id },
         { transaction }
       );
 
-      // Step 3: Add Normal Values
+      // 3. Add Normal Values (moved inside the loop and fixed scope)
       if (normalValues?.length) {
-        const enriched = normalValues.map((nv) => ({
+        const enrichedNormalValues = normalValues.map((nv) => ({
           ...nv,
           resultId: resultRecord.id,
         }));
-        await NormalValue.bulkCreate(enriched, { transaction });
+        await NormalValue.bulkCreate(enrichedNormalValues, { transaction });
+      }
+
+      // 4. Add Mandatories (moved inside the loop and fixed scope)
+      if (mandatories?.length) {
+        const enrichedMandatories = mandatories.map((m) => ({
+          ...m,
+          resultId: resultRecord.id,
+        }));
+        await Mandatory.bulkCreate(enrichedMandatories, { transaction });
+      }
+
+      // 5. Add Reflex Tests (moved inside the loop and fixed scope)
+      if (reflexTests?.length) {
+        const enrichedReflexTests = reflexTests.map((r) => ({
+          ...r,
+          resultId: resultRecord.id,
+        }));
+        await ReflexTest.bulkCreate(enrichedReflexTests, { transaction });
       }
     }
 
@@ -38,12 +72,17 @@ const addTest = async (req, res) => {
     res.status(201).json({ message: "Investigation created successfully" });
   } catch (err) {
     await transaction.rollback();
+        if (err.name === 'SequelizeUniqueConstraintError') {
+      return res.status(409).json({
+        message: 'Duplicate entry found',
+        error: 'DUPLICATE_ENTRY'
+      });
+    }
     res.status(500).json({ message: `Error creating investigation ${err}` });
   }
 };
 
 // 2. Get Test
-
 const getTest = async (req, res) => {
   try {
     let page = Number(req.query.page) || 1;
@@ -59,6 +98,14 @@ const getTest = async (req, res) => {
             {
               model: NormalValue,
               as: "normalValues",
+            },
+            {
+              model: Mandatory,
+              as: "mandatories",
+            },
+            {
+              model: ReflexTest,
+              as: "reflexTests",
             },
           ],
         },
@@ -91,7 +138,6 @@ const getTest = async (req, res) => {
 };
 
 // 3. Get Test By Test by Id
-
 const getTestById = async (req, res) => {
   try {
     const testId = req.params.id;
@@ -108,6 +154,14 @@ const getTestById = async (req, res) => {
             {
               model: NormalValue,
               as: "normalValues",
+            },
+            {
+              model: Mandatory,
+              as: "mandatories",
+            },
+            {
+              model: ReflexTest,
+              as: "reflexTests",
             },
           ],
         },
@@ -160,7 +214,9 @@ const updateSingleResult = async (req, res) => {
     const { investigationId, resultId } = req.params;
     const updateData = req.body; // No ID needed in body
 
-    const investigation = await Investigation.findByPk(investigationId, { transaction });
+    const investigation = await Investigation.findByPk(investigationId, {
+      transaction,
+    });
     if (!investigation) {
       await transaction.rollback();
       return res.status(404).json({ message: "Investigation not found" });
@@ -181,7 +237,6 @@ const updateSingleResult = async (req, res) => {
 
     await transaction.commit();
     res.status(200).json({ message: "Result updated successfully" });
-    
   } catch (err) {
     await transaction.rollback();
     res.status(500).json({ message: "Failed to update result" });
@@ -196,13 +251,15 @@ const updateNormalValues = async (req, res) => {
     const { resultId, normalValueId } = req.params;
     const updateData = req.body;
 
-      const result = await InvestigationResult.findByPk(resultId, { transaction });
+    const result = await InvestigationResult.findByPk(resultId, {
+      transaction,
+    });
     if (!result) {
       await transaction.rollback();
       return res.status(404).json({ message: "Result not found" });
     }
 
-     const [updatedRowsCount] = await NormalValue.update(updateData, {
+    const [updatedRowsCount] = await NormalValue.update(updateData, {
       where: {
         id: normalValueId,
         resultId: resultId,
@@ -210,7 +267,7 @@ const updateNormalValues = async (req, res) => {
       transaction,
     });
 
-     if (updatedRowsCount === 0) {
+    if (updatedRowsCount === 0) {
       await transaction.rollback();
       return res.status(404).json({ message: "Normal value not found" });
     }

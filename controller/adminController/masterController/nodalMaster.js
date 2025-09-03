@@ -5,10 +5,22 @@ const Nodal = require("../../../model/adminModel/masterModel/nodalMaster");
 const addNodal = async (req, res) => {
   const transaction = await sequelize.transaction();
   try {
-    const add_nodal = req.body;
-    const create_nodal = await Nodal.create(add_nodal, { transaction });
+    const { nodalname, motherlab, isactive } = req.body;
+    const check = await Nodal.findOne({
+      where: { nodalname },
+      transaction,
+    });
+    if (check) {
+      await transaction.rollback();
+      return res.status(409).json({
+        message: "Nodal with this name already exists",
+        error: "DUPLICATE_NODAL_NAME",
+      });
+    }
+
+    await Nodal.create(req.body, { transaction });
     await transaction.commit();
-    res.status(201).json(create_nodal);
+    res.status(201).json({ message: "Nodal created successfully" });
   } catch (error) {
     await transaction.rollback();
     res.status(400).send({ message: `Something went wrong ${error}` });
@@ -25,7 +37,7 @@ const getNodal = async (req, res) => {
     const { count, rows } = await Nodal.findAndCountAll({
       limit: limit,
       offset: offset,
-      order: [["nodalname", "ASC"]],
+      order: [["id", "ASC"]],
     });
 
     const totalPages = Math.ceil(count / limit);
@@ -73,7 +85,7 @@ const updateNodal = async (req, res) => {
         .status(200)
         .json({ message: `Not found any nodal for this id ${req.params.id}` });
     }
-    
+
     if (Object.keys(req.body).length === 0) {
       return res.status(400).json({ message: "Updated data not provided" });
     }

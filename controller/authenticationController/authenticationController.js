@@ -10,6 +10,7 @@ const Hospital = require("../../model/adminModel/masterModel/hospitalMaster");
 const Nodal = require("../../model/adminModel/masterModel/nodalMaster");
 const Doctor = require("../../model/adminModel/masterModel/doctorRegistration");
 const Phlebotomist = require("../../model/adminModel/masterModel/phlebotomistMaster");
+const Technician = require("../../model/adminModel/masterModel/technicianMaster");
 
 ///////////////////------------------------------- Register user----------------------////////////////
 
@@ -107,6 +108,11 @@ const login = async (req, res) => {
           as: "phlebotomist",
           attributes: ["phleboname"],
         },
+        {
+          model: Technician,
+          as: "technician",
+          attributes: ["technicianname"],
+        }
       ],
     });
     if (!user) return res.status(404).json({ message: "No User found" });
@@ -213,7 +219,7 @@ const login = async (req, res) => {
 
     //7. Handle Login Receptionist roles,Technician roles
     // Receptionist , Technician Not Belong to any Hospital
-    if (!user.nodalid) {
+    if (!user.nodal_id) {
       return res
         .status(403)
         .json({ message: "Access denied: User Belong to the Nodal" });
@@ -223,24 +229,36 @@ const login = async (req, res) => {
       {
         id: user.user_id,
         role: user.role,
-        nodalid: user.nodalid,
+        nodal_id: user.nodal_id,
         module: user.module,
       },
       process.env.JWT_SECRET
       // { expiresIn: '1h' }
     );
+
+           // Safely access included phleb object
+           const technicianData = user.technician
+           ? {
+               name: user.technician.technicianname,
+             }
+           : {};
+
+
+
+
+
     // Send response with token and user details
     return res.status(200).json({
       success: true,
       token,
       id: user.user_id,
       role: user.role,
-      nodal_id: user.nodalid,
+      nodal_id: user.nodal_id,
       module: user.module,
       // Nodal Data
       nodalname: user.nodal ? user.nodal.nodalname : "Unknown Nodal",
       //Need to Get User Name as per User ID
-      username: user.firstName + " " + user.lastname,
+      username: technicianData.name,
     });
   } catch (e) {
     return res.status(403).json({

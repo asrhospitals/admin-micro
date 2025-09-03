@@ -9,11 +9,31 @@ const {
 const addNodalHospital = async (req, res) => {
   const transaction = await sequelize.transaction();
   try {
-    const create_nodal_hospital = await NodalHospital.create(req.body, {
+    const { nodalid, hospitalid, isactive } = req.bdy;
+
+    // Check that Nodal actually exists
+    const NodalExists = await Nodal.findByPk(nodalid, {
+      transaction,
+    });
+    if (!NodalExists) {
+      await transaction.rollback();
+      return res.status(404).json({ message: "Parent nodal not found." });
+    }
+
+    // Check that Hospital actually exists
+    const HospitalExists = await Hospital.findByPk(hospitalid, {
+      transaction,
+    });
+    if (!HospitalExists) {
+      await transaction.rollback();
+      return res.status(404).json({ message: "Parent hospital not found." });
+    }
+
+    await NodalHospital.create(req.body, {
       transaction,
     });
     await transaction.commit();
-    res.status(201).json(create_nodal_hospital);
+    res.status(201).json({ message: "Nodal hosiptal created successfully" });
   } catch (error) {
     await transaction.rollback();
     res.status(400).send({ message: `Something went wrong ${error}` });

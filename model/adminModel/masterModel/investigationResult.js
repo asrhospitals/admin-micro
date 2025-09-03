@@ -2,7 +2,7 @@ const { DataTypes } = require("sequelize");
 const sequelize = require("../../../db/connectDB");
 
 const InvestigationResult = sequelize.define(
-  "investigationrslt",
+  "inv_result",
   {
     resultname: { type: DataTypes.STRING },
     unit: { type: DataTypes.STRING },

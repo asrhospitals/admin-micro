@@ -16,7 +16,7 @@ const { addTechnician, getTechnician, updateTechnician, getTechnicianById } = re
 const { addRefDoctor, getRefDoc, updateRefDoc } = require('../../controller/adminController/masterController/referralMaster');
 const { addProfile, getProfile, updateProfile } = require('../../controller/adminController/masterController/profileentrymaster');
 const { addReport, getReport, updateReport } = require('../../controller/adminController/masterController/reportTypeMaster');
-const { addSpecimen, getSpecimen, updateSpecimen } = require('../../controller/adminController/masterController/specimenMaster');
+const { addSpecimen, getSpecimen, updateSpecimen, getSpecimenById } = require('../../controller/adminController/masterController/specimenMaster');
 const { addTest, getTest, updateNormalValues, updateInvestigation, updateResults, getTestById, updateSingleResult } = require('../../controller/adminController/masterController/testMaster');
 const { addReagent, getReagent, updateReagent } = require('../../controller/adminController/masterController/reagentMaster');
 const { addDocAuth, getDocAuth, updateDocAuth } = require('../../controller/adminController/masterController/doctorAuthMaster');
@@ -162,8 +162,25 @@ router.route('/get-instrument/:id').get(getInstrumentById);
 // 57. Update Lab Instrument
 router.route('/update-instrument/:id').put(updateInstrument);
 
+///------------Specimen Type Master------------
+// 58. Add Specimen
+router.route('/add-specimen').post(addSpecimen);
+// 59. Get Specimen
+router.route('/get-specimen').get(getSpecimen);
+// 60. Get Specimen By Id
+router.route('/get-specimen/:id').get(getSpecimenById);
+// 61. Update Specimen
+router.route('/update-specimen/:id').put(updateSpecimen);
 
+/// --------------Profile Entry Master------------------
+router.route('/add-profileentry').post(addProfile);
+router.route('/get-profileentry').get(getProfile);
+router.route('/update-profileentry/:id').put(updateProfile);
 
+///---------- Profile Master------------
+router.route('/add-profile').post(createProfile);
+router.route('/get-profile').get(fetchProfile);
+router.route('/update-profile/:profile_id').put(updateProfiles);
 
 
 
@@ -199,15 +216,7 @@ router.route('/get-reportdoctor').get(getReportDoctor);
 router.route('/update-reportdoctor/:id').put(updateReportDoctor);
 
 
-/// --------------Profile Entry Master------------------
-router.route('/add-profileentry').post(addProfile);
-router.route('/get-profileentry').get(getProfile);
-router.route('/update-profileentry/:id').put(updateProfile);
 
-///---------- Profile Master------------
-router.route('/add-profile').post(createProfile);
-router.route('/get-profile').get(fetchProfile);
-router.route('/update-profile/:profile_id').put(updateProfiles);
 
 ///-----------Report Type Master--------------
 router.route('/add-report').post(addReport);
@@ -223,10 +232,7 @@ router.route('/update-reg/:id').put(updateReagent);
 
 
 
-///------------Specimen Type Master------------
-router.route('/add-specimen').post(addSpecimen);
-router.route('/get-specimen').get(getSpecimen);
-router.route('/update-specimen/:id').put(updateSpecimen);
+
 
 ///-----------Color Master---------------------
 router.route('/add-color').post(addColor);

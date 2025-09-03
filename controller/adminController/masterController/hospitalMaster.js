@@ -6,12 +6,48 @@ const HospipatlType = require("../../../model/adminModel/masterModel/hospitalTyp
 const addhospital = async (req, res) => {
   const transaction = await sequelize.transaction();
   try {
-    const add_hospital = req.body;
-    const create_hospital = await Hospital.create(add_hospital, {
+    const {
+      hospitalname,
+      address,
+      city,
+      district,
+      pin,
+      states,
+      email,
+      phoneno,
+      cntprsn,
+      cntprsnmob,
+      isactive,
+      hospital_type_id,
+    } = req.body;
+
+    // Check that department actually exists
+    const checkHospitalType = await HospipatlType.findByPk(hospital_type_id, {
+      transaction,
+    });
+    if (!checkHospitalType) {
+      await transaction.rollback();
+      return res.status(404).json({ message: "Parent department not found." });
+    }
+
+    const existingHospital = await Hospital.findOne({
+      where: { hospitalname },
+      transaction,
+    });
+
+    if (existingHospital) {
+      await transaction.rollback();
+      return res.status(409).json({
+        message: "Hospital with this name already exists",
+        error: "DUPLICATE_HOSPITAL_NAME",
+      });
+    }
+
+    await Hospital.create(req.body, {
       transaction,
     });
     await transaction.commit();
-    res.status(201).json(create_hospital);
+    res.status(201).json({ message: "Hospital created successfully" });
   } catch (error) {
     await transaction.rollback();
     res.status(400).json({ message: `Something went wrong ${error}` });
@@ -29,7 +65,7 @@ const gethospital = async (req, res) => {
     const { count, rows } = await Hospital.findAndCountAll({
       limit: limit,
       offset: offset,
-      order: [["hospitalname", "ASC"]],
+      order: [["id", "ASC"]],
       include: [
         { model: HospipatlType, as: "hospitalType", attributes: ["hsptltype"] },
       ],
@@ -64,11 +100,9 @@ const getHospitalById = async (req, res) => {
   try {
     const get_hospital = await Hospital.findByPk(req.params.id);
     if (!get_hospital) {
-      return res
-        .status(200)
-        .json({
-          message: `Not found any hospital for this id ${req.params.id}`,
-        });
+      return res.status(200).json({
+        message: `Not found any hospital for this id ${req.params.id}`,
+      });
     }
     res.status(200).json(get_hospital);
   } catch (error) {

@@ -3,7 +3,7 @@ const sequalize = require("../../../db/connectDB");
 
 
 const ProfileEntryMaster = sequalize.define(
-  "profileentrymaster",
+  "profile_entry",
   {
     id: {
       type: DataTypes.INTEGER,
@@ -13,10 +13,12 @@ const ProfileEntryMaster = sequalize.define(
     profilename: {
       type: DataTypes.STRING,
       allowNull: false,
+      unique:true
     },
     profilecode: {
       type: DataTypes.STRING,
       allowNull: false,
+      unique:true
     },
     alternativebarcode: {
       type: DataTypes.BOOLEAN,
