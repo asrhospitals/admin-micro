@@ -16,7 +16,7 @@ const { addTechnician, getTechnician, updateTechnician, getTechnicianById } = re
 const { addRefDoctor, getRefDoc, updateRefDoc } = require('../../controller/adminController/masterController/referralMaster');
 const { addProfile, getProfile, updateProfile } = require('../../controller/adminController/masterController/profileentrymaster');
 const { addReport, getReport, updateReport } = require('../../controller/adminController/masterController/reportTypeMaster');
-const { addSpecimen, getSpecimen, updateSpecimen, getSpecimenById } = require('../../controller/adminController/masterController/specimenMaster');
+// const { addSpecimen, getSpecimen, updateSpecimen, getSpecimenById } = require('../../controller/adminController/masterController/specimenMaster');
 const { addTest, getTest, updateNormalValues, updateInvestigation, updateResults, getTestById, updateSingleResult } = require('../../controller/adminController/masterController/testMaster');
 const { addReagent, getReagent, updateReagent } = require('../../controller/adminController/masterController/reagentMaster');
 const { addDocAuth, getDocAuth, updateDocAuth } = require('../../controller/adminController/masterController/doctorAuthMaster');
@@ -164,13 +164,13 @@ router.route('/update-instrument/:id').put(updateInstrument);
 
 ///------------Specimen Type Master------------
 // 58. Add Specimen
-router.route('/add-specimen').post(addSpecimen);
+// router.route('/add-specimen').post(addSpecimen);
 // 59. Get Specimen
-router.route('/get-specimen').get(getSpecimen);
+// router.route('/get-specimen').get(getSpecimen);
 // 60. Get Specimen By Id
-router.route('/get-specimen/:id').get(getSpecimenById);
+// router.route('/get-specimen/:id').get(getSpecimenById);
 // 61. Update Specimen
-router.route('/update-specimen/:id').put(updateSpecimen);
+// router.route('/update-specimen/:id').put(updateSpecimen);
 
 /// --------------Profile Entry Master------------------
 router.route('/add-profileentry').post(addProfile);
