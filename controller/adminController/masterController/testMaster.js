@@ -13,7 +13,7 @@ const addTest = async (req, res) => {
 
        // Check if test with same name already exists
     const existingTest = await Investigation.findOne({
-      where: { testname: investigationData.testname },
+      where: { test_name: investigationData.test_name },
       transaction
     });
 
@@ -72,12 +72,6 @@ const addTest = async (req, res) => {
     res.status(201).json({ message: "Investigation created successfully" });
   } catch (err) {
     await transaction.rollback();
-        if (err.name === 'SequelizeUniqueConstraintError') {
-      return res.status(409).json({
-        message: 'Duplicate entry found',
-        error: 'DUPLICATE_ENTRY'
-      });
-    }
     res.status(500).json({ message: `Error creating investigation ${err}` });
   }
 };

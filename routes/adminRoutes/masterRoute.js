@@ -218,10 +218,10 @@ router.route('/update-reportdoctor/:id').put(updateReportDoctor);
 
 
 
-///-----------Report Type Master--------------
-router.route('/add-report').post(addReport);
-router.route('/get-report').get(getReport);
-router.route('/update-report/:id').put(updateReport);
+// ///-----------Report Type Master--------------
+// router.route('/add-report').post(addReport);
+// router.route('/get-report').get(getReport);
+// router.route('/update-report/:id').put(updateReport);
 
 ///----------Reagent Master--------------
 router.route('/add-reg').post(addReagent);
@@ -234,16 +234,16 @@ router.route('/update-reg/:id').put(updateReagent);
 
 
 
-///-----------Color Master---------------------
-router.route('/add-color').post(addColor);
-router.route('/get-color').get(getColor);
-router.route('/update-color/:id').put(updateColors);
+// ///-----------Color Master---------------------
+// router.route('/add-color').post(addColor);
+// router.route('/get-color').get(getColor);
+// router.route('/update-color/:id').put(updateColors);
 
 
-///----------Kit Master----------------------
-router.route('/add-kit').post(addKit);
-router.route('/get-kit').get(getKit);
-router.route('/update-kit/:id').put(updateKit);
+// ///----------Kit Master----------------------
+// router.route('/add-kit').post(addKit);
+// router.route('/get-kit').get(getKit);
+// router.route('/update-kit/:id').put(updateKit);
 
 ///------------Doctor Authentication Master----------
 router.route('/add-docauth').post(addDocAuth);

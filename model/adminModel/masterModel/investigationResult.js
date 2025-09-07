@@ -10,6 +10,7 @@ const InvestigationResult = sequelize.define(
     formula: { type: DataTypes.STRING },
     order: { type: DataTypes.INTEGER },
     roundOff: { type: DataTypes.INTEGER },
+    normal_values: { type: DataTypes.STRING },
     showTrends: { type: DataTypes.BOOLEAN },
     defaultValue: { type: DataTypes.INTEGER },
     investigationId: { type: DataTypes.INTEGER },

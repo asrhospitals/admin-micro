@@ -212,9 +212,7 @@ const login = async (req, res) => {
         id: user.user_id,
         role: user.role,
         module: user.module,
-        hospitalid: user.hospitalid,
-        //Need to Get User Name as per User ID
-        username: user.firstName + " " + user.lastname,
+        hospital_id: user.hospitalid,
         doctor: doctorData,
       });
     }
