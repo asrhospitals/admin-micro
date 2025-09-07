@@ -13,6 +13,7 @@ const verifyToken = require("./middlewares/authMiddileware");
 const role = require("./middlewares/roleMiddleware");
 
 app.use(cors());
+// anand 
 app.use(express.json());
 
 /// User Authentication Routes
