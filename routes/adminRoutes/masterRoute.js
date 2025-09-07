@@ -182,6 +182,11 @@ router.route('/add-profile').post(createProfile);
 router.route('/get-profile').get(fetchProfile);
 router.route('/update-profile/:profile_id').put(updateProfiles);
 
+///---------------- Role Type Master------------------
+router.route('/add-role').post(addRole);
+router.route('/get-role').get(getRole);
+router.route('/update-role/:id').put(updateRole);
+
 
 
 
@@ -194,10 +199,7 @@ router.route('/add-nodalinstrument').post(addNodalInstrument);
 router.route('/get-nodalinstrument').get(getNodalInstrument);
 router.route('/update-nodalinstrument/:id').put(updateNodalInstrument);
 
-///---------------- Role Type Master------------------
-router.route('/add-role').post(addRole);
-router.route('/get-role').get(getRole);
-router.route('/update-role/:id').put(updateRole);
+
 
 
 
