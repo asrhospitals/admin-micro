@@ -1,48 +1,90 @@
-const ColorMaster=require('../../../model/adminModel/masterModel/colormaster');
+const ColorMaster = require("../../../model/adminModel/masterModel/colormaster");
 
-// Add Color 
+// ✅ Create
+const createColor = async (req, res) => {
+  try {
+    const existingColor = await ColorMaster.findOne({
+      where: { colorstatus: req.body.colorstatus },
+    });
 
-const addColor=async (req,res) => {
-    try {
-        const add_color=req.body;
-        const create_color=await ColorMaster.create(add_color);
-        res.status(201).json(create_color);
-    } catch (error) {
-        res.status(400).send({message:'Something went wrong',error:error.message});
+    if (existingColor) {
+      return res.status(409).json({ success: false, message: "Color already exists" });
     }
-    
+    const color = await ColorMaster.create(req.body);
+    return res.status(201).json({ success: true, data: color });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
 };
 
+// ✅ Get All
+const getAllColors = async (req, res) => {
+  try {
+    const colors = await ColorMaster.findAll();
 
-/// Get Color
-
-const getColor=async (req,res) => {
-    try {
-        const getColors=await ColorMaster.findAll();
-        res.status(200).json(getColors);
-    } catch (error) {
-        res.status(400).send({message:'Something went wrong',error:error.message});
-
+    if (!colors || colors.length === 0) {
+      return res.status(404).json({ success: false, message: "No colors found" });
     }
-    
+    return res.status(200).json({ success: true, data: colors });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
 };
 
+// ✅ Get By ID
+const getColorById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const color = await ColorMaster.findByPk(id);
 
-/// Update Colors
-
-const updateColors=async (req,res) => {
-
-    try {
-        const id=req.params.id;
-        const updateColor=await ColorMaster.findByPk(id);
-        updateColor.update(req.body);
-        res.status(200).json(updateColor);
-    } catch (error) {
-        res.status(400).send({message:'Something went wrong',error:error.message});
-
+    if (!color) {
+      return res.status(404).json({ success: false, message: "Color not found" });
     }
-    
+
+    return res.status(200).json({ success: true, data: color });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
 };
 
+// ✅ Update
+const updateColor = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const color = await ColorMaster.findByPk(id);
 
-module.exports={addColor,getColor,updateColors}
+    if (!color) {
+      return res.status(404).json({ success: false, message: "Color not found" });
+    }
+
+    await color.update(req.body);
+    return res.status(200).json({ success: true, data: color });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// ✅ Delete
+const deleteColor = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const color = await ColorMaster.findByPk(id);
+
+    if (!color) {
+      return res.status(404).json({ success: false, message: "Color not found" });
+    }
+
+    await color.destroy();
+    return res.status(200).json({ success: true, message: "Color deleted successfully" });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+module.exports = {
+  createColor,
+  getAllColors,
+  getColorById,
+  updateColor,
+  deleteColor,
+};

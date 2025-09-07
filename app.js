@@ -11,6 +11,8 @@ const ProfilePicture = require("./controller/commonImageUploader/profileImage");
 const sequelize = require("./db/connectDB");
 const verifyToken = require("./middlewares/authMiddileware");
 const role = require("./middlewares/roleMiddleware");
+const masterRoutes = require("./routes/adminRoutes/index");
+
 
 app.use(cors());
 // anand 123
@@ -20,7 +22,9 @@ app.use(express.json());
 app.use("/lims/authentication", AuthRoutes);
 
 /// All routes
-app.use("/lims/master", verifyToken, role("admin"), MasterRoutes);
+// app.use("/lims/master", verifyToken, role("admin"), MasterRoutes);
+app.use("/api/lims/master", verifyToken, role("admin"), masterRoutes);
+app.use("/api/lims/master", verifyToken, role("admin"), MasterRoutes);
 
 // Routes to upload image
 app.use("/lims/signature", SignatureImageUploader);

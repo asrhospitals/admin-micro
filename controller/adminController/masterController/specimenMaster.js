@@ -1,99 +1,89 @@
-const Speciman = require("../../../model/adminModel/masterModel/specimenTypeMaster");
-const sequalize = require("../../../db/connectDB");
+const SpecimenTypeMaster = require("../../../model/adminModel/masterModel/specimenTypeMaster");
 
-// 1. Add Speciman
-const addSpecimen = async (req, res) => {
-  const transaction = await sequalize.transaction();
+// ✅ Create
+const createSpecimenType = async (req, res) => {
   try {
-    const { specimenname, specimendes, isactive } = req.body;
-    const existingSpecimen = await Speciman.findOne({
-      where: { specimenname },
-      transaction,
+    const existingSpecimen = await SpecimenTypeMaster.findOne({
+      where: { specimenname: req.body.specimenname },
     });
 
     if (existingSpecimen) {
-      await transaction.rollback();
-      return res.status(409).json({
-        message: "Specimen with this name already exists",
-        error: "DUPLICATE_SPECIMEN_NAME",
-      });
+      return res.status(409).json({ success: false, message: "Specimen type already exists" });
     }
-    await Speciman.create(req.body, { transaction });
-    await transaction.commit();
-    res.status(201).json({ message: "Specimen created successfully" });
+    const specimen = await SpecimenTypeMaster.create(req.body);
+    return res.status(201).json({ success: true, data: specimen });
   } catch (error) {
-    await transaction.rollback();
-    res.status(400).send({ message: `Something went wrong ${error}` });
+    return res.status(500).json({ success: false, message: error.message });
   }
 };
 
-// 2. Get Specimen
-const getSpecimen = async (req, res) => {
+// ✅ Get All
+const getAllSpecimenTypes = async (req, res) => {
   try {
-    let page = parseInt(req.query.page) || 1;
-    let limit = parseInt(req.query.limit) || 10;
-    let offset = (page - 1) * limit;
-
-    const { count, rows } = await Speciman.findAndCountAll({
-      limit: limit,
-      offset: offset,
-      order: [["id", "ASC"]],
-    });
-
-    const totalpages = Math.ceil(count / limit);
-
-    if (!rows) {
-      return res.status(404).json({ message: "No data found" });
+    const specimens = await SpecimenTypeMaster.findAll();
+    if (!specimens || specimens.length === 0) {
+      return res.status(404).json({ success: false, message: "No specimen types found" });
     }
-
-    res.status(200).json({
-      data: rows,
-      meta: {
-        totalItems: count,
-        itemsPerPage: limit,
-        currentPage: page,
-        totalPages: totalpages,
-      },
-    });
+    return res.status(200).json({ success: true, data: specimens });
   } catch (error) {
-    res.status(400).send({ message: `Something went wrong ${error}` });
+    return res.status(500).json({ success: false, message: error.message });
   }
 };
 
-// 3. Get Specimen By Id
-const getSpecimenById = async (req, res) => {
+// ✅ Get By ID
+const getSpecimenTypeById = async (req, res) => {
   try {
-    const get_by_id = await Speciman.findByPk(req.params.id);
-    if (!get_by_id) {
-      return res
-        .status(404)
-        .json({ message: `No data found for this id ${req.params.id}` });
+    const { id } = req.params;
+    const specimen = await SpecimenTypeMaster.findByPk(id);
+
+    if (!specimen) {
+      return res.status(404).json({ success: false, message: "Specimen type not found" });
     }
-    res.status(200).json(get_by_id);
+
+    return res.status(200).json({ success: true, data: specimen });
   } catch (error) {
-    res.status(400).send({ message: `Something went wrong ${error}` });
+    return res.status(500).json({ success: false, message: error.message });
   }
 };
 
-// 4. Update Specimen
-const updateSpecimen = async (req, res) => {
-  const transaction = await sequalize.transaction();
+// ✅ Update
+const updateSpecimenType = async (req, res) => {
   try {
-    const updateSpecimens = await Speciman.findByPk(req.params.id);
-    if (!updateSpecimens) {
-      return res.status(404).json({ message: " Specimen not found" });
-    }
-    if (Object.keys(req.body).length === 0) {
-      return res.status(400).json({ message: "Updated data not provided" });
+    const { id } = req.params;
+    const specimen = await SpecimenTypeMaster.findByPk(id);
+
+    if (!specimen) {
+      return res.status(404).json({ success: false, message: "Specimen type not found" });
     }
 
-    await updateSpecimens.update(req.body, { transaction });
-    await transaction.commit();
-    res.status(200).json({message:"Specimen update successfully"});
+    await specimen.update(req.body);
+    return res.status(200).json({ success: true, data: specimen });
   } catch (error) {
-    await transaction.rollback();
-    res.status(400).send({ message: `Something went wrong ${error}` });
+    return res.status(500).json({ success: false, message: error.message });
   }
 };
 
-module.exports = { addSpecimen, getSpecimen, getSpecimenById, updateSpecimen };
+// ✅ Delete
+const deleteSpecimenType = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const specimen = await SpecimenTypeMaster.findByPk(id);
+
+    if (!specimen) {
+      return res.status(404).json({ success: false, message: "Specimen type not found" });
+    }
+
+    await specimen.destroy();
+    return res.status(200).json({ success: true, message: "Specimen type deleted successfully" });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+module.exports = {
+  createSpecimenType,
+  getAllSpecimenTypes,
+  getSpecimenTypeById,
+  updateSpecimenType,
+  deleteSpecimenType,
+};

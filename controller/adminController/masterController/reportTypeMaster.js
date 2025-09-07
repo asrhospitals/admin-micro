@@ -1,39 +1,86 @@
-const ReportType=require('../../../model/adminModel/masterModel/reportTypeMaster');
+const ReportType = require("../../../model/adminModel/masterModel/reportTypeMaster");
 
-/// Add New Report
-const addReport=async(req,res)=>{
-    try {
-        const newReport=req.body;
-        const createReport=await ReportType.create(newReport);
-        res.status(201).json(createReport);
-    } catch (error) {
-        res.status(400).send({message:'Something went wrong',error:error.message});
+// ✅ Create
+const createReportType = async (req, res) => {
+  try {
+    const existingReportType = await ReportType.findOne({
+      where: { reporttype: req.body.reporttype },
+    });
+
+    if (existingReportType) {
+      return res.status(409).json({ success: false, message: "Report type already exists" });
     }
+    const reportType = await ReportType.create(req.body);
+    return res.status(201).json({ success: true, data: reportType });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
 };
 
-
-/// Get Report
-
-const getReport=async(req,res)=>{
-    try {
-        const findReport=await ReportType.findAll();
-        res.status(200).json(findReport);
-    } catch (error) {
-        res.status(400).send({message:'Something went wrong',error:error.message});
-    }
+// ✅ Get All
+const getAllReportTypes = async (req, res) => {
+  try {
+    const reportTypes = await ReportType.findAll();
+    return res.status(200).json({ success: true, data: reportTypes });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
 };
 
+// ✅ Get By ID
+const getReportTypeById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const reportType = await ReportType.findByPk(id);
 
-/// Update Report
-const updateReport=async(req,res)=>{
-    try {
-        const id=req.params.id;
-        const updateReport=await ReportType.findByPk(id);
-        updateReport.update(req.body);
-        res.status(200).json(updateReport)
-    } catch (error) {
-        res.status(400).send({message:'Something went wrong',error:error.message});
+    if (!reportType) {
+      return res.status(404).json({ success: false, message: "Report type not found" });
     }
+
+    return res.status(200).json({ success: true, data: reportType });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
 };
 
-module.exports={addReport,getReport,updateReport}
+// ✅ Update
+const updateReportType = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const reportType = await ReportType.findByPk(id);
+
+    if (!reportType) {
+      return res.status(404).json({ success: false, message: "Report type not found" });
+    }
+
+    await reportType.update(req.body);
+    return res.status(200).json({ success: true, data: reportType });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// ✅ Delete
+const deleteReportType = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const reportType = await ReportType.findByPk(id);
+
+    if (!reportType) {
+      return res.status(404).json({ success: false, message: "Report type not found" });
+    }
+
+    await reportType.destroy();
+    return res.status(200).json({ success: true, message: "Report type deleted successfully" });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+module.exports = {
+  createReportType,
+  getAllReportTypes,
+  getReportTypeById,
+  updateReportType,
+  deleteReportType,
+};
