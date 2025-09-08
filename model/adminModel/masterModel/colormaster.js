@@ -20,7 +20,7 @@ const ColorMaster = sequelize.define(
       defaultValue: {},
     },
   },
-  { timestamps: false }
+  { timestamps: true }
 );
 
 module.exports = ColorMaster;
