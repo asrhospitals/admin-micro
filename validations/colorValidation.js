@@ -1,3 +1,5 @@
+const Joi = require("joi");
+
 const colorSchema = Joi.object({
   colorstatus: Joi.string().required(),
   colorcodes: Joi.object({
@@ -10,3 +12,6 @@ const colorSchema = Joi.object({
   createdAt: Joi.date().optional(),   // <-- allow frontend to send it
   // updatedAt: Joi.date().optional(),   // optional if needed
 });
+
+
+module.exports = { colorSchema };
