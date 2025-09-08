@@ -24,7 +24,7 @@ app.use("/lims/authentication", AuthRoutes);
 /// All routes
 // app.use("/lims/master", verifyToken, role("admin"), MasterRoutes);
 app.use("/api/lims/master", verifyToken, role("admin"), masterRoutes);
-app.use("/api/lims/master", verifyToken, role("admin"), MasterRoutes);
+app.use("/lims/master", verifyToken, role("admin"), MasterRoutes);
 
 // Routes to upload image
 app.use("/lims/signature", SignatureImageUploader);
