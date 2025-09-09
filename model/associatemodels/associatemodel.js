@@ -1,6 +1,6 @@
 const Investigation = require("../adminModel/masterModel/investigation");
 const Hospital = require("../adminModel/masterModel/hospitalMaster");
-const ProfileEntryMaster = require("../adminModel/masterModel/profileentrymaster");
+const ProfileEntry = require("../adminModel/masterModel/profileentrymaster");
 const Profile = require("../adminModel/masterModel/profileMaster");
 const Nodal = require("../adminModel/masterModel/nodalMaster");
 const NodalHospital = require("../adminModel/masterModel/attachNodalHospitalMaster");
@@ -63,18 +63,16 @@ ReflexTest.belongsTo(InvestigationResult, {
   as: "result",
 });
 
-// ProfileEntryMaster - Investigation many-to-many
-Investigation.belongsToMany(ProfileEntryMaster, {
-  through: Profile,
-  foreignKey: "investigationid",
-  otherKey: "profileid",
-});
+Profile.belongsTo(ProfileEntry, { foreignKey: "profileid" });
+Profile.belongsTo(Investigation, { foreignKey: "investigationid" });
 
-ProfileEntryMaster.belongsToMany(Investigation, {
-  through: Profile,
-  foreignKey: "profileid",
-  otherKey: "investigationid",
-});
+ProfileEntry.hasMany(Profile, { foreignKey: "profileid" });
+Investigation.hasMany(Profile, { foreignKey: "investigationid" });
+
+Investigation.belongsTo(Department, { foreignKey: "departmentId" });
+Department.hasMany(Investigation, { foreignKey: "departmentId" });
+
+
 
 // Nodal - NodalHospital one-to-many
 //NodalHospital belongs to Nodal through nodalid
@@ -157,7 +155,7 @@ Hospital.belongsTo(Nodal, {
 module.exports = {
   Investigation,
   Hospital,
-  ProfileEntryMaster,
+  ProfileEntry,
   Nodal,
   NodalHospital,
   Profile,

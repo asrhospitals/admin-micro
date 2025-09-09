@@ -8,16 +8,6 @@ const addhospital = async (req, res) => {
   try {
     const {
       hospitalname,
-      address,
-      city,
-      district,
-      pin,
-      states,
-      email,
-      phoneno,
-      cntprsn,
-      cntprsnmob,
-      isactive,
       hospital_type_id,
     } = req.body;
 
@@ -31,7 +21,10 @@ const addhospital = async (req, res) => {
     }
 
     const existingHospital = await Hospital.findOne({
-      where: { hospitalname },
+      where: sequelize.where(
+        sequelize.fn("LOWER", sequelize.col("hospitalname")),
+        hospitalname.toLowerCase()
+      ),
       transaction,
     });
 

@@ -18,7 +18,7 @@ const { Sequelize } = require("sequelize");
 //    port: 5432,
 //  });
 
-// // Stagged Database
+// Stagged Database
 const sequelize = new Sequelize(process.env.DATABASE_URL, {
   dialect: "postgres",
   port: 30988,

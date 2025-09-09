@@ -4,6 +4,7 @@ const InvestigationResult = require("../../../model/adminModel/masterModel/inves
 const NormalValue = require("../../../model/adminModel/masterModel/normalValue");
 const Mandatory = require("../../../model/adminModel/masterModel/mandatory");
 const ReflexTest = require("../../../model/adminModel/masterModel/reflexTest");
+const Department = require("../../../model/adminModel/masterModel/departmentMaster");
 
 // 1. Add Test
 const addTest = async (req, res) => {
@@ -11,17 +12,20 @@ const addTest = async (req, res) => {
   try {
     const { results, ...investigationData } = req.body;
 
-       // Check if test with same name already exists
+    // Check if test with same name already exists
     const existingTest = await Investigation.findOne({
-      where: { test_name: investigationData.test_name },
-      transaction
+      where: sequelize.where(
+        sequelize.fn("LOWER", sequelize.col("testname")),
+        investigationData.testname.toLowerCase()
+      ),
+      transaction,
     });
 
     if (existingTest) {
       await transaction.rollback();
       return res.status(409).json({
-        message: 'Test with this name already exists',
-        error: 'DUPLICATE_TEST_NAME'
+        message: "Test with this name already exists",
+        error: "DUPLICATE_TEST_NAME",
       });
     }
 
@@ -72,19 +76,51 @@ const addTest = async (req, res) => {
     res.status(201).json({ message: "Investigation created successfully" });
   } catch (err) {
     await transaction.rollback();
-    res.status(500).json({ message: `Error creating investigation ${err}` });
+    if (
+      err.name === "SequelizeValidationError" ||
+      err.name === "SequelizeUniqueConstraintError"
+    ) {
+      // Extract detailed messages
+      const validationErrors = err.errors.map((err) => ({
+        field: err.path,
+        message: err.message,
+        value: err.value,
+      }));
+
+      return res.status(400).json({
+        message: "Validation error",
+        errors: validationErrors,
+      });
+    }
+
+    console.error("Error creating investigation:", err);
+    res.status(500).json({
+      message: "Internal server error",
+      error: "SERVER_ERROR",
+    });
+
+    return res.status(400).json({
+      message: "Validation error",
+      errors: validationErrors,
+    });
   }
 };
 
 // 2. Get Test
 const getTest = async (req, res) => {
   try {
-    let page = Number(req.query.page) || 1;
-    let limit = Number(req.query.limit) || 10;
+    let page = parseInt(req.query.page) || 1;
+    let limit = parseInt(req.query.limit) || 10;
     let offset = (page - 1) * limit;
 
     const { count, rows } = await Investigation.findAndCountAll({
+      attributes: { exclude: ["departmentId"] },
       include: [
+        {
+          model: Department,
+          as: "department",
+          attributes: ["dptname"],
+        },
         {
           model: InvestigationResult,
           as: "results",
@@ -114,7 +150,9 @@ const getTest = async (req, res) => {
     const totalPages = Math.ceil(count / limit);
 
     if (!rows) {
-      return res.status(200).json({ message: "No records found" });
+      return res
+        .status(200)
+        .json({ message: "No records found", data: [], meta: {} });
     }
 
     res.status(200).json({

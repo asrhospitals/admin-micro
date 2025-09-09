@@ -5,9 +5,13 @@ const ProfileEntryMaster = require("../../../model/adminModel/masterModel/profil
 const addProfile = async (req, res) => {
   const transaction = await sequelize.transaction();
   try {
+    const { profilename, profilecode } = req.body;
     // Check the Profile Name already exist or not
     const check = await ProfileEntryMaster.findOne({
-      where: { profilename },
+      where: sequelize.where(
+        sequelize.fn("LOWER", sequelize.col("profilename")),
+        profilename.toLowerCase()
+      ),
       transaction,
     });
     if (check) {
@@ -34,7 +38,7 @@ const addProfile = async (req, res) => {
     await transaction.commit();
     res.status(201).json({ message: "Profile entry created successfully" });
   } catch (error) {
-    res.status(400).send({ message: `Something went wrong ${error}`});
+    res.status(400).send({ message: `Something went wrong ${error}` });
   }
 };
 
@@ -42,28 +46,78 @@ const addProfile = async (req, res) => {
 
 const getProfile = async (req, res) => {
   try {
-    const getNewProfile = await ProfileEntryMaster.findAll();
-    res.status(200).json(getNewProfile);
-  } catch (error) {
-    res
-      .status(400)
-      .send({ message: "Something went wrong", error: error.message });
+    let page = Number(req.query.page) || 1;
+    let limit = Number(req.query.limit) || 10;
+    let offset = (page - 1) * limit;
+
+    const { count, rows } = await ProfileEntryMaster.findAndCountAll({
+      limit: limit,
+      offset: offset,
+      order: [["id", "ASC"]],
+    });
+
+    const totalPages = Math.ceil(count / limit);
+
+    if (!rows) {
+      return res.status(404).json({ message: "No Profile Entry found" });
+    }
+    res.status(200).json({
+      data: rows,
+      meta: {
+        totalItems: count,
+        itemsPerPage: limit,
+        currentPage: page,
+        totalPages: totalPages,
+      },
+    });
+  } catch (e) {
+    res.status(400).send({ message: `Something went wrong ${e}` });
   }
 };
 
-/// Update Profile
+// 3. Get Profile By Id
+
+const getProfileEntryById = async (req, res) => {
+  try {
+    const get_id = await ProfileEntryMaster.findByPk(req.params.id);
+    if (!get_id) {
+      return res.status(404).json({
+        message: `No profile entry found for this id ${req.params.id}`,
+      });
+    }
+    res.status(200).json(get_id);
+  } catch (error) {
+    res.status(400).send({ message: `Something went wrong ${error}` });
+  }
+};
+
+// 4.Update Profile
 
 const updateProfile = async (req, res) => {
+  const transaction = await sequelize.transaction();
   try {
-    const id = req.params.id;
-    const updateNewProfile = await ProfileEntryMaster.findByPk(id);
-    updateNewProfile.update(req.body);
-    res.status(200).json(updateNewProfile);
+    const update_profile = await ProfileEntryMaster.findByPk(req.params.id);
+    if (!update_profile) {
+      await transaction.rollback();
+      return res.status(200).json({ message: "Profile entry not found" });
+    }
+
+    if (Object.keys(req.body).length === 0) {
+      await transaction.rollback();
+      return res.status(400).json({ message: "Updated data not provided" });
+    }
+
+    await update_profile.update(req.body, {
+      transaction,
+    });
+    await transaction.commit();
+    res.status(200).json({
+      message: "Profile entry updated successfully",
+    });
   } catch (error) {
-    res
-      .status(400)
-      .send({ message: "Something went wrong", error: error.message });
+    await transaction.rollback();
+    res.status(400).send({ message: `Something went wrong ${error}` });
   }
 };
 
-module.exports = { addProfile, getProfile, updateProfile };
+module.exports = { addProfile, getProfile, getProfileEntryById, updateProfile };

@@ -3,19 +3,27 @@ const sequelize = require("../../../db/connectDB");
 const Investigation = require("../../adminModel/masterModel/investigation");
 const ProfileEntry = require("../../adminModel/masterModel/profileentrymaster");
 
-
-const Profile = sequelize.define("profilemaster",{
+const Profile = sequelize.define(
+  "profile_master",
+  {
+    id: {
+      type: DataTypes.INTEGER,
+      autoIncrement: true,
+      primaryKey: true,
+    },
     profileid: {
       type: DataTypes.INTEGER,
+      allowNull: false,
       references: {
-        model: ProfileEntry,
+        model: ProfileEntry,  
         key: "id",
       },
     },
     investigationid: {
       type: DataTypes.INTEGER,
+      allowNull: false,
       references: {
-        model: Investigation,
+        model: Investigation, 
         key: "id",
       },
     },

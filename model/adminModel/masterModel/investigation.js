@@ -31,8 +31,13 @@ const Investigation = sequelize.define("investigation", {
     type: DataTypes.INTEGER,
     unique:true
   },
-  department: {
-    type: DataTypes.STRING,
+ departmentId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+      model: "departments", 
+      key: "id",
+    },
   },
   subdepartment: {
     type: DataTypes.STRING,

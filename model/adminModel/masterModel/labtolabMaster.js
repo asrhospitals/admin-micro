@@ -1,49 +1,54 @@
 const { DataTypes } = require("sequelize");
 const sequalize = require("../../../db/connectDB");
 
-const LabtoLab = sequalize.define("lab", {
-  id:{
-    type: DataTypes.INTEGER,
-    primaryKey: true,
-    autoIncrement: true,    
-  },
-  labname: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
-  addressline: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
-  city: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
-  state: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
-  pincode: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-  },
+const LabtoLab = sequalize.define(
+  "lab",
+  {
+    id: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true,
+    },
+    labname: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      unique: true,
+    },
+    addressline: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    city: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    state: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    pincode: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
 
-  contactperson: {
-    type: DataTypes.STRING,
-    allowNull: false,
+    contactperson: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    contactno: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    email: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    isactive: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+    },
   },
-  contactno : {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
-  email: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
-  isactive: {
-    type: DataTypes.BOOLEAN,
-    allowNull: false,
-  },
-},{timestamps:false});
+  { timestamps: false }
+);
 
-module.exports=LabtoLab;
+module.exports = LabtoLab;

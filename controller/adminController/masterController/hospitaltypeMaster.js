@@ -6,10 +6,13 @@ const addhsptltype = async (req, res) => {
   const transaction = await sequelize.transaction();
 
   try {
-    const { hsptltype, hsptldsc, isactive } = req.body;
+    const { hsptltype } = req.body;
 
     const check = await HospipatlType.findOne({
-      where: { hsptltype },
+      where: sequelize.where(
+        sequelize.fn("LOWER", sequelize.col("hsptltype")),
+        hsptltype.toLowerCase()
+      ),
       transaction,
     });
 
@@ -46,7 +49,7 @@ const gethsptltype = async (req, res) => {
     const { count, rows } = await HospipatlType.findAndCountAll({
       limit: limit,
       offset: offset,
-      order: [["hsptltype", "ASC"]],
+      order: [["id", "ASC"]],
     });
 
     // Count Total Page

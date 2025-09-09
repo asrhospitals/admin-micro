@@ -14,7 +14,7 @@ const { addInstrument, getInstrument, updateInstrument, getInstrumentById } = re
 const { addNodalInstrument, getNodalInstrument, updateNodalInstrument } = require('../../controller/adminController/masterController/attachedNodalInstrumentMaster');
 const { addTechnician, getTechnician, updateTechnician, getTechnicianById } = require('../../controller/adminController/masterController/technicianMaster');
 const { addRefDoctor, getRefDoc, updateRefDoc } = require('../../controller/adminController/masterController/referralMaster');
-const { addProfile, getProfile, updateProfile } = require('../../controller/adminController/masterController/profileentrymaster');
+const { addProfile, getProfile, updateProfile, getProfileEntryById } = require('../../controller/adminController/masterController/profileentrymaster');
 const { addReport, getReport, updateReport } = require('../../controller/adminController/masterController/reportTypeMaster');
 // const { addSpecimen, getSpecimen, updateSpecimen, getSpecimenById } = require('../../controller/adminController/masterController/specimenMaster');
 const { addTest, getTest, updateNormalValues, updateInvestigation, updateResults, getTestById, updateSingleResult } = require('../../controller/adminController/masterController/testMaster');
@@ -173,14 +173,19 @@ router.route('/update-instrument/:id').put(updateInstrument);
 // router.route('/update-specimen/:id').put(updateSpecimen);
 
 /// --------------Profile Entry Master------------------
+// 62. Add Profile Entry
 router.route('/add-profileentry').post(addProfile);
+// 63. Get Profile Entry
 router.route('/get-profileentry').get(getProfile);
+// 64.Get Profile By Id
+router.route('/get-profileentry/:id').get(getProfileEntryById);
+// 65. Update Profile By Id
 router.route('/update-profileentry/:id').put(updateProfile);
 
 ///---------- Profile Master------------
 router.route('/add-profile').post(createProfile);
 router.route('/get-profile').get(fetchProfile);
-router.route('/update-profile/:profile_id').put(updateProfiles);
+router.route('/update-profile/:id').put(updateProfiles);
 
 ///---------------- Role Type Master------------------
 router.route('/add-role').post(addRole);

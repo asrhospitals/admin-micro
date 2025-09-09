@@ -1,13 +1,17 @@
 const Department = require("../../../model/adminModel/masterModel/departmentMaster");
 const sequelize = require("../../../db/connectDB");
+const { Op } = require("sequelize");
 
 // 1. Create Department
 const addDepartment = async (req, res) => {
   const transaction = await sequelize.transaction();
   try {
-    const { dptname, isactive } = req.body;
+    const { dptname } = req.body;
     const existingDpt = await Department.findOne({
-      where: { dptname },
+      where: sequelize.where(
+        sequelize.fn("LOWER", sequelize.col("dptname")),
+        dptname.toLowerCase()
+      ),
       transaction,
     });
     if (existingDpt) {

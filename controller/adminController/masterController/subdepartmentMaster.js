@@ -20,7 +20,10 @@ const addSubDepartment = async (req, res) => {
     }
 
     const existingSubDpt = await Subdepartment.findOne({
-      where: { subdptname },
+       where: sequelize.where(
+        sequelize.fn("LOWER", sequelize.col("subdptname")),
+        subdptname.toLowerCase()
+      ),
       transaction,
     });
 
@@ -56,7 +59,7 @@ const getSubDepartment = async (req, res) => {
     const { count, rows } = await Subdepartment.findAndCountAll({
       limit: limit,
       offset: offset,
-      order: [["subdptname", "ASC"]],
+      order: [["id", "ASC"]],
       include: [
         {
           model: Department,

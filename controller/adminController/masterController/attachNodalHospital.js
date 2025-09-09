@@ -9,31 +9,48 @@ const {
 const addNodalHospital = async (req, res) => {
   const transaction = await sequelize.transaction();
   try {
-    const { nodalid, hospitalid, isactive } = req.bdy;
+    const { nodalid, hospitalid, isactive } = req.body;
 
     // Check that Nodal actually exists
-    const NodalExists = await Nodal.findByPk(nodalid, {
+    const nodalExists = await Nodal.findByPk(nodalid, {
       transaction,
     });
-    if (!NodalExists) {
+    if (!nodalExists) {
       await transaction.rollback();
       return res.status(404).json({ message: "Parent nodal not found." });
     }
 
     // Check that Hospital actually exists
-    const HospitalExists = await Hospital.findByPk(hospitalid, {
+    const hospitalExists = await Hospital.findByPk(hospitalid, {
       transaction,
     });
-    if (!HospitalExists) {
+    if (!hospitalExists) {
       await transaction.rollback();
       return res.status(404).json({ message: "Parent hospital not found." });
+    }
+    
+    // Check for existing relationship (prevent duplicates)
+    const existingRelation = await NodalHospital.findOne({
+      where: { 
+        nodalid: nodalid,
+        hospitalid: hospitalid 
+      },
+      transaction,
+    });
+    
+    if (existingRelation) {
+      await transaction.rollback();
+      return res.status(409).json({
+        message: "This nodal-hospital  already exists",
+        error: "DUPLICATE_NODAL_HOSPITAL",
+      });
     }
 
     await NodalHospital.create(req.body, {
       transaction,
     });
     await transaction.commit();
-    res.status(201).json({ message: "Nodal hosiptal created successfully" });
+    res.status(201).json({ message: "Nodal hospital created successfully" });
   } catch (error) {
     await transaction.rollback();
     res.status(400).send({ message: `Something went wrong ${error}` });
@@ -109,7 +126,7 @@ const getNodalHospitalById = async (req, res) => {
     });
 
     if (!findNodal) {
-      return res.status(404).json({ message: "NodalHospital not found" });
+      return res.status(404).json({ message: "Nodal Hospital not found" });
     }
 
     const formattedData = {
@@ -127,18 +144,42 @@ const getNodalHospitalById = async (req, res) => {
 const updateNodalHospital = async (req, res) => {
   const transaction = await sequelize.transaction();
   try {
-    const updatenodal = await NodalHospital.findByPk(req.params.id);
+      const { nodalid, hospitalid, isactive } = req.body;
+    const updatenodal = await NodalHospital.findByPk(req.params.id,{transaction});
     if (!updatenodal) {
       await transaction.rollback();
       return res
         .status(200)
-        .json({ message: "NodalHospital record not found" });
+        .json({ message: "Nodal Hospital record not found" });
     }
 
     if (Object.keys(req.body).length === 0) {
       await transaction.rollback();
       return res.status(400).json({ message: "Updated data not provided" });
     }
+
+        // Check that Nodal actually exists
+   if (nodalid) {
+      const nodalExists = await Nodal.findByPk(nodalid, {
+        transaction,
+      });
+      if (!nodalExists) {
+        await transaction.rollback();
+        return res.status(404).json({ message: "Parent nodal not found." });
+      }
+    }
+
+    // Check that Hospital actually exists
+    if (hospitalid) {
+      const hospitalExists = await Hospital.findByPk(hospitalid, {
+        transaction,
+      });
+      if (!hospitalExists) {
+        await transaction.rollback();
+        return res.status(404).json({ message: "Parent hospital not found." });
+      }
+    }
+    
     await updatenodal.update(req.body, { transaction });
     await transaction.commit();
     res.status(200).json({

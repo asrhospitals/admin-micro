@@ -5,8 +5,23 @@ const LabtoLab = require("../../../model/adminModel/masterModel/labtolabMaster")
 const addlabtolab = async (req, res) => {
   const transaction = await sequelize.transaction();
   try {
-    const newLab = req.body;
-    await LabtoLab.create(newLab, { transaction });
+    const { labname } = req.body;
+
+    // Check if lab with the same name already exists
+    const existingLab = await LabtoLab.findOne({
+      where: sequelize.where(
+        sequelize.fn("LOWER", sequelize.col("labname")),
+        labname.toLowerCase()
+      ),
+    });
+    if (existingLab) {
+      await transaction.rollback();
+      return res.status(409).json({
+        message: "Lab with this name already exists",
+        error: "DUPLICATE_LAB_NAME",
+      });
+    }
+    await LabtoLab.create(req.body, { transaction });
     await transaction.commit();
     res.status(201).json({ message: "Lab created successfully" });
   } catch (error) {
@@ -25,7 +40,7 @@ const getlabtolab = async (req, res) => {
     const { count, rows } = await LabtoLab.findAndCountAll({
       limit: limit,
       offset: offset,
-      order: [["labname", "ASC"]],
+      order: [["id", "ASC"]],
     });
 
     const totalpage = Math.ceil(count / limit);
@@ -86,4 +101,4 @@ const updatelabtolab = async (req, res) => {
   }
 };
 
-module.exports = { addlabtolab, getlabtolab,getLabById, updatelabtolab };
+module.exports = { addlabtolab, getlabtolab, getLabById, updatelabtolab };

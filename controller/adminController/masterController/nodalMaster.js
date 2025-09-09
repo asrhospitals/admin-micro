@@ -5,9 +5,12 @@ const Nodal = require("../../../model/adminModel/masterModel/nodalMaster");
 const addNodal = async (req, res) => {
   const transaction = await sequelize.transaction();
   try {
-    const { nodalname, motherlab, isactive } = req.body;
+    const { nodalname } = req.body;
     const check = await Nodal.findOne({
-      where: { nodalname },
+     where: sequelize.where(
+        sequelize.fn("LOWER", sequelize.col("nodalname")),
+        nodalname.toLowerCase()
+      ),
       transaction,
     });
     if (check) {
