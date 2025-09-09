@@ -15,17 +15,14 @@ const Profile = sequelize.define(
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        model: ProfileEntry,  
+        model: ProfileEntry,
         key: "id",
       },
     },
-    investigationid: {
-      type: DataTypes.INTEGER,
+    investigationids: {
+      type: DataTypes.JSON,
       allowNull: false,
-      references: {
-        model: Investigation, 
-        key: "id",
-      },
+      defaultValue: [],
     },
     isactive: {
       type: DataTypes.BOOLEAN,

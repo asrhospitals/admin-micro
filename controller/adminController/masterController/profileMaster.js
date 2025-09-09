@@ -2,13 +2,14 @@ const Investigation = require("../../../model/adminModel/masterModel/investigati
 const ProfileEntry = require("../../../model/adminModel/masterModel/profileentrymaster");
 const Profile = require("../../../model/adminModel/masterModel/profileMaster");
 const sequelize = require("../../../db/connectDB");
+const { Op } = require("sequelize");
 
 // 1. Add Profile
 const createProfile = async (req, res) => {
   const transaction = await sequelize.transaction();
 
   try {
-    const { profileid, investigationid } = req.body;
+    const { profileid, investigationids } = req.body;
 
     // A. Check Profile Exists
     const profile = await ProfileEntry.findByPk(profileid);
@@ -18,33 +19,53 @@ const createProfile = async (req, res) => {
     }
 
     // B. Check Investigation IDs Provided as Array
-    if (!Array.isArray(investigationid) || investigationid.length === 0) {
+    if (!Array.isArray(investigationids)) {
       await transaction.rollback();
-      return res.status(400).json({ message: "Invalid investigation IDs." });
+      return res
+        .status(400)
+        .json({ message: "Investigation IDs must be a non-empty" });
     }
 
     // C. Check Investigations Exist
     const investigations = await Investigation.findAll({
       where: {
-        id: investigationid,
+        id: {
+          [Op.in]: investigationids,
+        },
+        status: "Active",
       },
     });
 
-    if (investigations.length !== investigationid.length) {
+    if (!investigations) {
+      await transaction.rollback();
+      return res.status(400).json({ message: "Investigations not found." });
+    }
+
+    // D. Avoid duplicate
+    const existingMappings = await Profile.findAll({
+      where: {
+        profileid: profileid,
+      },
+      transaction,
+    });
+
+    if (existingMappings.length > 0) {
       await transaction.rollback();
       return res
-        .status(400)
-        .json({ message: "Some investigation IDs are invalid." });
+        .status(409)
+        .json({ message: "Profile-Investigation mapping already exists." });
     }
 
     // C. Create Profile-Investigation mapping
-    const profileInvestigations = investigationid.map((investigationid) => ({
-      profileid: profileid,
-      investigationid: investigationid,
-      isactive: true,
-    }));
+    await Profile.create(
+      {
+        profileid: profileid,
+        investigationids: investigationids,
+        isactive: true,
+      },
+      { transaction }
+    );
 
-    await Profile.bulkCreate(profileInvestigations, { transaction });
     await transaction.commit();
     return res.status(201).json({ message: "Profile created successfully." });
   } catch (error) {
@@ -61,16 +82,17 @@ const fetchProfile = async (req, res) => {
     let offset = (page - 1) * limit;
 
     const { count, rows } = await Profile.findAndCountAll({
-      include:[
-          {
-          model: ProfileEntry,
-       
-          attributes: ["profilename"],
-        },
+      include: [
         {
-          model: Investigation,
-        
-          attributes: ["testname"],
+          model: ProfileEntry,
+          attributes: ["profilename"],
+          include: [
+            {
+              model: Investigation,
+
+              attributes: ["testname"],
+            },
+          ],
         },
       ],
 
@@ -79,13 +101,21 @@ const fetchProfile = async (req, res) => {
       order: [["id", "ASC"]],
     });
 
+    const transformedData = rows.map((profile) => ({
+      id: profile.id,
+      profileid: profile.profileid,
+      profilename: profile.ProfileEntry?.profilename,
+      investigationids: profile.investigationids,
+      isactive: profile.isactive,
+    }));
+
     const totalPages = Math.ceil(count / limit);
 
-    if (!rows) {
+    if (!transformedData) {
       return res.status(404).json({ message: "No profile found" });
     }
     res.status(200).json({
-      data: rows,
+      data: transformedData,
       meta: {
         totalItems: count,
         itemsPerPage: limit,
@@ -121,7 +151,7 @@ const updateProfiles = async (req, res) => {
   } catch (error) {
     await transaction.rollback();
 
-     return res.status(500).json({ message: `Something went wrong ${error}` });
+    return res.status(500).json({ message: `Something went wrong ${error}` });
   }
 };
 
