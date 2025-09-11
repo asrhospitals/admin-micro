@@ -11,11 +11,13 @@ const Technician = require("../adminModel/masterModel/technicianMaster");
 const Reception = require("../adminModel/masterModel/receptionMaster");
 const Phlebotomist = require("../adminModel/masterModel/phlebotomistMaster");
 const User = require("../authModel/authenticationModel/userModel");
-const Department=require('../adminModel/masterModel/departmentMaster');
-const Subdepartment=require('../adminModel/masterModel/subdptMaster');
-const HospitalType=require('../adminModel/masterModel/hospitalTypeMaster');
-const Mandatory=require('../adminModel/masterModel/mandatory');
-const ReflexTest=require('../adminModel/masterModel/reflexTest');
+const Department = require("../adminModel/masterModel/departmentMaster");
+const Subdepartment = require("../adminModel/masterModel/subdptMaster");
+const HospitalType = require("../adminModel/masterModel/hospitalTypeMaster");
+const Mandatory = require("../adminModel/masterModel/mandatory");
+const ReflexTest = require("../adminModel/masterModel/reflexTest");
+const Instrument = require("../adminModel/masterModel/instrumentMaster");
+const NodalInstrument = require("../adminModel/masterModel/attachNodalInstrumentMaster");
 
 // Associations
 
@@ -69,8 +71,6 @@ ProfileEntry.hasMany(Profile, { foreignKey: "profileid" });
 Investigation.belongsTo(Department, { foreignKey: "departmentId" });
 Department.hasMany(Investigation, { foreignKey: "departmentId" });
 
-
-
 // Nodal - NodalHospital one-to-many
 //NodalHospital belongs to Nodal through nodalid
 NodalHospital.belongsTo(Nodal, {
@@ -98,56 +98,76 @@ User.belongsTo(Reception, { foreignKey: "reception_id" });
 Phlebotomist.hasOne(User, { foreignKey: "phlebotomist_id" });
 User.belongsTo(Phlebotomist, { foreignKey: "phlebotomist_id" });
 
-
 // Department has many sub departments
-Department.hasMany(Subdepartment,{foreignKey:'department_id',as:'department'});
+Department.hasMany(Subdepartment, {
+  foreignKey: "department_id",
+  as: "department",
+});
 //Subdepartment belongs only departments
-Subdepartment.belongsTo(Department,{foreignKey:'department_id',as:'department'});
+Subdepartment.belongsTo(Department, {
+  foreignKey: "department_id",
+  as: "department",
+});
 
 // A HospitalType has many Hospitals
-HospitalType.hasMany(Hospital, {foreignKey: 'hospital_type_id',as:'hospitals'});
+HospitalType.hasMany(Hospital, {
+  foreignKey: "hospital_type_id",
+  as: "hospitals",
+});
 // A Hospital belongs to a HospitalType
-Hospital.belongsTo(HospitalType, {foreignKey: 'hospital_type_id',as: 'hospitalType'});
-
+Hospital.belongsTo(HospitalType, {
+  foreignKey: "hospital_type_id",
+  as: "hospitalType",
+});
 
 // Hospital has many Users. Use a plural alias.
 Hospital.hasMany(User, {
-  foreignKey: 'hospital_id',
-  as: 'users' // Correct: use 'users'
+  foreignKey: "hospital_id",
+  as: "users", // Correct: use 'users'
 });
 
 // A User belongs to a Hospital. Use a singular alias.
 User.belongsTo(Hospital, {
-  foreignKey: 'hospital_id',
-  as: 'hospital' // Correct: use 'hospital'
+  foreignKey: "hospital_id",
+  as: "hospital", // Correct: use 'hospital'
 });
 
 // Nodal has many Users. Use a plural alias.
 Nodal.hasMany(User, {
-  foreignKey: 'nodal_id',
-  as: 'users' // Correct: use 'users'
+  foreignKey: "nodal_id",
+  as: "users", // Correct: use 'users'
 });
 
 // A User belongs to a Nodal. Use a singular alias.
 User.belongsTo(Nodal, {
-  foreignKey: 'nodal_id',
-  as: 'nodal' // Correct: use 'nodal'
+  foreignKey: "nodal_id",
+  as: "nodal", // Correct: use 'nodal'
 });
 
 // A Nodal has many Hospitals. Use a plural alias.
 Nodal.hasMany(Hospital, {
-  foreignKey: 'nodal_id',
-  as: 'hospitals' // Correct: use 'hospitals'
+  foreignKey: "nodal_id",
+  as: "hospitals", // Correct: use 'hospitals'
 });
 
 // A Hospital belongs to a Nodal. Use a singular alias.
 Hospital.belongsTo(Nodal, {
-  foreignKey: 'nodal_id',
-  as: 'nodal' // Correct: use 'nodal'
+  foreignKey: "nodal_id",
+  as: "nodal", // Correct: use 'nodal'
 });
 
+NodalInstrument.belongsTo(Nodal, {
+  foreignKey: "nodalid", // This should match the column name in NodalInstrument
+  targetKey: "id", // This is the primary key in Nodal table
+  as: "nodal",
+});
 
-
+// NodalInstrument belongs to Instrument through instrumentId
+NodalInstrument.belongsTo(Instrument, {
+  foreignKey: "instrumentId", // This should match the column name in NodalInstrument
+  targetKey: "id", // This is the primary key in Instrument table
+  as: "instrument",
+});
 
 module.exports = {
   Investigation,
@@ -164,5 +184,7 @@ module.exports = {
   Department,
   Subdepartment,
   HospitalType,
-  Hospital
+  Hospital,
+  NodalInstrument,
+  Instrument,
 };

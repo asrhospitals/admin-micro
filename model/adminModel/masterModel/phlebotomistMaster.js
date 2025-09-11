@@ -29,7 +29,6 @@ const Phlebotomist = sequalize.define(
       type: DataTypes.INTEGER,
       allowNull: false,
     },
-
     dob: {
       type: DataTypes.DATE,
       allowNull: false,
@@ -39,14 +38,6 @@ const Phlebotomist = sequalize.define(
       allowNull: false,
     },
     gender: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    nodal: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    hospital: {
       type: DataTypes.STRING,
       allowNull: false,
     },

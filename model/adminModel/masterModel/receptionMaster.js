@@ -3,13 +3,12 @@ const sequialize = require("../../../db/connectDB");
 
 const Reception = sequialize.define(
   "reception",
-  
-  {
 
-    id:{
-      type:DataTypes.INTEGER,
-      autoIncrement:true,
-      primaryKey:true
+  {
+    id: {
+      type: DataTypes.INTEGER,
+      autoIncrement: true,
+      primaryKey: true,
     },
     receptionistname: {
       type: DataTypes.STRING,
@@ -44,10 +43,7 @@ const Reception = sequialize.define(
       type: DataTypes.STRING,
       allowNull: false,
     },
-    nodal: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
+
     isactive: {
       type: DataTypes.BOOLEAN,
       allowNull: false,

@@ -13,18 +13,7 @@ const Technician = sequalize.define(
       type: DataTypes.STRING,
       allowNull: false,
     },
-    nodal: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    roletype: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    instrument: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
+
     addressline: {
       type: DataTypes.STRING,
       allowNull: false,

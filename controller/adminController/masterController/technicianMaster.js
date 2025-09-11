@@ -5,15 +5,32 @@ const Technician = require("../../../model/adminModel/masterModel/technicianMast
 const addTechnician = async (req, res) => {
   const transaction = await sequelize.transaction();
   try {
-    const add_technician = req.body;
-    const create_technician = await Technician.create(add_technician, {
+    const { technicianname } = req.body;
+    const existingTechnician = await Technician.findOne({
+      where: sequelize.where(
+        sequelize.fn("LOWER", sequelize.col("technicianname")),
+        technicianname.toLowerCase()
+      ),
+      transaction,
+    });
+    if (existingTechnician) {
+      await transaction.rollback();
+      return res.status(409).json({
+        message: "Technician with this name already exists",
+        error: "DUPLICATE_TECHNICIAN_NAME",
+      });
+    }
+
+    await Technician.create(req.body, {
       transaction,
     });
     await transaction.commit();
-    res.status(201).json(create_technician);
-  } catch (error) {
+    res.status(201).json({
+      message: "Technician added successfully",
+    });
+  } catch (e) {
     await transaction.rollback();
-    res.status(400).send({ message: `Something went wrong ${error}` });
+    res.status(400).send({ message: `Something went wrong ${e}` });
   }
 };
 
@@ -28,7 +45,7 @@ const getTechnician = async (req, res) => {
     const { count, rows } = await Technician.findAndCountAll({
       limit: limit,
       offset: offset,
-      order: [["technicianname", "ASC"]],
+      order: [["id", "ASC"]],
     });
 
     const totalPages = Math.ceil(count / limit);

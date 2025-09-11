@@ -1,17 +1,35 @@
 const Instrument = require("../../../model/adminModel/masterModel/instrumentMaster");
 const sequelize = require("../../../db/connectDB");
 
-
 // 1. Add Instrument
 const addInstrument = async (req, res) => {
   const transaction = await sequelize.transaction();
   try {
+    //check instrument already exists
+    const { instrumentname } = req.body;
+    const checkinstrument = await Instrument.findOne({
+      where: sequelize.where(
+        sequelize.fn("LOWER", sequelize.col("instrumentname")),
+        instrumentname.toLowerCase()
+      ),
+      transaction,
+    });
+    if (checkinstrument) {
+      await transaction.rollback();
+      return res.status(409).json({
+        message: "Instrument with this name already exists",
+        error: "DUPLICATE_INSTRUMENT_NAME",
+      });
+    }
+
     await Instrument.create(req.body, { transaction });
     await transaction.commit();
-    res.status(201).json({ message: "Instrument created successfully" });
-  } catch (e) {
+    res.status(201).json({
+      message: "Instrument create successfully",
+    });
+  } catch (err) {
     await transaction.rollback();
-    res.status(400).send({ message: `Something went wrong ${e}` });
+    res.status(400).send({ message: `Something went wrong ${err}` });
   }
 };
 
@@ -25,7 +43,7 @@ const getInstrument = async (req, res) => {
     const { count, rows } = await Instrument.findAndCountAll({
       limit: limit,
       offset: offset,
-      order: [["instrumentname", "ASC"]],
+      order: [["id", "ASC"]],
     });
 
     const totalpage = Math.ceil(count / limit);
@@ -74,6 +92,9 @@ const updateInstrument = async (req, res) => {
       return res
         .status(404)
         .json({ message: `No data found for this id ${req.params.id}` });
+    }
+    if (Object.keys(req.body).length === 0) {
+      return res.status(400).json({ message: "Updated data not provided" });
     }
     await updateinstrument.update(req.body, { transaction });
     await transaction.commit();

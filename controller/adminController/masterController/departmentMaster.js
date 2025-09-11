@@ -45,7 +45,7 @@ const getDepartment = async (req, res) => {
     const { count, rows } = await Department.findAndCountAll({
       limit: limit,
       offset: offset,
-      order: [["dptname", "ASC"]],
+      order: [["id", "ASC"]],
     });
 
     const totalPages = Math.ceil(count / limit);

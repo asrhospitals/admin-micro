@@ -1,20 +1,30 @@
 const { DataTypes } = require('sequelize');
 const sequialize = require('../../../db/connectDB');
+const Nodal = require('../masterModel/nodalMaster');
+const Instrument = require('../masterModel/instrumentMaster');
 
 
-const NodalInstrument=sequialize.define('nodalinstrument',{
+const NodalInstrument=sequialize.define('nodal_instrument',{
     id:{
         type:DataTypes.INTEGER,
         primaryKey:true,
         autoIncrement:true
     },
-    nodalname:{
-        type:DataTypes.STRING,
-        allowNull:false
+    nodalid: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: Nodal,
+        key: "id",
+      },
     },
-    instrumentname:{
-        type:DataTypes.STRING,
-        allowNull:false
+    instrumentId: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        references: {
+          model: Instrument,
+          key: "id",
+        },
     },
     isactive:{
         type:DataTypes.BOOLEAN,

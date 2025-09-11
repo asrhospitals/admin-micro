@@ -5,12 +5,32 @@ const Doctor = require("../../../model/adminModel/masterModel/doctorRegistration
 const addDoctor = async (req, res) => {
   const transaction = await sequelize.transaction();
   try {
-    const doctor = await Doctor.create(req.body, { transaction });
+    const { dname } = req.body;
+    const existingDoctor = await Doctor.findOne({
+      where: sequelize.where(
+        sequelize.fn("LOWER", sequelize.col("dname")),
+        dname.toLowerCase()
+      ),
+      transaction,
+    });
+    if (existingDoctor) {
+      await transaction.rollback();
+      return res.status(409).json({
+        message: "Doctor with this name already exists",
+        error: "DUPLICATE_DOCTOR_NAME",
+      });
+    }
+
+    await Doctor.create(req.body, {
+      transaction,
+    });
     await transaction.commit();
-    res.status(201).json(doctor);
+    res.status(201).json({
+      message: "Doctor added successfully",
+    });
   } catch (e) {
     await transaction.rollback();
-    res.status(400).json({ message: `Something went wrong ${e}` });
+    res.status(400).send({ message: `Something went wrong ${e}` });
   }
 };
 
@@ -25,7 +45,7 @@ const getDoctor = async (req, res) => {
     const { count, rows } = await Doctor.findAndCountAll({
       limit: limit,
       offset: offset,
-      order: [["dname", "DESC"]],
+      order: [["id", "DESC"]],
     });
 
     const totalpages = Math.ceil(count / limit);

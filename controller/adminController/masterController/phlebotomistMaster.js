@@ -3,14 +3,29 @@ const Phlebotomist = require("../../../model/adminModel/masterModel/phlebotomist
 
 // 1. Add New Phlebotomist
 const addPhlebo = async (req, res) => {
-  const t = await sequelize.transaction();
+  const transaction = await sequelize.transaction();
   try {
-    const newPhlebo = req.body;
-    const createPhlebo = await Phlebotomist.create(newPhlebo, { t });
-    await t.commit();
-    res.status(201).json(createPhlebo);
+    const { phleboname } = req.body;
+
+    // Check Phlebo Already exist
+    const existingPhlebo = await Phlebotomist.findOne({
+      where: sequelize.where(
+        sequelize.fn("LOWER", sequelize.col("phleboname")),
+        phleboname.toLowerCase()
+      ),
+      transaction,
+    });
+    if (existingPhlebo) {
+      await transaction.rollback();
+      return res.status(409).json({
+        message: "Phlebo with this name already exists",
+        error: "DUPLICATE_PHLEBO_NAME",
+      });
+    }
+    await Phlebotomist.create(req.body, { transaction });
+    await transaction.commit();
   } catch (error) {
-    await t.rollback();
+    await transaction.rollback();
     res.status(400).send({ message: `Something went wrong ${error}` });
   }
 };
@@ -25,7 +40,7 @@ const getPhlebo = async (req, res) => {
     const { count, rows } = await Phlebotomist.findAndCountAll({
       limit: limit,
       offset: offset,
-      order: [["phleboname", "ASC"]],
+      order: [["id", "ASC"]],
     });
     if (!rows) {
       return res.status(200).json({ message: "No data available" });
@@ -62,25 +77,27 @@ const getPhleboById = async (req, res) => {
 
 // 4. Update Phlebo
 const updatePhlebo = async (req, res) => {
-  const t = await sequelize.transaction();
+  const transaction = await sequelize.transaction();
   try {
-    const id = req.params.id;
-    const update_phlebo = await Phlebotomist.findByPk(id);
+    const update_phlebo = await Phlebotomist.findByPk(req.params.id);
     if (!update_phlebo) {
-      return res
-        .status(404)
-        .json({ message: `No data found for this id ${id}` });
-    }
-    if (Object.keys(req.body).length === 0) {
-      return res.status(404).json({ message: "Updated data not provided" });
+      return res.status(200).json({ message: "Phlebotomist not found" });
     }
 
-    await update_phlebo.update(req.body, { t });
-    await t.commit();
-    res.status(200).json({ message: "Phlebotomist update successfully" });
-  } catch (error) {
-    await t.rollback();
-    res.status(400).send({ message: `Something went wrong ${error}` });
+    if (Object.keys(req.body).length === 0) {
+      return res.status(400).json({ message: "Updated data not provided" });
+    }
+
+    await update_phlebo.update(req.body, {
+      transaction,
+    });
+    await transaction.commit();
+    res.status(200).json({
+      message: "Phlebotomist updated successfully",
+    });
+  } catch (e) {
+    await transaction.rollback();
+    res.status(400).send({ message: `Something went wrong ${e}` });
   }
 };
 

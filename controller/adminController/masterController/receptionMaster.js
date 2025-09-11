@@ -5,13 +5,32 @@ const Reception = require("../../../model/adminModel/masterModel/receptionMaster
 const addReception = async (req, res) => {
   const transaction = await sequelize.transaction();
   try {
-    const new_recp = req.body;
-    const createRecep = await Reception.create(new_recp, { transaction });
+    const { receptionistname } = req.body;
+    const existingReceptionist = await Reception.findOne({
+      where: sequelize.where(
+        sequelize.fn("LOWER", sequelize.col("receptionistname")),
+        receptionistname.toLowerCase()
+      ),
+      transaction,
+    });
+    if (existingReceptionist) {
+      await transaction.rollback();
+      return res.status(409).json({
+        message: "Receptionist with this name already exists",
+        error: "DUPLICATE_RECEPTIONIST_NAME",
+      });
+    }
+
+    await Reception.create(req.body, {
+      transaction,
+    });
     await transaction.commit();
-    res.status(201).json(createRecep);
-  } catch (error) {
+    res.status(201).json({
+      message: "Receptionist created successfully",
+    });
+  } catch (e) {
     await transaction.rollback();
-    res.status(400).send({ message: `Something went wrong ${error}` });
+    res.status(400).send({ message: `Something went wrong ${e}` });
   }
 };
 
@@ -25,7 +44,7 @@ const getReception = async (req, res) => {
     const { count, rows } = await Reception.findAndCountAll({
       limit: limit,
       offset: offset,
-      order: [["receptionistname", "ASC"]],
+      order: [["id", "ASC"]],
     });
 
     if (!rows) {

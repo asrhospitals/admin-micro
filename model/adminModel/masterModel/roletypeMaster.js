@@ -2,7 +2,13 @@ const { DataTypes } = require('sequelize');
 const sequalize=require('../../../db/connectDB');
 
 
-const RoleType=sequalize.define('roletype',{
+const RoleType=sequalize.define('role',{
+
+    id:{
+        type:DataTypes.INTEGER,
+        primaryKey:true,
+        autoIncrement:true
+    },
     roletype:{
         type:DataTypes.STRING,
         allowNull:false
@@ -16,6 +22,6 @@ const RoleType=sequalize.define('roletype',{
         allowNull:false
     }
        
-}, {timestamps:false});
+});
 
 module.exports=RoleType;
