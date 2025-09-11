@@ -30,6 +30,7 @@ const createProfile = async (req, res) => {
 
     // C. Check Investigations Exist
     const investigations = await Investigation.findAll({
+
       where: {
         id: {
           [Op.in]: investigationids,
@@ -37,6 +38,8 @@ const createProfile = async (req, res) => {
         status: "Active",
       },
     });
+
+  console.log("inside createProfile investigations ===>>>", investigations);
 
     // if (!investigations) {
     //   await transaction.rollback();
