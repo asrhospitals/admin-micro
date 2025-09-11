@@ -6,6 +6,8 @@ const { Op } = require("sequelize");
 
 // 1. Add Profile
 const createProfile = async (req, res) => {
+  console.log("inside createProfile");
+  
   const transaction = await sequelize.transaction();
 
   try {

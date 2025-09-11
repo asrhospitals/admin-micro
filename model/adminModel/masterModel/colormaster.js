@@ -13,7 +13,7 @@ const ColorMaster = sequelize.define(
       type: DataTypes.STRING,
       allowNull: false,
     },
-    colorname: {          // NEW FIELD
+    colorname: {        
       type: DataTypes.STRING,
       allowNull: false,
     },
