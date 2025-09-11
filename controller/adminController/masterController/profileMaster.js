@@ -38,10 +38,18 @@ const createProfile = async (req, res) => {
       },
     });
 
-    if (!investigations) {
+    // if (!investigations) {
+    //   await transaction.rollback();
+    //   return res.status(400).json({ message: "Investigations not found." });
+    // }
+
+    // anand 
+    if (investigations.length === 0) {
       await transaction.rollback();
       return res.status(400).json({ message: "Investigations not found." });
     }
+
+    
 
     // D. Avoid duplicate
     const existingMappings = await Profile.findAll({
