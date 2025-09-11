@@ -13,11 +13,14 @@ const ColorMaster = sequelize.define(
       type: DataTypes.STRING,
       allowNull: false,
     },
-    // { hex: "#ff0000", rgb: "rgb(255,0,0)", hsl: "hsl(0, 100%, 50%)" }
+    colorname: {          // NEW FIELD
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
     colorcode: {
       type: DataTypes.JSON,
       allowNull: false,
-      defaultValue: {},
+      defaultValue: {},   // e.g., { hex: "#ff0000", rgb: "rgb(255,0,0)", hsl: "hsl(0, 100%, 50%)" }
     },
   },
   { timestamps: false }
