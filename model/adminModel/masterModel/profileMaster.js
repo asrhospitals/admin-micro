@@ -20,7 +20,7 @@ const Profile = sequelize.define(
       },
     },
     investigationids: {
-      type: DataTypes.JSON,
+      type: DataTypes.ARRAY(DataTypes.INTEGER),
       allowNull: false,
       defaultValue: [],
     },

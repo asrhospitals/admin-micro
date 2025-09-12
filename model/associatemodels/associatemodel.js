@@ -65,8 +65,33 @@ ReflexTest.belongsTo(InvestigationResult, {
   as: "result",
 });
 
-Profile.belongsTo(ProfileEntry, { foreignKey: "profileid" });
-ProfileEntry.hasMany(Profile, { foreignKey: "profileid" });
+
+// Profile associations
+Profile.belongsTo(ProfileEntry, { 
+  foreignKey: "profileid", 
+  as: "profileentry" 
+});
+
+Profile.belongsTo(Investigation, { 
+  foreignKey: "investigationids", 
+  as: "investigation" 
+});
+
+// ProfileEntry associations
+ProfileEntry.hasMany(Profile, { 
+  foreignKey: "profileid", 
+  as: "profiles" 
+});
+
+// Investigation associations
+Investigation.hasMany(Profile, { 
+  foreignKey: "investigationids", 
+  as: "profiles" 
+});
+
+
+
+
 
 Investigation.belongsTo(Department, { foreignKey: "departmentId" });
 Department.hasMany(Investigation, { foreignKey: "departmentId" });

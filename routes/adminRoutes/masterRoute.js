@@ -23,7 +23,7 @@ const { addDocAuth, getDocAuth, updateDocAuth } = require('../../controller/admi
 const { addColor, getColor, updateColors } = require('../../controller/adminController/masterController/colormaster');
 const { addKit, getKit, updateKit } = require('../../controller/adminController/masterController/kitmaster');
 const { addReportDoctor, getReportDoctor, updateReportDoctor } = require('../../controller/adminController/masterController/reportDoctor');
-const { createProfile, fetchProfile, updateProfiles } = require('../../controller/adminController/masterController/profileMaster');
+const { createProfile, fetchProfile, updateProfiles, fetchProfileById } = require('../../controller/adminController/masterController/profileMaster');
 const { addDoctor, getDoctor, updateDoctor, getDoctorById } = require('../../controller/adminController/masterController/doctorRegistration');
 
 
@@ -204,8 +204,13 @@ router.route('/update-nodalinstrument/:id').put(updateNodalInstrument);
 
 
 ///---------- Profile Master------------
+// 74. Create Profile
 router.route('/add-profile').post(createProfile);
+// 75. Get Profile
 router.route('/get-profile').get(fetchProfile);
+// 76.Get Profile By Id
+router.route('/get-profile/:id').get(fetchProfileById);
+// 77. Update Profile
 router.route('/update-profile/:id').put(updateProfiles);
 
 /// ------------Referral Doctor Master-----------

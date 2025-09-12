@@ -7,7 +7,7 @@ const { Op } = require("sequelize");
 // 1. Add Profile
 const createProfile = async (req, res) => {
   console.log("inside createProfile");
-  
+
   const transaction = await sequelize.transaction();
 
   try {
@@ -30,7 +30,6 @@ const createProfile = async (req, res) => {
 
     // C. Check Investigations Exist
     const investigations = await Investigation.findAll({
-
       where: {
         id: {
           [Op.in]: investigationids,
@@ -39,20 +38,18 @@ const createProfile = async (req, res) => {
       },
     });
 
-  console.log("inside createProfile investigations ===>>>", investigations);
+    // console.log("inside createProfile investigations ===>>>", investigations);
 
     // if (!investigations) {
     //   await transaction.rollback();
     //   return res.status(400).json({ message: "Investigations not found." });
     // }
 
-    // anand 
+    // anand
     if (investigations.length === 0) {
       await transaction.rollback();
       return res.status(400).json({ message: "Investigations not found." });
     }
-
-    
 
     // D. Avoid duplicate
     const existingMappings = await Profile.findAll({
@@ -95,49 +92,99 @@ const fetchProfile = async (req, res) => {
     let offset = (page - 1) * limit;
 
     const { count, rows } = await Profile.findAndCountAll({
+  
       include: [
         {
           model: ProfileEntry,
+          as: "profileentry",
           attributes: ["profilename"],
-          include: [
-            {
-              model: Investigation,
-
-              attributes: ["testname"],
-            },
-          ],
         },
       ],
-
-      limit: limit,
-      offset: offset,
+      limit,
+      offset,
       order: [["id", "ASC"]],
+      
     });
 
-    const transformedData = rows.map((profile) => ({
-      id: profile.id,
-      profileid: profile.profileid,
-      profilename: profile.ProfileEntry?.profilename,
-      investigationids: profile.investigationids,
-      isactive: profile.isactive,
-    }));
+    const data = await Promise.all(
+      rows.map(async (profile) => {
+        let investigations = [];
+        
+        if (profile.investigationids && profile.investigationids.length > 0) {
+          investigations = await Investigation.findAll({
+            where: {
+              id: {
+                [Op.in]: profile.investigationids
+              }
+            },
+            attributes: ["id", "testname"],
+          });
+        }
 
-    const totalPages = Math.ceil(count / limit);
+        return {
+          id: profile.id,
+          profilename: profile.profileentry?.profilename || null,
+          investigations: investigations,
+          isactive: profile.isactive,
+        };
+      })
+    );
 
-    if (!transformedData) {
-      return res.status(404).json({ message: "No profile found" });
-    }
     res.status(200).json({
-      data: transformedData,
+      data: data,
       meta: {
         totalItems: count,
         itemsPerPage: limit,
         currentPage: page,
-        totalPages: totalPages,
+        totalPages: Math.ceil(count / limit),
       },
     });
   } catch (error) {
-    return res.status(500).json({ message: `Something went wrong ${error}` });
+    res.status(500).json({ message: `Something went wrong: ${error.message}` });
+  }
+};
+
+
+// 3. Get Profile by ID
+const fetchProfileById = async (req, res) => {
+  try {
+    const profile = await Profile.findByPk(req.params.id, { 
+      include: [
+        {
+          model: ProfileEntry,
+          as: "profileentry",
+          attributes: ["profilename"],
+        },
+      ],
+    });
+
+    if (!profile) {
+      return res.status(404).json({ message: "Profile not found." });
+    }
+
+    let investigations = [];
+    
+    if (profile.investigationids && profile.investigationids.length > 0) {
+      investigations = await Investigation.findAll({
+        where: {
+          id: {
+            [Op.in]: profile.investigationids
+          }
+        },
+        attributes: ["id", "testname"],
+      });
+    }
+
+    const data = {
+      id: profile.id,
+      profilename: profile.profileentry?.profilename || null,
+      investigations: investigations,
+      isactive: profile.isactive,
+    };
+
+    res.status(200).json({ data });
+  } catch (error) {
+    res.status(500).json({ message: `Something went wrong: ${error.message}` });
   }
 };
 
@@ -168,4 +215,4 @@ const updateProfiles = async (req, res) => {
   }
 };
 
-module.exports = { createProfile, fetchProfile, updateProfiles };
+module.exports = { createProfile, fetchProfile, fetchProfileById, updateProfiles };
