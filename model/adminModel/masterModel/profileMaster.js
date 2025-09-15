@@ -1,6 +1,5 @@
 const { DataTypes } = require("sequelize");
 const sequelize = require("../../../db/connectDB");
-const Investigation = require("../../adminModel/masterModel/investigation");
 const ProfileEntry = require("../../adminModel/masterModel/profileentrymaster");
 
 const Profile = sequelize.define(
@@ -22,7 +21,7 @@ const Profile = sequelize.define(
     investigationids: {
       type: DataTypes.ARRAY(DataTypes.INTEGER),
       allowNull: false,
-      defaultValue: [],
+      
     },
     isactive: {
       type: DataTypes.BOOLEAN,

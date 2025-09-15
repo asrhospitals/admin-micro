@@ -72,25 +72,11 @@ Profile.belongsTo(ProfileEntry, {
   as: "profileentry" 
 });
 
-Profile.belongsTo(Investigation, { 
-  foreignKey: "investigationids", 
-  as: "investigation" 
-});
-
 // ProfileEntry associations
 ProfileEntry.hasMany(Profile, { 
   foreignKey: "profileid", 
   as: "profiles" 
 });
-
-// Investigation associations
-Investigation.hasMany(Profile, { 
-  foreignKey: "investigationids", 
-  as: "profiles" 
-});
-
-
-
 
 
 Investigation.belongsTo(Department, { foreignKey: "departmentId" });
