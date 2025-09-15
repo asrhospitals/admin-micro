@@ -37,8 +37,8 @@ const addRole = async (req, res) => {
 
 const getRole = async (req, res) => {
   try {
-    let page = Number(req.query.page) || 1;
-    let limit = Number(req.query.limit) || 10;
+    let page = parseInt(req.query.page) || 1;
+    let limit = parseInt(req.query.limit) || 10;
     let offset = (page - 1) * limit;
 
     const { count, rows } = await Role.findAndCountAll({
