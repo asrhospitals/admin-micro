@@ -12,7 +12,7 @@ const sequelize = require("./db/connectDB");
 const verifyToken = require("./middlewares/authMiddileware");
 const role = require("./middlewares/roleMiddleware");
 const masterRoutes = require("./routes/adminRoutes/index");
-
+const {checkAdmin} = require("./controller/authenticationController/authenticationController");
 
 app.use(cors());
 // anand 123
@@ -42,8 +42,12 @@ app.get("/", async (req, res) => {
 const server = async () => {
   try {
     await sequelize.authenticate();
-      //  await sequelize.sync();
+    //  await sequelize.sync();
     console.log("Database connection has been established successfully");
+
+    // check admin is exist or not
+    await checkAdmin();
+
     app.listen(PORT, () => {
       console.log(`Admin Server is running on ${PORT}`);
     });

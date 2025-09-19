@@ -64,7 +64,7 @@ const User = sequelize.define(
       type: DataTypes.STRING,
       allowNull: true,
     },
-    login_id: {
+    username: {
       type: DataTypes.STRING,
       allowNull: false,
       unique: true,

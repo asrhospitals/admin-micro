@@ -16,7 +16,7 @@ const router = Router();
 // router.route("/verifyotp").post(verifyOtp);
 // router.route("/resendotp/:userid").post(resendOtp);
 
-router.route("/create-user").post(validate(userSchema), createUser);
+router.route("/create-user").post( createUser);
 router.route("/assign-role").post(assignRole);
 router.route("/signin").post(login);
 router.route("/verifyotp").post(verifyOtp);

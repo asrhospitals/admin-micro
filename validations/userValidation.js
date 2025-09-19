@@ -7,11 +7,9 @@ const userSchema = Joi.object({
   //   .valid("admin", "reception", "doctor", "technician", "phlebotomist", "hr")
   //   .required(),
   module: Joi.array().items(Joi.string()).required(),
-  role: Joi.number().integer().required(),
   first_name: Joi.string().max(50).optional(),
   last_name: Joi.string().max(50).optional(),
   email: Joi.string().email().optional(),
-  isactive: Joi.boolean().required(),
   hospital_id: Joi.number().integer().optional().allow(null),
   nodal_id: Joi.number().integer().optional().allow(null),
   doctor_id: Joi.number().integer().optional().allow(null),

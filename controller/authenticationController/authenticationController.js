@@ -14,8 +14,49 @@ const Technician = require("../../model/adminModel/masterModel/technicianMaster"
 const Reception = require("../../model/adminModel/masterModel/receptionMaster");
 const RoleType = require("../../model/adminModel/masterModel/roletypeMaster");
 
-///////////////////------------------------------- Register user----------------------////////////////
+/////////////////------------------------------- Check Admin Exists----------------------////////////////
 
+const checkAdmin = async () => {
+ try {
+   const userCount = await User.count();
+  if (userCount === 0) {
+    let adminRole = await RoleType.findOne({ where: { roletype: 'admin' } });
+    if (!adminRole) {
+       adminRole = await RoleType.create({ roletype: 'admin' ,isactive:true,roledescription:'Administrator with full access'});
+      console.log("Admin role created in RoleType table");
+    }
+
+    const hashedPassword = await bcrypt.hash('Admin@123', 10);
+    await User.create({
+      email: 'admin@example.com',
+      first_name: 'Asr',
+      last_name: 'Admin',
+      mobile_number: '0000000000',
+      alternate_number: '0000000000',
+      wattsapp_number: '0000000000',
+      gender: 'Male',
+      dob: '1990-01-01',
+      address: 'Admin Address',
+      city: 'Admin City',
+      state: 'Admin State',
+      pincode: '000000',
+      module: ["admin"],
+      created_by: 0,
+      username: 'Admin',
+      password: hashedPassword,
+      role: adminRole.id
+    });
+
+    console.log("Default admin user created: Admin / Admin@123");
+  }
+ } catch (error) {
+   console.error(`Error checking admin user: ${error}`);
+ }
+};
+
+
+
+///////////////////------------------------------- Register user----------------------////////////////
 
 const createUser = async (req, res) => {
   try {
@@ -32,7 +73,7 @@ const createUser = async (req, res) => {
       city,
       state,
       pincode,
-      login_id,
+      username,
       password,
       module,
       created_by,
@@ -55,7 +96,7 @@ const createUser = async (req, res) => {
       city,
       state,
       pincode,
-      login_id,
+      username,
       password: hashedPassword,
       module,
       created_by,
@@ -72,6 +113,7 @@ const createUser = async (req, res) => {
   }
 };
 
+/////////////////------------------------------- Assign Role to User----------------------////////////////
 const assignRole = async (req, res) => {
   try {
     const {
@@ -256,7 +298,7 @@ const login = async (req, res) => {
       return res.status(400).json({ message: "Invalid credentials" });
 
     //4. Handle Login Admin Users
-    if (user.role === "admin") {
+    if (user.role === 1) {
       const otp = generateOtp();
       await OTP.create({
         user_id: user.user_id,
@@ -457,8 +499,9 @@ const verifyOtp = async (req, res) => {
     await OTP.destroy({ where: { id: storedOtp.id } });
 
     // Generate the JWT token with the user's ID and role
+    const roleType = await RoleType.findByPk(user.role);
     const token = jwt.sign(
-      { id: user.id, role: user.role },
+      { id: user.id, role: user.role, roletype: roleType.roletype },
       process.env.JWT_SECRET
       // { expiresIn: '1h' }
     );
@@ -506,4 +549,5 @@ module.exports = {
   resendOtp,
   createUser,
   assignRole,
+  checkAdmin,
 };
