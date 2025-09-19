@@ -13,48 +13,51 @@ const Phlebotomist = require("../../model/adminModel/masterModel/phlebotomistMas
 const Technician = require("../../model/adminModel/masterModel/technicianMaster");
 const Reception = require("../../model/adminModel/masterModel/receptionMaster");
 const RoleType = require("../../model/adminModel/masterModel/roletypeMaster");
+const { Op } = require("sequelize");
 
 /////////////////------------------------------- Check Admin Exists----------------------////////////////
 
 const checkAdmin = async () => {
- try {
-   const userCount = await User.count();
-  if (userCount === 0) {
-    let adminRole = await RoleType.findOne({ where: { roletype: 'admin' } });
-    if (!adminRole) {
-       adminRole = await RoleType.create({ roletype: 'admin' ,isactive:true,roledescription:'Administrator with full access'});
-      console.log("Admin role created in RoleType table");
+  try {
+    const userCount = await User.count();
+    if (userCount === 0) {
+      let adminRole = await RoleType.findOne({ where: { roletype: "admin" } });
+      if (!adminRole) {
+        adminRole = await RoleType.create({
+          roletype: "admin",
+          isactive: true,
+          roledescription: "Administrator with full access",
+        });
+        console.log("Admin role created in RoleType table");
+      }
+
+      const hashedPassword = await bcrypt.hash("Admin@123", 10);
+      await User.create({
+        email: "admin@example.com",
+        first_name: "Asr",
+        last_name: "Admin",
+        mobile_number: "0000000000",
+        alternate_number: "0000000000",
+        wattsapp_number: "0000000000",
+        gender: "Male",
+        dob: "1990-01-01",
+        address: "Admin Address",
+        city: "Admin City",
+        state: "Admin State",
+        pincode: "000000",
+        module: ["admin"],
+        created_by: 0,
+        username: "Admin",
+        password: hashedPassword,
+        role: adminRole.id,
+      });
+
+      console.log("Default admin user created: Admin / Admin@123");
     }
-
-    const hashedPassword = await bcrypt.hash('Admin@123', 10);
-    await User.create({
-      email: 'admin@example.com',
-      first_name: 'Asr',
-      last_name: 'Admin',
-      mobile_number: '0000000000',
-      alternate_number: '0000000000',
-      wattsapp_number: '0000000000',
-      gender: 'Male',
-      dob: '1990-01-01',
-      address: 'Admin Address',
-      city: 'Admin City',
-      state: 'Admin State',
-      pincode: '000000',
-      module: ["admin"],
-      created_by: 0,
-      username: 'Admin',
-      password: hashedPassword,
-      role: adminRole.id
-    });
-
-    console.log("Default admin user created: Admin / Admin@123");
+  } catch (error) {
+    console.error(`Error checking admin user: ${error}`);
   }
- } catch (error) {
-   console.error(`Error checking admin user: ${error}`);
- }
 };
-
-
 
 ///////////////////------------------------------- Register user----------------------////////////////
 
@@ -306,11 +309,13 @@ const login = async (req, res) => {
         expires_at: new Date(Date.now() + 10 * 60 * 1000),
       });
       await sendOtp(process.env.PREDEFINED_EMAIL, otp);
+      const roleType = await RoleType.findByPk(user.role);
       return res.status(200).json({
         message: "OTP sent to email",
         id: user.user_id,
         otp,
         role: user.role,
+        roleType: roleType ? roleType.roletype : "Unknown Role",
       });
     }
 
@@ -395,7 +400,6 @@ const login = async (req, res) => {
           .status(403)
           .json({ message: "Access denied: User Belong to the Nodal" });
       }
-
       // Generate JWT token
       const token = jwt.sign(
         {
@@ -501,7 +505,11 @@ const verifyOtp = async (req, res) => {
     // Generate the JWT token with the user's ID and role
     const roleType = await RoleType.findByPk(user.role);
     const token = jwt.sign(
-      { id: user.id, role: user.role, roletype: roleType.roletype },
+      {
+        id: user.id,
+        role: user.role,
+        roleType: roleType ? roleType.roletype : "Unknown Role",
+      },
       process.env.JWT_SECRET
       // { expiresIn: '1h' }
     );
@@ -542,6 +550,53 @@ const resendOtp = async (req, res) => {
   }
 };
 
+/////////////--------------------------------Get All Users ------------------/////////////////////
+
+const getAllUsers = async (req, res) => {
+  try {
+    const users = await User.findAll();
+    res.status(200).json(users);
+  } catch (e) {
+    res.status(500).json({ message: "Failed to retrieve users" });
+  }
+};
+
+/////////---------------------------------Search All Users----------------------///////////////////
+
+const searchUsers = async (req, res) => {
+  try {
+
+    /* 1. Query Parameters */
+    const { username, first_name } = req.query;
+    req.query;
+    const filters = {};
+
+
+        if (username) {
+      filters["username"] = {
+        [Op.iLike]: `%${username}%`,
+      };
+    }
+    if (first_name) {
+      filters["first_name"] = {
+        [Op.iLike]: `%${first_name}%`,
+      };
+    }
+
+    /* Find Users Matching the Query */
+    const users = await User.findAll({
+      where: filters,
+      order: [["user_id", "ASC"]],
+    });
+
+    return res.status(200).json(users);
+  } catch (error) {
+    return res.status(500).json({
+      message: `Something went wrong while searching users ${error}`,
+    });
+  }
+};
+
 module.exports = {
   // registration,
   login,
@@ -550,4 +605,6 @@ module.exports = {
   createUser,
   assignRole,
   checkAdmin,
+  getAllUsers,
+  searchUsers,
 };
