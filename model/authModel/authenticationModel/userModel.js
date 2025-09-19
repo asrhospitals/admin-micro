@@ -6,6 +6,7 @@ const Doctor = require("../../adminModel/masterModel/doctorRegistration");
 const Technician = require("../../adminModel/masterModel/technicianMaster");
 const Reception = require("../../adminModel/masterModel/receptionMaster");
 const Phlebotomist = require("../../adminModel/masterModel/phlebotomistMaster");
+const RoleType = require("../../adminModel/masterModel/roletypeMaster");
 
 const User = sequelize.define(
   "user",
@@ -15,7 +16,55 @@ const User = sequelize.define(
       autoIncrement: true,
       primaryKey: true,
     },
-    username: {
+    wattsapp_number: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      unique: true,
+    },
+    mobile_number: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      unique: true,
+    },
+    alternate_number: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    email: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    first_name: {
+      type: DataTypes.STRING,
+    },
+    last_name: {
+      type: DataTypes.STRING,
+    },
+    gender: {
+      type: DataTypes.ENUM("Male", "Female", "Other"),
+      allowNull: false,
+    },
+    dob: {
+      type: DataTypes.DATEONLY,
+      allowNull: false,
+    },
+    address: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    city: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    state: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    pincode: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    login_id: {
       type: DataTypes.STRING,
       allowNull: false,
       unique: true,
@@ -24,34 +73,37 @@ const User = sequelize.define(
       type: DataTypes.STRING,
       allowNull: false,
     },
-    role: {
-      type: DataTypes.ENUM(
-        "admin",
-        "reception",
-        "doctor",
-        "technician",
-        "phlebotomist"
-      ),
-      allowNull: false,
-    },
     module: {
       type: DataTypes.ARRAY(DataTypes.STRING),
       allowNull: false,
     },
-    first_name: {
-      type: DataTypes.STRING,
-    },
-    last_name: {
-      type: DataTypes.STRING,
-    },
-    email: {
-      type: DataTypes.STRING,
+    role: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: {
+        model: RoleType,
+        key: "id",
+      },
+      onDelete: "CASCADE",
     },
     isactive: {
       type: DataTypes.BOOLEAN,
       allowNull: false,
+      defaultValue: true,
     },
-    // Renamed to snake_case
+    created_by: {
+      type: DataTypes.STRING, // or FK to admin user
+      allowNull: true,
+    },
+    created_date: {
+      type: DataTypes.DATEONLY,
+      allowNull: false,
+      defaultValue: DataTypes.NOW,
+    },
+    image: {
+      type: DataTypes.STRING, // store file path / URL
+      allowNull: true,
+    },
     hospital_id: {
       type: DataTypes.INTEGER,
       allowNull: true,
@@ -61,7 +113,6 @@ const User = sequelize.define(
       },
       onDelete: "SET NULL",
     },
-    // Renamed to snake_case
     nodal_id: {
       type: DataTypes.INTEGER,
       allowNull: true,
@@ -109,7 +160,7 @@ const User = sequelize.define(
     },
   },
   {
-    timestamps: false,
+    timestamps: true,
     tableName: "users",
   }
 );

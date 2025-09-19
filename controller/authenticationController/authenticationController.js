@@ -12,73 +12,201 @@ const Doctor = require("../../model/adminModel/masterModel/doctorRegistration");
 const Phlebotomist = require("../../model/adminModel/masterModel/phlebotomistMaster");
 const Technician = require("../../model/adminModel/masterModel/technicianMaster");
 const Reception = require("../../model/adminModel/masterModel/receptionMaster");
+const RoleType = require("../../model/adminModel/masterModel/roletypeMaster");
 
 ///////////////////------------------------------- Register user----------------------////////////////
 
-const registration = async (req, res) => {
+
+const createUser = async (req, res) => {
   try {
     const {
-      username,
+      wattsapp_number,
+      mobile_number,
+      alternate_number,
+      email,
+      first_name,
+      last_name,
+      gender,
+      dob,
+      address,
+      city,
+      state,
+      pincode,
+      login_id,
       password,
-      role,
+      module,
+      created_by,
+      image,
+    } = req.body;
+
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const newUser = await User.create({
+      wattsapp_number,
+      mobile_number,
+      alternate_number,
+      email,
+      first_name,
+      last_name,
+      gender,
+      dob,
+      address,
+      city,
+      state,
+      pincode,
+      login_id,
+      password: hashedPassword,
+      module,
+      created_by,
+      image,
+    });
+
+    res.status(201).json({
+      message: "User Created Successfully (Role not assigned yet)",
+      user: newUser,
+    });
+  } catch (err) {
+    console.error(err.message);
+    res.status(400).json({ message: `User Creation Failed: ${err.message}` });
+  }
+};
+
+const assignRole = async (req, res) => {
+  try {
+    const {
+      user_id,
+      role, // role_id
       hospital_id,
       nodal_id,
-      module,
-      firstName,
-      lastname,
       doctor_id,
       technician_id,
       reception_id,
       phlebotomist_id,
-      isactive,
     } = req.body;
 
-    // Ensure that the hospital exists for Phelobtomist users
+    const user = await User.findByPk(user_id);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const roleRecord = await RoleType.findOne({ where: { id: role } });
+    if (!roleRecord) {
+      return res.status(404).json({ message: "Invalid Role ID" });
+    }
+
+    const roleName = roleRecord.roletype.toLowerCase();
+
+    // Hospital validation for roles that require it
     if (
-      role !== "admin" &&
-      role !== "reception" &&
-      role !== "technician" &&
-      role !== "doctor"
+      roleName !== "admin" &&
+      roleName !== "reception" &&
+      roleName !== "technician" &&
+      roleName !== "doctor" &&
+      roleName !== "hr"
     ) {
-      const hospital = await Hospital.findOne({ where: { id: hospital_id } });
+      const hospital = await Hospital.findByPk(hospital_id);
       if (!hospital) {
         return res
-          .status(404)
+          .status(400)
           .json({ message: "Hospital ID is required for this role" });
       }
     }
 
-    // Hash the password
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    // Create a new user
-    const newUser = await User.create({
-      username,
-      password: hashedPassword,
+    await user.update({
       role,
-      hospital_id:
-        role !== "admin" && "reception" && "technician" ? hospital_id : null,
-      nodal_id: role !== "admin" ? nodal_id : null,
-      module,
-      firstName,
-      lastname,
-      doctor_id: role === "doctor" ? doctor_id : null,
-      technician_id: role === "technician" ? technician_id : null,
-      reception_id: role === "reception" ? reception_id : null,
-      phlebotomist_id: role === "phlebotomist" ? phlebotomist_id : null,
-      isactive,
+      hospital_id: roleName !== "admin" ? hospital_id : null,
+      nodal_id: roleName !== "admin" ? nodal_id : null,
+      doctor_id: roleName === "doctor" ? doctor_id : null,
+      technician_id: roleName === "technician" ? technician_id : null,
+      reception_id: roleName === "reception" ? reception_id : null,
+      phlebotomist_id: roleName === "phlebotomist" ? phlebotomist_id : null,
     });
 
-    res
-      .status(201)
-      .json({ message: "User Registered Successfully", user: newUser });
-  } catch (e) {
-    console.log(e.message);
-    res.status(400).json({ message: `User Registration Failed ${e}` });
+    res.status(200).json({
+      message: "Role assigned successfully",
+      user,
+    });
+  } catch (err) {
+    console.error(err.message);
+    res.status(400).json({ message: `Role Assignment Failed: ${err.message}` });
   }
 };
 
+// const registration = async (req, res) => {
+//   try {
+//     const {
+//       // username,
+//       password,
+//       role, // role_id (FK to RoleType.id)
+//       hospital_id,
+//       nodal_id,
+//       module,
+//       firstName,
+//       lastname,
+//       doctor_id,
+//       technician_id,
+//       reception_id,
+//       phlebotomist_id,
+//       isactive,
+//     } = req.body;
+
+//     // 1. Get role info from RoleType table
+//     const roleRecord = await RoleType.findOne({ where: { id: role } });
+//     if (!roleRecord) {
+//       return res.status(404).json({ message: "Invalid role ID" });
+//     }
+
+//     const roleName = roleRecord.roletype.toLowerCase();
+
+//     // 2. Validate hospital requirement for some roles
+//     if (
+//       roleName !== "admin" &&
+//       roleName !== "reception" &&
+//       roleName !== "technician" &&
+//       roleName !== "doctor" &&
+//       roleName !== "hr"
+//     ) {
+//       const hospital = await Hospital.findOne({ where: { id: hospital_id } });
+//       if (!hospital) {
+//         return res
+//           .status(404)
+//           .json({ message: "Hospital ID is required for this role" });
+//       }
+//     }
+
+//     // 3. Hash password
+//     const hashedPassword = await bcrypt.hash(password, 10);
+
+//     // 4. Create user
+//     const newUser = await User.create({
+//       username,
+//       password: hashedPassword,
+//       role: role ? role : null, // store role_id, not string
+//       hospital_id: roleName !== "admin" ? hospital_id : null,
+//       nodal_id: roleName !== "admin" ? nodal_id : null,
+//       module,
+//       first_name: firstName,
+//       last_name: lastname,
+//       doctor_id: roleName === "doctor" ? doctor_id : null,
+//       technician_id: roleName === "technician" ? technician_id : null,
+//       reception_id: roleName === "reception" ? reception_id : null,
+//       phlebotomist_id: roleName === "phlebotomist" ? phlebotomist_id : null,
+//       isactive,
+//     });
+
+//     res.status(201).json({
+//       message: "User Registered Successfully",
+//       user: newUser,
+//     });
+//   } catch (e) {
+//     console.log(e.message);
+//     res.status(400).json({ message: `User Registration Failed: ${e.message}` });
+//   }
+// };
+
 ///////////////////////////--------------------- Login User----------------------/////////////////
+
 const login = async (req, res) => {
   try {
     //1. Request By User
@@ -117,7 +245,7 @@ const login = async (req, res) => {
           model: Reception,
           as: "reception",
           attributes: ["receptionistname"],
-        }
+        },
       ],
     });
     if (!user) return res.status(404).json({ message: "No User found" });
@@ -217,10 +345,8 @@ const login = async (req, res) => {
       });
     }
 
-    
     // 7. Technician Not Belong to any Hospital
     if (user.role === "technician") {
-
       // Verify that the technician belongs to the nodal
       if (!user.nodal_id) {
         return res
@@ -264,7 +390,6 @@ const login = async (req, res) => {
 
     // 8. Receptionist Not Belong to any Hospital
     if (user.role === "reception") {
-
       // Verify that the technician belongs to the nodal
       if (!user.nodal_id) {
         return res
@@ -305,8 +430,6 @@ const login = async (req, res) => {
         username: receptionistData.name,
       });
     }
-
-
   } catch (e) {
     return res.status(403).json({
       success: false,
@@ -376,4 +499,11 @@ const resendOtp = async (req, res) => {
   }
 };
 
-module.exports = { registration, login, verifyOtp, resendOtp };
+module.exports = {
+  // registration,
+  login,
+  verifyOtp,
+  resendOtp,
+  createUser,
+  assignRole,
+};
