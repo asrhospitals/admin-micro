@@ -78,9 +78,9 @@ const createUser = async (req, res) => {
       pincode,
       username,
       password,
-      module,
       created_by,
       image,
+      module,
     } = req.body;
 
     // Hash password
@@ -101,9 +101,9 @@ const createUser = async (req, res) => {
       pincode,
       username,
       password: hashedPassword,
-      module,
       created_by,
       image,
+      module,
     });
 
     res.status(201).json({
@@ -121,7 +121,8 @@ const assignRole = async (req, res) => {
   try {
     const {
       user_id,
-      role, // role_id
+      role,
+      module,
       hospital_id,
       nodal_id,
       doctor_id,
@@ -160,6 +161,7 @@ const assignRole = async (req, res) => {
 
     await user.update({
       role,
+      module,
       hospital_id: roleName !== "admin" ? hospital_id : null,
       nodal_id: roleName !== "admin" ? nodal_id : null,
       doctor_id: roleName === "doctor" ? doctor_id : null,
@@ -309,18 +311,24 @@ const login = async (req, res) => {
         expires_at: new Date(Date.now() + 10 * 60 * 1000),
       });
       await sendOtp(process.env.PREDEFINED_EMAIL, otp);
+
       const roleType = await RoleType.findByPk(user.role);
+
       return res.status(200).json({
         message: "OTP sent to email",
         id: user.user_id,
         otp,
         role: user.role,
-        roleType: roleType ? roleType.roletype : "Unknown Role",
+        roleType: roleType.roletype,
       });
     }
 
     //5. Handle Login plebotomist users
-    if (user.role === "phlebotomist") {
+    const roleType = await RoleType.findByPk(user.role);
+    if (!roleType) {
+      return res.status(500).json({ message: "User role not found" });
+    }
+    if (roleType.roletype === "phlebotomist") {
       // Require hospital and Nodal verification for phlebotomists
       if (!user.hospital_id && !user.nodal_id) {
         return res
@@ -333,6 +341,7 @@ const login = async (req, res) => {
           role: user.role,
           hospital_id: user.hospital_id,
           nodal_id: user.nodal_id,
+          roleType: roleType.roletype,
         },
         process.env.JWT_SECRET
         // { expiresIn: '1h' }
@@ -352,6 +361,7 @@ const login = async (req, res) => {
         role: user.role,
         hospital_id: user.hospital_id,
         nodal_id: user.nodal_id,
+        roleType: roleType.roletype,
         //Need to Get Hospital Name as per Hospital ID
         hospitalname: user.hospital
           ? user.hospital.hospitalname
@@ -565,14 +575,12 @@ const getAllUsers = async (req, res) => {
 
 const searchUsers = async (req, res) => {
   try {
-
     /* 1. Query Parameters */
     const { username, first_name } = req.query;
     req.query;
     const filters = {};
 
-
-        if (username) {
+    if (username) {
       filters["username"] = {
         [Op.iLike]: `%${username}%`,
       };
