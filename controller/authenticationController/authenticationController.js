@@ -208,7 +208,6 @@ const assignRole = async (req, res) => {
 ///////////////////////////--------------------- Login User----------------------/////////////////
 
 const login = async (req, res) => {
-  const transaction = await sequelize.transaction();
   try {
     //1. Request By User
     const { username, password } = req.body;
@@ -250,13 +249,11 @@ const login = async (req, res) => {
       ],
     });
     if (!user) {
-      await transaction.rollback();
       return res.status(404).json({ message: "No User found" });}
 
     //3. Compare the password
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      await transaction.rollback();
       return res.status(401).json({ message: "Invalid credentials" });
     }
 
@@ -284,7 +281,6 @@ const login = async (req, res) => {
     //5. Handle Login plebotomist users
     const roleType = await RoleType.findByPk(user.role);
     if (!roleType) {
-      await transaction.rollback();
       return res.status(500).json({ message: "User role not found" });
     }
     if (roleType.roletype === "phlebotomist") {
