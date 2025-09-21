@@ -62,6 +62,7 @@ const checkAdmin = async () => {
 ///////////////////------------------------------- Register user----------------------////////////////
 
 const createUser = async (req, res) => {
+  const transaction = await sequelize.transaction();
   try {
     const {
       wattsapp_number,
@@ -83,41 +84,57 @@ const createUser = async (req, res) => {
       module,
     } = req.body;
 
+    const existingUser = await User.findOne(
+      { where: { username, first_name, mobile_number } },
+      { transaction }
+    );
+    if (existingUser) {
+      await transaction.rollback();
+      return res.status(409).json({
+        message: "Username or Mobile or Name  already exists",
+        error: "DUPLICATE_USERNAME_OR_MOBILE_NUMBER_OR_NAME",
+      });
+    }
+
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const newUser = await User.create({
-      wattsapp_number,
-      mobile_number,
-      alternate_number,
-      email,
-      first_name,
-      last_name,
-      gender,
-      dob,
-      address,
-      city,
-      state,
-      pincode,
-      username,
-      password: hashedPassword,
-      created_by,
-      image,
-      module,
-    });
-
+    const newUser = await User.create(
+      {
+        wattsapp_number,
+        mobile_number,
+        alternate_number,
+        email,
+        first_name,
+        last_name,
+        gender,
+        dob,
+        address,
+        city,
+        state,
+        pincode,
+        username,
+        password: hashedPassword,
+        created_by,
+        image,
+        module,
+      },
+      { transaction }
+    );
+    await transaction.commit();
     res.status(201).json({
       message: "User Created Successfully (Role not assigned yet)",
       user: newUser,
     });
   } catch (err) {
-    console.error(err.message);
+    await transaction.rollback();
     res.status(400).json({ message: `User Creation Failed: ${err.message}` });
   }
 };
 
 /////////////////------------------------------- Assign Role to User----------------------////////////////
 const assignRole = async (req, res) => {
+  const transaction = await sequelize.transaction();
   try {
     const {
       user_id,
@@ -133,11 +150,13 @@ const assignRole = async (req, res) => {
 
     const user = await User.findByPk(user_id);
     if (!user) {
+      await transaction.rollback();
       return res.status(404).json({ message: "User not found" });
     }
 
     const roleRecord = await RoleType.findOne({ where: { id: role } });
     if (!roleRecord) {
+      await transaction.rollback();
       return res.status(404).json({ message: "Invalid Role ID" });
     }
 
@@ -153,108 +172,43 @@ const assignRole = async (req, res) => {
     ) {
       const hospital = await Hospital.findByPk(hospital_id);
       if (!hospital) {
+        await transaction.rollback();
         return res
           .status(400)
           .json({ message: "Hospital ID is required for this role" });
       }
     }
 
-    await user.update({
-      role,
-      module,
-      hospital_id: roleName !== "admin" ? hospital_id : null,
-      nodal_id: roleName !== "admin" ? nodal_id : null,
-      doctor_id: roleName === "doctor" ? doctor_id : null,
-      technician_id: roleName === "technician" ? technician_id : null,
-      reception_id: roleName === "reception" ? reception_id : null,
-      phlebotomist_id: roleName === "phlebotomist" ? phlebotomist_id : null,
-    });
+    await user.update(
+      {
+        role,
+        module,
+        hospital_id: roleName !== "admin" ? hospital_id : null,
+        nodal_id: roleName !== "admin" ? nodal_id : null,
+        doctor_id: roleName === "doctor" ? doctor_id : null,
+        technician_id: roleName === "technician" ? technician_id : null,
+        reception_id: roleName === "reception" ? reception_id : null,
+        phlebotomist_id: roleName === "phlebotomist" ? phlebotomist_id : null,
+      },
+      { transaction }
+    );
+
+    await transaction.commit();
 
     res.status(200).json({
       message: "Role assigned successfully",
-      user,
     });
   } catch (err) {
+    await transaction.rollback();
     console.error(err.message);
     res.status(400).json({ message: `Role Assignment Failed: ${err.message}` });
   }
 };
 
-// const registration = async (req, res) => {
-//   try {
-//     const {
-//       // username,
-//       password,
-//       role, // role_id (FK to RoleType.id)
-//       hospital_id,
-//       nodal_id,
-//       module,
-//       firstName,
-//       lastname,
-//       doctor_id,
-//       technician_id,
-//       reception_id,
-//       phlebotomist_id,
-//       isactive,
-//     } = req.body;
-
-//     // 1. Get role info from RoleType table
-//     const roleRecord = await RoleType.findOne({ where: { id: role } });
-//     if (!roleRecord) {
-//       return res.status(404).json({ message: "Invalid role ID" });
-//     }
-
-//     const roleName = roleRecord.roletype.toLowerCase();
-
-//     // 2. Validate hospital requirement for some roles
-//     if (
-//       roleName !== "admin" &&
-//       roleName !== "reception" &&
-//       roleName !== "technician" &&
-//       roleName !== "doctor" &&
-//       roleName !== "hr"
-//     ) {
-//       const hospital = await Hospital.findOne({ where: { id: hospital_id } });
-//       if (!hospital) {
-//         return res
-//           .status(404)
-//           .json({ message: "Hospital ID is required for this role" });
-//       }
-//     }
-
-//     // 3. Hash password
-//     const hashedPassword = await bcrypt.hash(password, 10);
-
-//     // 4. Create user
-//     const newUser = await User.create({
-//       username,
-//       password: hashedPassword,
-//       role: role ? role : null, // store role_id, not string
-//       hospital_id: roleName !== "admin" ? hospital_id : null,
-//       nodal_id: roleName !== "admin" ? nodal_id : null,
-//       module,
-//       first_name: firstName,
-//       last_name: lastname,
-//       doctor_id: roleName === "doctor" ? doctor_id : null,
-//       technician_id: roleName === "technician" ? technician_id : null,
-//       reception_id: roleName === "reception" ? reception_id : null,
-//       phlebotomist_id: roleName === "phlebotomist" ? phlebotomist_id : null,
-//       isactive,
-//     });
-
-//     res.status(201).json({
-//       message: "User Registered Successfully",
-//       user: newUser,
-//     });
-//   } catch (e) {
-//     console.log(e.message);
-//     res.status(400).json({ message: `User Registration Failed: ${e.message}` });
-//   }
-// };
-
 ///////////////////////////--------------------- Login User----------------------/////////////////
 
 const login = async (req, res) => {
+  const transaction = await sequelize.transaction();
   try {
     //1. Request By User
     const { username, password } = req.body;
@@ -295,12 +249,16 @@ const login = async (req, res) => {
         },
       ],
     });
-    if (!user) return res.status(404).json({ message: "No User found" });
+    if (!user) {
+      await transaction.rollback();
+      return res.status(404).json({ message: "No User found" });}
 
     //3. Compare the password
     const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch)
-      return res.status(400).json({ message: "Invalid credentials" });
+    if (!isMatch) {
+      await transaction.rollback();
+      return res.status(401).json({ message: "Invalid credentials" });
+    }
 
     //4. Handle Login Admin Users
     if (user.role === 1) {
@@ -326,6 +284,7 @@ const login = async (req, res) => {
     //5. Handle Login plebotomist users
     const roleType = await RoleType.findByPk(user.role);
     if (!roleType) {
+      await transaction.rollback();
       return res.status(500).json({ message: "User role not found" });
     }
     if (roleType.roletype === "phlebotomist") {

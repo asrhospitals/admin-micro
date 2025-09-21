@@ -13,22 +13,15 @@ const { addlabtolab, getlabtolab, updatelabtolab, getLabById } = require('../../
 const { addInstrument, getInstrument, updateInstrument, getInstrumentById } = require('../../controller/adminController/masterController/instrumentMaster');
 const { addNodalInstrument, getNodalInstrument, updateNodalInstrument, getNodalInstrumentById } = require('../../controller/adminController/masterController/attachedNodalInstrumentMaster');
 const { addTechnician, getTechnician, updateTechnician, getTechnicianById } = require('../../controller/adminController/masterController/technicianMaster');
-const { addRefDoctor, getRefDoc, updateRefDoc } = require('../../controller/adminController/masterController/referralMaster');
+const { addRefDoctor, getRefDoc, updateRefDoc, getRefDocById } = require('../../controller/adminController/masterController/referDoctor');
 const { addProfile, getProfile, updateProfile, getProfileEntryById } = require('../../controller/adminController/masterController/profileentrymaster');
-const { addReport, getReport, updateReport } = require('../../controller/adminController/masterController/reportTypeMaster');
-// const { addSpecimen, getSpecimen, updateSpecimen, getSpecimenById } = require('../../controller/adminController/masterController/specimenMaster');
-const { addTest, getTest, updateNormalValues, updateInvestigation, updateResults, getTestById, updateSingleResult } = require('../../controller/adminController/masterController/testMaster');
-const { addReagent, getReagent, updateReagent } = require('../../controller/adminController/masterController/reagentMaster');
-const { addDocAuth, getDocAuth, updateDocAuth } = require('../../controller/adminController/masterController/doctorAuthMaster');
-const { addColor, getColor, updateColors } = require('../../controller/adminController/masterController/colormaster');
-const { addKit, getKit, updateKit } = require('../../controller/adminController/masterController/kitmaster');
-const { addReportDoctor, getReportDoctor, updateReportDoctor } = require('../../controller/adminController/masterController/reportDoctor');
+const { addTest, getTest, updateNormalValues, updateInvestigation, getTestById, updateSingleResult } = require('../../controller/adminController/masterController/testMaster');
 const { createProfile, fetchProfile, updateProfiles, fetchProfileById } = require('../../controller/adminController/masterController/profileMaster');
 const { addDoctor, getDoctor, updateDoctor, getDoctorById } = require('../../controller/adminController/masterController/doctorRegistration');
 
 
 
-/// ---------Department Master--------------
+/// 1. ---------Department Master--------------
 // 1. Add Department
 router.route('/add-department').post(addDepartment);
 // 2. Get Department
@@ -38,7 +31,7 @@ router.route('/get-department/:id').get(getDepartmentById);
 // 4. Update Department
 router.route('/update-department/:id').put(updateDepartment);
 
-///---------- Subdepartment Master--------------
+/// 2. ---------- Subdepartment Master--------------
 // 5. Add Sub Department
 router.route('/add-subdepartment').post(addSubDepartment);
 // 6. Get Sub Department
@@ -48,7 +41,7 @@ router.route('/get-subdepartment/:id').get(getById);
 // 8. Update Sub Department
 router.route('/update-subdepartment/:id').put(updateSubDepartment);
 
-///------------ Hospital Type Master----------------
+/// 3. ------------ Hospital Type Master----------------
 // 9. Add Hospital Type
 router.route('/add-hsptltype').post(addhsptltype);
 // 10. Get Hospital type
@@ -58,7 +51,7 @@ router.route('/get-hsptltype/:id').get(getHospitalTypeById);
 // 12. Update Hospital Type
 router.route('/update-hsptltype/:id').put(updatehsptltype);
 
-///----------- Hospital Master---------------
+/// 4. ----------- Hospital Master---------------
 // 13. Add Hospital
 router.route('/add-hospital').post(addhospital);
 // 14. Get Hospital
@@ -68,7 +61,7 @@ router.route('/get-hospital/:id').get(getHospitalById);
 // 16. Update Hospital
 router.route('/update-hospital/:id').put(updatehospital);
 
-///--------------- Nodal Master--------------
+/// 5. -------------- Nodal Master--------------
 // 17. Add Nodal
 router.route('/add-nodal').post(addNodal);
 // 18. Get Nodal
@@ -78,7 +71,7 @@ router.route('/get-nodal/:id').get(getNodalById);
 // 20. Update Nodal
 router.route('/update-nodal/:id').put(updateNodal);
 
-/// --------------Attach Nodal Hospital------------
+/// 6. --------------Attach Nodal Hospital------------
 // 21. Add Nodal Hospitals
 router.route('/add-nodalhospital').post(addNodalHospital);
 // 22. Get Nodal Hospitals
@@ -88,7 +81,7 @@ router.route('/get-nodalhospital/:id').get(getNodalHospitalById);
 // 24. Update Nodal Hospitals
 router.route('/update-nodalhospital/:id').put(updateNodalHospital);
 
-/// --------------Technician Master--------
+/// 7. --------------Technician Master--------
 // 25. Add Technician
 router.route('/add-tech').post(addTechnician);
 // 26. Get Technician
@@ -98,7 +91,7 @@ router.route('/get-tech/:id').get(getTechnicianById);
 // 28. Update Technician
 router.route('/update-tech/:id').put(updateTechnician);
 
-///----------- Reception Master-----------
+/// 8. ----------- Reception Master-----------
 // 29. Add Reception
 router.route('/add-recep').post(addReception);
 // 30. Get Reception
@@ -108,7 +101,7 @@ router.route('/get-recep/:id').get(getReceptionById);
 // 32. Update Reception
 router.route('/update-recep/:id').put(updateReception);
 
-///--------- Phlebotomist Master---------------
+/// 9. ----------- Phlebotomist Master---------------
 // 33. Add Phlebo
 router.route('/add-phlebo').post(addPhlebo);
 // 34. Get Phlebo
@@ -118,7 +111,7 @@ router.route('/get-phlebo/:id').get(getPhleboById);
 // 36. Update Phlebo
 router.route('/update-phlebo/:id').put(updatePhlebo);
 
-//-----------Doctor Registration Master--------------
+// 10. -----------Doctor Registration Master--------------
 // 40. Add Doctor
 router.route('/add-doctor').post(addDoctor);
 // 41. Get Doctor
@@ -128,7 +121,7 @@ router.route('/get-doctor/:id').get(getDoctorById);
 // 43. Update Doctor
 router.route('/update-doctor/:id').put(updateDoctor);
 
-///----------- Investigation Master----------
+/// 11. ----------- Investigation Master----------
 // 44. Add Investigation
 router.route('/add-test').post(addTest);
 // 45. Get Investigation
@@ -142,7 +135,7 @@ router.route('/update/:investigationId/results/:resultId').put(updateSingleResul
 // 49. Update Investigation Normal Values
 router.route('/update-normal/:resultId/normal-values/:normalValueId').put(updateNormalValues);
 
-/// ------------Lab to Lab Master-----------
+/// 12. ------------Lab to Lab Master-----------
 // 50. Add Lab to Lab
 router.route('/add-labtolab').post(addlabtolab);
 // 51. Get Lab to Lab
@@ -152,7 +145,7 @@ router.route('/get-labtolab/:id').get(getLabById);
 // 53. Update Lab to Lab    
 router.route('/update-labtolab/:id').put(updatelabtolab);
 
-///---------------- Lab Instrument Master-----------
+/// 13.---------------- Lab Instrument Master-----------
 // 54. Add Lab Instrument
 router.route('/add-instrument').post(addInstrument);
 // 55. Get Lab Instrument
@@ -162,7 +155,7 @@ router.route('/get-instrument/:id').get(getInstrumentById);
 // 57. Update Lab Instrument
 router.route('/update-instrument/:id').put(updateInstrument);
 
-///------------Specimen Type Master------------
+/// 14.------------Specimen Type Master------------
 // 58. Add Specimen
 // router.route('/add-specimen').post(addSpecimen);
 // 59. Get Specimen
@@ -172,7 +165,7 @@ router.route('/update-instrument/:id').put(updateInstrument);
 // 61. Update Specimen
 // router.route('/update-specimen/:id').put(updateSpecimen);
 
-/// --------------Profile Entry Master------------------
+/// 15.--------------Profile Entry Master------------------
 // 62. Add Profile Entry
 router.route('/add-profileentry').post(addProfile);
 // 63. Get Profile Entry
@@ -182,7 +175,7 @@ router.route('/get-profileentry/:id').get(getProfileEntryById);
 // 65. Update Profile By Id
 router.route('/update-profileentry/:id').put(updateProfile);
 
-///---------------- Role Master------------------
+/// 16.--------------- Role Master------------------
 // 66.Add Role 
 router.route('/add-role').post(addRole);
 // 67.Get Role
@@ -192,7 +185,7 @@ router.route('/get-role/:id').get(getRoleById);
 // 69.Update Role
 router.route('/update-role/:id').put(updateRole);
 
-/// ---------------Attach Nodal Instrument Master--------------
+/// 17.---------------Attach Nodal Instrument Master--------------
 // 70. Add Nodal Instrument
 router.route('/add-nodalinstrument').post(addNodalInstrument);
 // 71.Get Nodal Instrument    
@@ -203,7 +196,7 @@ router.route('/get-nodalinstrument/:id').get(getNodalInstrumentById);
 router.route('/update-nodalinstrument/:id').put(updateNodalInstrument);
 
 
-///---------- Profile Master------------
+/// 18.---------- Profile Master------------
 // 74. Create Profile
 router.route('/add-profile').post(createProfile);
 // 75. Get Profile
@@ -213,26 +206,15 @@ router.route('/get-profile/:id').get(fetchProfileById);
 // 77. Update Profile
 router.route('/update-profile/:id').put(updateProfiles);
 
-/// ------------Referral Doctor Master-----------
+/// 19.------------Referral Doctor Master-----------
+// 78. Add Referral Doctor
 router.route('/add-refdoc').post(addRefDoctor);
+// 79. Get Referral Doctor
 router.route('/get-refdoc').get(getRefDoc);
+// 80. Get Referral Doctor By Id
+router.route('/get-refdoc/:id').get(getRefDocById);
+// 81. Update Referral Doctor
 router.route('/update-refdoc/:id').put(updateRefDoc);
-
-/// ------------Report Doctor Master--------------
-router.route('/add-reportdoctor').post(addReportDoctor);
-router.route('/get-reportdoctor').get(getReportDoctor);
-router.route('/update-reportdoctor/:id').put(updateReportDoctor);
-
-///----------Reagent Master--------------
-router.route('/add-reg').post(addReagent);
-router.route('/get-reg').get(getReagent);
-router.route('/update-reg/:id').put(updateReagent);
-
-///------------Doctor Authentication Master----------
-router.route('/add-docauth').post(addDocAuth);
-router.route('/get-docauth').get(getDocAuth);
-router.route('/update-docauth/:id').put(updateDocAuth);
-
 
 
 module.exports=router;

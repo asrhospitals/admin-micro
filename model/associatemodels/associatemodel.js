@@ -19,6 +19,7 @@ const ReflexTest = require("../adminModel/masterModel/reflexTest");
 const Instrument = require("../adminModel/masterModel/instrumentMaster");
 const NodalInstrument = require("../adminModel/masterModel/attachNodalInstrumentMaster");
 const RoleType = require("../adminModel/masterModel/roletypeMaster");
+const ReferralDoctor = require("../adminModel/masterModel/referalDoctorMaster");
 
 // Associations
 
@@ -183,6 +184,12 @@ NodalInstrument.belongsTo(Instrument, {
 
 User.belongsTo(RoleType, { foreignKey: "role", as: "roleType" });
 RoleType.hasMany(User, { foreignKey: "role", as: "users" });
+
+// Referral Doctor & Hospital
+ReferralDoctor.belongsTo(Hospital, { foreignKey: "hospitalid", as: "hospital" });
+Hospital.hasMany(ReferralDoctor, { foreignKey: "hospitalid", as: "referralDoctors" });
+
+
 
 module.exports = {
   Investigation,
