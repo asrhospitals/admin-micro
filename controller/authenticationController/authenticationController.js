@@ -510,6 +510,21 @@ const getAllUsers = async (req, res) => {
   }
 };
 
+//////////----------------------------Get all users with id----------------------/////////////////////
+
+const getUserById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const user = await User.findByPk(id);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    res.status(200).json(user);
+  } catch (e) {
+    res.status(500).json({ message: `Failed to retrieve user ${e}` });
+  }
+};
+
 /////////---------------------------------Search All Users----------------------///////////////////
 
 const searchUsers = async (req, res) => {
@@ -545,7 +560,6 @@ const searchUsers = async (req, res) => {
 };
 
 module.exports = {
-  // registration,
   login,
   verifyOtp,
   resendOtp,
@@ -554,4 +568,5 @@ module.exports = {
   checkAdmin,
   getAllUsers,
   searchUsers,
+  getUserById,
 };
