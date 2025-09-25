@@ -1,6 +1,6 @@
 const Router=require('express');
 const router=Router();
-const { addDepartment, getDepartment, updateDepartment, getDepartmentById } = require('../../controller/adminController/masterController/departmentMaster');
+const { addDepartment, getDepartment, updateDepartment, getDepartmentById, getAllDepartments } = require('../../controller/adminController/masterController/departmentMaster');
 const { addSubDepartment, getSubDepartment, updateSubDepartment, getById } = require('../../controller/adminController/masterController/subdepartmentMaster');
 const { addhsptltype, gethsptltype, updatehsptltype, getHospitalTypeById } = require('../../controller/adminController/masterController/hospitaltypeMaster');
 const { addhospital, gethospital, updatehospital, getHospitalById } = require('../../controller/adminController/masterController/hospitalMaster');
@@ -30,6 +30,8 @@ router.route('/get-department').get(getDepartment);
 router.route('/get-department/:id').get(getDepartmentById);
 // 4. Update Department
 router.route('/update-department/:id').put(updateDepartment);
+// 5. Get All Departments
+router.route('/get-all-departments').get(getAllDepartments);
 
 /// 2. ---------- Subdepartment Master--------------
 // 5. Add Sub Department

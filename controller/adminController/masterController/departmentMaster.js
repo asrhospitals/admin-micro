@@ -106,9 +106,22 @@ const updateDepartment = async (req, res) => {
   }
 };
 
+// 5. Get All Departments
+const getAllDepartments = async (req,res) => {
+  try {
+    const departments = await Department.findAll({
+      order: [["id", "ASC"]],
+    });
+    res.status(200).json(departments);
+  } catch (err) {
+    res.status(400).send({ message: `Something went wrong ${e}` });
+  }
+}
+
 module.exports = {
   addDepartment,
   getDepartment,
   getDepartmentById,
   updateDepartment,
+  getAllDepartments
 };
