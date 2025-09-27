@@ -9,9 +9,9 @@ const ColorMaster = sequelize.define(
       primaryKey: true,
       autoIncrement: true,
     },
-    colorname: {
-      type: DataTypes.STRING,
-      allowNull: false,
+    status_of_color:{
+      type:DataTypes.STRING,
+      allowNull:false
     },
     colorcode: {
       type: DataTypes.JSON,
@@ -19,7 +19,6 @@ const ColorMaster = sequelize.define(
       defaultValue: {},   // e.g., { hex: "#ff0000", rgb: "rgb(255,0,0)", hsl: "hsl(0, 100%, 50%)" }
     },
   },
-  { timestamps: true }
 );
 
 module.exports = ColorMaster;
