@@ -102,4 +102,15 @@ const updateNodal = async (req, res) => {
   }
 };
 
-module.exports = { addNodal, getNodal, getNodalById, updateNodal };
+// 5. Get All Nodals
+const getAllNodals=async (req,res) => {
+  try {
+    const getAllNodal=await Nodal.findAll({order:[['id','ASC']]});
+    res.status(200).json(getAllNodal);
+  } catch (error) {
+     res.status(400).json({ message: `Something went wrong ${error}` });
+  }
+  
+}
+
+module.exports = { addNodal, getNodal, getNodalById, updateNodal,getAllNodals };

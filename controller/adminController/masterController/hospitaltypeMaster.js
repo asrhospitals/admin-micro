@@ -114,9 +114,23 @@ const updatehsptltype = async (req, res) => {
   }
 };
 
+// 5. Get All Hospital Types
+const getAllHospitalType=async (req,res) => {
+  try {
+    const getHospitalType=await HospipatlType.findAll({
+      order:[['id','ASC']]
+    });
+    res.status(200).json(getHospitalType);
+  } catch (error) {
+    res.status(500).json({message:`something went wrong ${error}`})
+  }
+  
+}
+
 module.exports = {
   addhsptltype,
   gethsptltype,
   getHospitalTypeById,
   updatehsptltype,
+  getAllHospitalType
 };

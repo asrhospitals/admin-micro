@@ -79,31 +79,11 @@ const updateColor = async (req, res) => {
   }
 };
 
-// ✅ Delete
-const deleteColor = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const color = await ColorMaster.findByPk(id);
 
-    if (!color) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Color not found" });
-    }
-
-    await color.destroy();
-    return res
-      .status(200)
-      .json({ success: true, message: "Color deleted successfully" });
-  } catch (error) {
-    return res.status(500).json({ success: false, message: error.message });
-  }
-};
 
 module.exports = {
   createColor,
   getAllColors,
   getColorById,
   updateColor,
-  deleteColor,
 };

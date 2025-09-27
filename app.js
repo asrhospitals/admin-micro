@@ -11,7 +11,6 @@ const ProfilePicture = require("./controller/commonImageUploader/profileImage");
 const sequelize = require("./db/connectDB");
 const verifyToken = require("./middlewares/authMiddileware");
 const role = require("./middlewares/roleMiddleware");
-const masterRoutes = require("./routes/adminRoutes/index");
 const {checkAdmin} = require("./controller/authenticationController/authenticationController");
 
 app.use(cors());
@@ -23,7 +22,6 @@ app.use("/lims/authentication", AuthRoutes);
 
 /// All routes
 // app.use("/lims/master", verifyToken, role("admin"), MasterRoutes);
-app.use("/api/lims/master", verifyToken, role("admin"), masterRoutes);
 app.use("/lims/master", verifyToken, role("admin"), MasterRoutes);
 
 // Routes to upload image

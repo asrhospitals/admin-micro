@@ -129,9 +129,22 @@ const updateSubDepartment = async (req, res) => {
   }
 };
 
+// 5. Get All Subdepartments
+const getAllSubdepartments=async (req,res) => {
+  try {
+    const getSub=await Subdepartment.findAll({order:[['id','ASC']]});
+    res.status(200).json(getSub);
+  } catch (error) {
+     res.status(400).json({ message: `Something went wrong ${error}` });
+  }
+  
+}
+
+
 module.exports = {
   addSubDepartment,
   getSubDepartment,
   getById,
   updateSubDepartment,
+  getAllSubdepartments
 };

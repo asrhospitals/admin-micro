@@ -120,4 +120,15 @@ const updateProfile = async (req, res) => {
   }
 };
 
-module.exports = { addProfile, getProfile, getProfileEntryById, updateProfile };
+// 5. Profile Entry
+const getAllProfileEntry=async (req,res) => {
+  try {
+    const getAll=await ProfileEntryMaster.findAll({order:[['id','ASC']]});
+    res.status(200).json(getAll);
+  } catch (error) {
+     res.status(400).json({ message: `Something went wrong ${error}` });
+  }
+  
+}
+
+module.exports = { addProfile, getProfile, getProfileEntryById, updateProfile,getAllProfileEntry };

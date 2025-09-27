@@ -311,7 +311,39 @@ const login = async (req, res) => {
       });
     }
 
-    //6. Handle Login Doctor roles
+    // 6. Receptionist Not Belong to any Hospital
+    if (roleType.roletype === "reception") {
+      // Verify that the reception belongs to the nodal
+      if (!user.nodal_id) {
+        return res
+          .status(403)
+          .json({ message: "Access denied: User Belong to the Nodal" });
+      }
+      // Generate JWT token
+      const token = jwt.sign(
+        {
+          id: user.user_id,
+          role: user.role,
+          nodal_id: user.nodal_id,
+          roleType: roleType.roletype,
+        },
+        process.env.JWT_SECRET
+        // { expiresIn: '1h' }
+      );
+
+      // Send response with token and user details
+      return res.status(200).json({
+        success: true,
+        token,
+        id: user.user_id,
+        role: user.role,
+        nodal_id: user.nodal_id,
+        roleType: roleType.roletype,
+        nodalname: user.nodal ? user.nodal.nodalname : "Unknown Nodal",
+      });
+    }
+
+    //7. Handle Login Doctor roles
     // Doctor Not Belong to any Hospital or Nodal
     if (user.role === "doctor") {
       const token = jwt.sign(
@@ -341,7 +373,7 @@ const login = async (req, res) => {
       });
     }
 
-    // 7. Technician Not Belong to any Hospital
+    // 8. Technician Not Belong to any Hospital
     if (user.role === "technician") {
       // Verify that the technician belongs to the nodal
       if (!user.nodal_id) {
@@ -380,49 +412,6 @@ const login = async (req, res) => {
         nodalname: user.nodal ? user.nodal.nodalname : "Unknown Nodal",
         //Need to Get User Name as per User ID
         username: technicianData.name,
-      });
-    }
-
-    // 8. Receptionist Not Belong to any Hospital
-    if (user.role === "reception") {
-      // Verify that the technician belongs to the nodal
-      if (!user.nodal_id) {
-        return res
-          .status(403)
-          .json({ message: "Access denied: User Belong to the Nodal" });
-      }
-
-      // Generate JWT token
-      const token = jwt.sign(
-        {
-          id: user.user_id,
-          role: user.role,
-          nodal_id: user.nodal_id,
-          module: user.module,
-        },
-        process.env.JWT_SECRET
-        // { expiresIn: '1h' }
-      );
-
-      // Safely access included phleb object
-      const receptionistData = user.reception
-        ? {
-            name: user.reception.receptionistname,
-          }
-        : {};
-
-      // Send response with token and user details
-      return res.status(200).json({
-        success: true,
-        token,
-        id: user.user_id,
-        role: user.role,
-        nodal_id: user.nodal_id,
-        module: user.module,
-        // Nodal Data
-        nodalname: user.nodal ? user.nodal.nodalname : "Unknown Nodal",
-        //Need to Get User Name as per User ID
-        username: receptionistData.name,
       });
     }
   } catch (e) {

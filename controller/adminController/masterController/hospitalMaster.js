@@ -6,10 +6,7 @@ const HospipatlType = require("../../../model/adminModel/masterModel/hospitalTyp
 const addhospital = async (req, res) => {
   const transaction = await sequelize.transaction();
   try {
-    const {
-      hospitalname,
-      hospital_type_id,
-    } = req.body;
+    const { hospitalname, hospital_type_id } = req.body;
 
     // Check that department actually exists
     const checkHospitalType = await HospipatlType.findByPk(hospital_type_id, {
@@ -125,4 +122,16 @@ const updatehospital = async (req, res) => {
   }
 };
 
-module.exports = { addhospital, gethospital, getHospitalById, updatehospital };
+// 5. Get All Hospitals
+const getAllHospitals = async (req, res) => {
+  try {
+    const getAllHospital = await Hospital.findAll({
+      order: [["id", "ASC"]],
+    });
+    res.status(200).json(getAllHospital);
+  } catch (error) {
+    res.status(400).json({ message: `Something went wrong ${error}` });
+  }
+};
+
+module.exports = { addhospital, gethospital, getHospitalById, updatehospital,getAllHospitals };

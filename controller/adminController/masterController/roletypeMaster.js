@@ -107,4 +107,15 @@ const updateRole = async (req, res) => {
   }
 };
 
-module.exports = { addRole, getRole, getRoleById, updateRole };
+// 5. Get all roles
+const getAllRoles=async (req,res) => {
+  try {
+    const getRoles=await Role.findAll({order:[['id','ASC']]});
+    res.status(200).json(getRoles);
+  } catch (error) {
+     res.status(400).json({ message: `Something went wrong ${error}` });
+  }
+  
+}
+
+module.exports = { addRole, getRole, getRoleById, updateRole ,getAllRoles};

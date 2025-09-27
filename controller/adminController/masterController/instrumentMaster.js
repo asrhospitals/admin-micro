@@ -105,9 +105,23 @@ const updateInstrument = async (req, res) => {
   }
 };
 
+// 5. Get All Instrument
+const getAllInstrument=async (req,res) => {
+  try {
+    const getInstruments=await Instrument.findAll({
+      order:[['id','ASC']]
+    });
+    res.status(200).json(getInstruments)
+  } catch (error) {
+    res.status(500).json({message:`Something went wrong:${error}`});
+  }
+  
+}
+
 module.exports = {
   addInstrument,
   getInstrument,
   getInstrumentById,
   updateInstrument,
+  getAllInstrument
 };
