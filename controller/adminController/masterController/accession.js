@@ -4,7 +4,9 @@ const bwipjs = require("bwip-js");
 // 1. Add Accession
 const addAcesstion = async (req, res) => {
   try {
-    const checkAccession = await Accession.findOne(req.body.a_sample_id);
+
+    const{a_sample_id}=req.body;
+    const checkAccession = await Accession.findOne({where:a_sample_id});
     if (checkAccession) {
       return res.status(409).json({
         message: "Sample Id already exists",
@@ -12,7 +14,7 @@ const addAcesstion = async (req, res) => {
       });
     }
     const createAccession = await Accession.create(req.body);
-    res.status().json(createAccession);
+    res.status(200).json(createAccession);
   } catch (error) {
     res.status(400).json({ message: `Somthing went wrong : ${error}` });
   }
