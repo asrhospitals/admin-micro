@@ -21,6 +21,8 @@ const { addDoctor, getDoctor, updateDoctor, getDoctorById } = require('../../con
 const { createSpecimenType, getSpecimenTypeById, getAllSpecimenTypes, updateSpecimenType, getAllSpecimen } = require('../../controller/adminController/masterController/specimenMaster');
 const { createColor, getAllColors, getColorById, updateColor } = require('../../controller/adminController/masterController/colormaster');
 const { createKit, getAllKits, getKitById, updateKit } = require('../../controller/adminController/masterController/kitmaster');
+const { createReportType, getAllReportTypes, getReportTypeById, updateReportType, getAllReport } = require('../../controller/adminController/masterController/reportTypeMaster');
+const { addAcesstion, getBarcode } = require('../../controller/adminController/masterController/accession');
 
 
 
@@ -258,5 +260,27 @@ router.route('/get-kit').get(getAllKits);
 router.route('/get-kit/:id').get(getKitById);
 // 99. Update Kit
 router.route('/update-kit/:id').put(updateKit);
+
+
+// 22. -------------------Report Type Masters--------------
+// 100. Add Reports
+router.route('/add-report').post(createReportType);
+// 101. Get Reports
+router.route('/get-report').get(getAllReportTypes);
+// 102. Get Report By Id 
+router.route('/get-report/:id').get(getReportTypeById);
+// 103. Update Report
+router.route('/update-report/:id').put(updateReportType);
+// 104. Get All Report Type
+router.route('/get-all-reports').get(getAllReport);
+
+// 23.------------Accession Master-----------------
+
+// 105. Add Accession
+router.route('/add-accession').post(addAcesstion);
+// 106. Get Barcode
+router.route('/get-barcode/:id').get(getBarcode);
+
+
 
 module.exports=router;
