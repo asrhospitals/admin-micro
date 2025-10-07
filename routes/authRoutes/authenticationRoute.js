@@ -8,6 +8,7 @@ const {
   getAllUsers,
   searchUsers,
   getUserById,
+  updateUsers,
 } = require("../../controller/authenticationController/authenticationController");
 const router = Router();
 
@@ -17,8 +18,12 @@ router.route("/assign-role").post(assignRole);
 router.route("/signin").post(login);
 router.route("/verifyotp").post(verifyOtp);
 router.route("/resendotp/:userid").post(resendOtp);
-router.route("/get-all-users").get(getAllUsers);
+router.route("/get-all-users").get(getAllUsers); 
 router.route("/get-user/:id").get(getUserById);
 router.route("/search-users").get(searchUsers);
+
+// anand 
+
+router.route('/update-users/:id').put(updateUsers);
 
 module.exports = router;
