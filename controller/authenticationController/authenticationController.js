@@ -125,8 +125,6 @@ const createUser = async (req, res) => {
   }
 };
 
-
-
 /////////////////------------------------------- Assign Role to User----------------------////////////////
 const assignRole = async (req, res) => {
   try {
@@ -499,7 +497,7 @@ const getAllUsers = async (req, res) => {
   } catch (e) {
     res.status(500).json({ message: "Failed to retrieve users" });
   }
-};
+}; 
 
 //////////----------------------------Get all users with id----------------------/////////////////////
 
@@ -550,6 +548,72 @@ const searchUsers = async (req, res) => {
   }
 };
 
+
+// update users 
+
+const updateUsers = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const {
+      first_name,
+      last_name,
+      mobile_number,
+      wattsapp_number,
+      alternate_number,
+      email,
+      dob,
+      gender,
+      address,
+      city,
+      state,
+      pincode,
+      username,
+      password,
+      module,
+      isactive
+    } = req.body;
+
+    const user = await User.findByPk(id);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Only update allowed fields
+    const updateData = {
+      first_name,
+      last_name,
+      mobile_number,
+      wattsapp_number,
+      alternate_number,
+      email,
+      dob,
+      gender,
+      address,
+      city,
+      state,
+      pincode,
+      username,
+      module,
+      isactive
+    };
+
+    // Hash password if it is provided
+    if (password) {
+      const bcrypt = require("bcryptjs");
+      updateData.password = await bcrypt.hash(password, 10);
+    }
+
+    await user.update(updateData);
+
+    res.status(200).json({ message: "User updated successfully", user });
+  } catch (e) {
+    console.error("Error updating user:", e);
+    res.status(500).json({ message: "Failed to update user" });
+  }
+};
+
+
+
 module.exports = {
   login,
   verifyOtp,
@@ -560,5 +624,5 @@ module.exports = {
   getAllUsers,
   searchUsers,
   getUserById,
-  updateUser
+  updateUsers
 };
