@@ -497,7 +497,7 @@ const getAllUsers = async (req, res) => {
   } catch (e) {
     res.status(500).json({ message: "Failed to retrieve users" });
   }
-};
+}; 
 
 //////////----------------------------Get all users with id----------------------/////////////////////
 
@@ -548,6 +548,81 @@ const searchUsers = async (req, res) => {
   }
 };
 
+
+// update users 
+
+const updateUsers = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const {
+      wattsapp_number,
+      mobile_number,
+      alternate_number,
+      email,
+      first_name,
+      last_name,
+      gender,
+      dob,
+      address,
+      city,
+      state,
+      pincode,
+      username,
+      password,
+      module,
+      role,
+      isactive,
+      hospital_id,
+      nodal_id,
+      doctor_id,
+      technician_id,
+      reception_id,
+      phlebotomist_id,
+      image
+    } = req.body;
+
+
+    const user = await User.findByPk(id);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+
+    await user.update({
+      wattsapp_number,
+      mobile_number,
+      alternate_number,
+      email,
+      first_name,
+      last_name,
+      gender,
+      dob,
+      address,
+      city,
+      state,
+      pincode,
+      username,
+      password,
+      module,
+      role,
+      isactive,
+      hospital_id,
+      nodal_id,
+      doctor_id,
+      technician_id,
+      reception_id,
+      phlebotomist_id,
+      image
+    });
+
+    res.status(200).json({ message: "User updated successfully", user });
+  } catch (e) {
+    console.error("Error updating user:", e);
+    res.status(500).json({ message: "Failed to update user" });
+  }
+};
+
+
 module.exports = {
   login,
   verifyOtp,
@@ -558,4 +633,5 @@ module.exports = {
   getAllUsers,
   searchUsers,
   getUserById,
+  updateUsers
 };
