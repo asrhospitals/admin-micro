@@ -555,14 +555,14 @@ const updateUsers = async (req, res) => {
   try {
     const { id } = req.params;
     const {
-      wattsapp_number,
-      mobile_number,
-      alternate_number,
-      email,
       first_name,
       last_name,
-      gender,
+      mobile_number,
+      wattsapp_number,
+      alternate_number,
+      email,
       dob,
+      gender,
       address,
       city,
       state,
@@ -570,50 +570,40 @@ const updateUsers = async (req, res) => {
       username,
       password,
       module,
-      role,
-      isactive,
-      hospital_id,
-      nodal_id,
-      doctor_id,
-      technician_id,
-      reception_id,
-      phlebotomist_id,
-      image
+      isactive
     } = req.body;
-
 
     const user = await User.findByPk(id);
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
 
-
-    await user.update({
-      wattsapp_number,
-      mobile_number,
-      alternate_number,
-      email,
+    // Only update allowed fields
+    const updateData = {
       first_name,
       last_name,
-      gender,
+      mobile_number,
+      wattsapp_number,
+      alternate_number,
+      email,
       dob,
+      gender,
       address,
       city,
       state,
       pincode,
       username,
-      password,
       module,
-      role,
-      isactive,
-      hospital_id,
-      nodal_id,
-      doctor_id,
-      technician_id,
-      reception_id,
-      phlebotomist_id,
-      image
-    });
+      isactive
+    };
+
+    // Hash password if it is provided
+    if (password) {
+      const bcrypt = require("bcryptjs");
+      updateData.password = await bcrypt.hash(password, 10);
+    }
+
+    await user.update(updateData);
 
     res.status(200).json({ message: "User updated successfully", user });
   } catch (e) {
@@ -621,6 +611,7 @@ const updateUsers = async (req, res) => {
     res.status(500).json({ message: "Failed to update user" });
   }
 };
+
 
 
 module.exports = {
