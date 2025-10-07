@@ -125,6 +125,21 @@ const createUser = async (req, res) => {
   }
 };
 
+////////////////---------------------------------- Update User---------------------///////////////////
+const updateUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const checkUser = await User.findByPk(id);
+    if (!checkUser) {
+      res.status(404).json({ message: "User not found" });
+    }
+    await User.update(req.body);
+    res.status(200).json({ message: "User update successfully" });
+  } catch (error) {
+    res.status(400).json({ message: `Something went wrong : ${error}` });
+  }
+};
+
 /////////////////------------------------------- Assign Role to User----------------------////////////////
 const assignRole = async (req, res) => {
   try {
@@ -558,4 +573,5 @@ module.exports = {
   getAllUsers,
   searchUsers,
   getUserById,
+  updateUser
 };

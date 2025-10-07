@@ -14,7 +14,7 @@ const addAcesstion = async (req, res) => {
       });
     }
     const createAccession = await Accession.create(req.body);
-    res.status(200).json(createAccession);
+    res.status(201).json(createAccession);
   } catch (error) {
     res.status(400).json({ message: `Somthing went wrong : ${error}` });
   }
