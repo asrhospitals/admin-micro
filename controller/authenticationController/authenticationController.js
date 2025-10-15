@@ -374,7 +374,7 @@ const login = async (req, res) => {
     }
 
     // 8. Technician Not Belong to any Hospital
-    if (user.role === "technician") {
+    if (roleType.roletype === "technician") {
       // Verify that the technician belongs to the nodal
       if (!user.nodal_id) {
         return res
@@ -492,7 +492,7 @@ const resendOtp = async (req, res) => {
 
 const getAllUsers = async (req, res) => {
   try {
-    const users = await User.findAll();
+    const users = await User.findAll({order:['id','ASC']});
     res.status(200).json(users);
   } catch (e) {
     res.status(500).json({ message: "Failed to retrieve users" });

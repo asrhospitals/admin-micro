@@ -76,6 +76,7 @@ const getNodalInstrument = async (req, res) => {
       ],
       limit: limit,
       offset: offset,
+      order:[['id','ASC']]
     });
 
     const totalPages = Math.ceil(count / limit);
@@ -112,12 +113,12 @@ const getNodalInstrumentById = async (req, res) => {
         {
           model: Nodal,
           as: "nodal",
-          attributes: ["nodalname"],
+          attributes: ['id',"nodalname"],
         },
         {
           model: Instrument,
           as: "instrument",
-          attributes: ["instrumentname"],
+          attributes: ['id',"instrumentname"],
         },
       ],
     });
