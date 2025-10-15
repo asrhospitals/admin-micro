@@ -113,12 +113,12 @@ const getNodalInstrumentById = async (req, res) => {
         {
           model: Nodal,
           as: "nodal",
-          attributes: ['id',"nodalname"],
+          attributes: ["id","nodalname"],
         },
         {
           model: Instrument,
           as: "instrument",
-          attributes: ['id',"instrumentname"],
+          attributes: ["id","instrumentname"],
         },
       ],
     });
@@ -128,7 +128,9 @@ const getNodalInstrumentById = async (req, res) => {
     }
 
     const formattedData = {
+      nodalid:findNodal.nodal?.id,
       nodalName: findNodal.nodal?.nodalname,
+      instrumentid:findNodal.instrument?.id,
       instrumentName: findNodal.instrument?.instrumentname,
       isactive: findNodal.isactive,
     };
