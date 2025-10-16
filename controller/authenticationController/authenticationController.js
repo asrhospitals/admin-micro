@@ -308,6 +308,7 @@ const login = async (req, res) => {
         // Nodal Data
         nodalname: user.nodal ? user.nodal.nodalname : "Unknown Nodal",
         username: phlebotomistData.name,
+        first_name:user.first_name
       });
     }
 
@@ -340,6 +341,7 @@ const login = async (req, res) => {
         nodal_id: user.nodal_id,
         roleType: roleType.roletype,
         nodalname: user.nodal ? user.nodal.nodalname : "Unknown Nodal",
+         first_name:user.first_name
       });
     }
 
@@ -388,6 +390,7 @@ const login = async (req, res) => {
           role: user.role,
           nodal_id: user.nodal_id,
           module: user.module,
+          roleType: roleType.roletype,
         },
         process.env.JWT_SECRET
         // { expiresIn: '1h' }
@@ -408,10 +411,12 @@ const login = async (req, res) => {
         role: user.role,
         nodal_id: user.nodal_id,
         module: user.module,
+        roleType: roleType.roletype,
         // Nodal Data
         nodalname: user.nodal ? user.nodal.nodalname : "Unknown Nodal",
         //Need to Get User Name as per User ID
         username: technicianData.name,
+        first_name:user.first_name
       });
     }
   } catch (e) {
@@ -490,14 +495,46 @@ const resendOtp = async (req, res) => {
 
 /////////////--------------------------------Get All Users ------------------/////////////////////
 
+// const getAllUsers = async (req, res) => {
+//   try {
+//     const users = await User.findAll({ order: [["id", "ASC"]] });
+//     res.status(200).json(users);
+//   } catch (e) {
+//     res.status(500).json({ message: "Failed to retrieve users" });
+//   }
+// };
+
+
 const getAllUsers = async (req, res) => {
   try {
-    const users = await User.findAll({order:['id','ASC']});
-    res.status(200).json(users);
+    let page = Number(req.query.page) || 1;
+    let limit = Number(req.query.limit) || 10;
+    let offset = (page - 1) * limit;
+
+    const { count, rows } = await User.findAndCountAll({
+      limit: limit,
+      offset: offset,
+      order: [["user_id", "ASC"]],
+    });
+
+    const totalPages = Math.ceil(count / limit);
+
+    if (!rows) {
+      return res.status(404).json({ message: "No User found" });
+    }
+    res.status(200).json({
+      data: rows,
+      meta: {
+        totalItems: count,
+        itemsPerPage: limit,
+        currentPage: page,
+        totalPages: totalPages,
+      },
+    });
   } catch (e) {
-    res.status(500).json({ message: "Failed to retrieve users" });
+    res.status(400).send({ message: `Something went wrong ${e}` });
   }
-}; 
+};
 
 //////////----------------------------Get all users with id----------------------/////////////////////
 
@@ -548,8 +585,7 @@ const searchUsers = async (req, res) => {
   }
 };
 
-
-// update users 
+// update users
 
 const updateUsers = async (req, res) => {
   try {
@@ -570,7 +606,7 @@ const updateUsers = async (req, res) => {
       username,
       password,
       module,
-      isactive
+      isactive,
     } = req.body;
 
     const user = await User.findByPk(id);
@@ -594,7 +630,7 @@ const updateUsers = async (req, res) => {
       pincode,
       username,
       module,
-      isactive
+      isactive,
     };
 
     // Hash password if it is provided
@@ -612,8 +648,6 @@ const updateUsers = async (req, res) => {
   }
 };
 
-
-
 module.exports = {
   login,
   verifyOtp,
@@ -624,5 +658,5 @@ module.exports = {
   getAllUsers,
   searchUsers,
   getUserById,
-  updateUsers
+  updateUsers,
 };
