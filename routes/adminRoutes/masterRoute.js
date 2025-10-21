@@ -22,7 +22,7 @@ const { createSpecimenType, getSpecimenTypeById, getAllSpecimenTypes, updateSpec
 const { createColor, getAllColors, getColorById, updateColor } = require('../../controller/adminController/masterController/colormaster');
 const { createKit, getAllKits, getKitById, updateKit } = require('../../controller/adminController/masterController/kitmaster');
 const { createReportType, getAllReportTypes, getReportTypeById, updateReportType, getAllReport } = require('../../controller/adminController/masterController/reportTypeMaster');
-const { addAcesstion, getBarcode } = require('../../controller/adminController/masterController/accession');
+const { addAcesstion, getBarcode, getAccessionDetails } = require('../../controller/adminController/masterController/accession');
 
 
 
@@ -280,6 +280,8 @@ router.route('/get-all-reports').get(getAllReport);
 router.route('/add-accession').post(addAcesstion);
 // 106. Get Barcode
 router.route('/get-barcode/:id').get(getBarcode);
+// 107. Get Assesions
+router.route('/get-accession').get(getAccessionDetails);
 
 
 

@@ -104,7 +104,7 @@ const User = sequelize.define(
       type: DataTypes.STRING, // store file path / URL
       allowNull: true,
     },
-    hospital_id: {
+    hospitalid: {
       type: DataTypes.INTEGER,
       allowNull: true,
       references: {
@@ -113,7 +113,7 @@ const User = sequelize.define(
       },
       onDelete: "SET NULL",
     },
-    nodal_id: {
+    nodalid: {
       type: DataTypes.INTEGER,
       allowNull: true,
       references: {

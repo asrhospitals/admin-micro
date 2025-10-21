@@ -52,4 +52,15 @@ const getBarcode = async (req, res) => {
   }
 };
 
-module.exports = { addAcesstion,getBarcode };
+// 3. Get Accession Details
+const getAccessionDetails = async (req, res) => {
+  try {
+    const accession = await Accession.findAll();
+    if (!accession) return res.status(404).send("Accession not found");
+    res.status(200).json(accession);
+  } catch (error) {
+    res.status(500).json({ message: `Something went wrong: ${error}` });
+  }
+};
+
+module.exports = { addAcesstion,getBarcode,getAccessionDetails };

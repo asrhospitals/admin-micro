@@ -135,37 +135,37 @@ Hospital.belongsTo(HospitalType, {
 
 // Hospital has many Users. Use a plural alias.
 Hospital.hasMany(User, {
-  foreignKey: "hospital_id",
+  foreignKey: "hospitalid",
   as: "users", // Correct: use 'users'
 });
 
 // A User belongs to a Hospital. Use a singular alias.
 User.belongsTo(Hospital, {
-  foreignKey: "hospital_id",
+  foreignKey: "hospitalid",
   as: "hospital", // Correct: use 'hospital'
 });
 
 // Nodal has many Users. Use a plural alias.
 Nodal.hasMany(User, {
-  foreignKey: "nodal_id",
+  foreignKey: "nodalid",
   as: "users", // Correct: use 'users'
 });
 
 // A User belongs to a Nodal. Use a singular alias.
 User.belongsTo(Nodal, {
-  foreignKey: "nodal_id",
+  foreignKey: "nodalid",
   as: "nodal", // Correct: use 'nodal'
 });
 
 // A Nodal has many Hospitals. Use a plural alias.
 Nodal.hasMany(Hospital, {
-  foreignKey: "nodal_id",
+  foreignKey: "nodalid",
   as: "hospitals", // Correct: use 'hospitals'
 });
 
-// A Hospital belongs to a Nodal. Use a singular alias.
+// // A Hospital belongs to a Nodal. Use a singular alias.
 Hospital.belongsTo(Nodal, {
-  foreignKey: "nodal_id",
+  foreignKey: "nodalid",
   as: "nodal", // Correct: use 'nodal'
 });
 

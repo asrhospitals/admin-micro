@@ -132,8 +132,8 @@ const assignRole = async (req, res) => {
       user_id,
       role,
       module,
-      hospital_id,
-      nodal_id,
+      hospitalid,
+      nodalid,
       doctor_id,
       technician_id,
       reception_id,
@@ -160,7 +160,7 @@ const assignRole = async (req, res) => {
       roleName !== "doctor" &&
       roleName !== "hr"
     ) {
-      const hospital = await Hospital.findByPk(hospital_id);
+      const hospital = await Hospital.findByPk(hospitalid);
       if (!hospital) {
         return res
           .status(400)
@@ -171,8 +171,8 @@ const assignRole = async (req, res) => {
     await user.update({
       role,
       module,
-      hospital_id: roleName !== "admin" ? hospital_id : null,
-      nodal_id: roleName !== "admin" ? nodal_id : null,
+      hospitalid: roleName !== "admin" ? hospitalid : null,
+      nodalid: roleName !== "admin" ? nodalid : null,
       doctor_id: roleName === "doctor" ? doctor_id : null,
       technician_id: roleName === "technician" ? technician_id : null,
       reception_id: roleName === "reception" ? reception_id : null,
@@ -269,7 +269,7 @@ const login = async (req, res) => {
     }
     if (roleType.roletype === "phlebotomist") {
       // Require hospital and Nodal verification for phlebotomists
-      if (!user.hospital_id && !user.nodal_id) {
+      if (!user.hospitalid && !user.nodalid) {
         return res
           .status(403)
           .json({ message: "Access denied: No hospital or Nodal assigned" });
@@ -278,8 +278,8 @@ const login = async (req, res) => {
         {
           id: user.user_id,
           role: user.role,
-          hospital_id: user.hospital_id,
-          nodal_id: user.nodal_id,
+          hospitalid: user.hospitalid,
+          nodalid: user.nodalid,
           roleType: roleType.roletype,
         },
         process.env.JWT_SECRET
@@ -298,8 +298,8 @@ const login = async (req, res) => {
         token,
         id: user.user_id,
         role: user.role,
-        hospital_id: user.hospital_id,
-        nodal_id: user.nodal_id,
+        hospitalid: user.hospitalid,
+        nodalid: user.nodalid,
         roleType: roleType.roletype,
         //Need to Get Hospital Name as per Hospital ID
         hospitalname: user.hospital
@@ -315,7 +315,7 @@ const login = async (req, res) => {
     // 6. Receptionist Not Belong to any Hospital
     if (roleType.roletype === "reception") {
       // Verify that the reception belongs to the nodal
-      if (!user.nodal_id) {
+      if (!user.nodalid) {
         return res
           .status(403)
           .json({ message: "Access denied: User Belong to the Nodal" });
@@ -325,7 +325,7 @@ const login = async (req, res) => {
         {
           id: user.user_id,
           role: user.role,
-          nodal_id: user.nodal_id,
+          nodalid: user.nodalid,
           roleType: roleType.roletype,
         },
         process.env.JWT_SECRET
@@ -338,7 +338,7 @@ const login = async (req, res) => {
         token,
         id: user.user_id,
         role: user.role,
-        nodal_id: user.nodal_id,
+        nodalid: user.nodalid,
         roleType: roleType.roletype,
         nodalname: user.nodal ? user.nodal.nodalname : "Unknown Nodal",
          first_name:user.first_name
@@ -370,7 +370,7 @@ const login = async (req, res) => {
         id: user.user_id,
         role: user.role,
         module: user.module,
-        hospital_id: user.hospitalid,
+        hospitalid: user.hospitalid,
         doctor: doctorData,
       });
     }
@@ -378,7 +378,7 @@ const login = async (req, res) => {
     // 8. Technician Not Belong to any Hospital
     if (roleType.roletype === "technician") {
       // Verify that the technician belongs to the nodal
-      if (!user.nodal_id) {
+      if (!user.nodalid) {
         return res
           .status(403)
           .json({ message: "Access denied: User Belong to the Nodal" });
@@ -388,7 +388,7 @@ const login = async (req, res) => {
         {
           id: user.user_id,
           role: user.role,
-          nodal_id: user.nodal_id,
+          nodalid: user.nodalid,
           module: user.module,
           roleType: roleType.roletype,
         },
@@ -409,7 +409,7 @@ const login = async (req, res) => {
         token,
         id: user.user_id,
         role: user.role,
-        nodal_id: user.nodal_id,
+        nodalid: user.nodalid,
         module: user.module,
         roleType: roleType.roletype,
         // Nodal Data
@@ -494,17 +494,6 @@ const resendOtp = async (req, res) => {
 };
 
 /////////////--------------------------------Get All Users ------------------/////////////////////
-
-// const getAllUsers = async (req, res) => {
-//   try {
-//     const users = await User.findAll({ order: [["id", "ASC"]] });
-//     res.status(200).json(users);
-//   } catch (e) {
-//     res.status(500).json({ message: "Failed to retrieve users" });
-//   }
-// };
-
-
 const getAllUsers = async (req, res) => {
   try {
     let page = Number(req.query.page) || 1;
