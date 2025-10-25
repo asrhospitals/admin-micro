@@ -15,16 +15,12 @@ const OTP = sequelize.define('otp', {
         type: DataTypes.INTEGER,
         allowNull: false,
     },
-    createdAt: {
-        type: DataTypes.DATE,
-        defaultValue: DataTypes.NOW,
-    },
     expiresAt: {
         type: DataTypes.DATE,
         allowNull: false,
         defaultValue: () => new Date(Date.now() + 5 * 60 * 1000), // Set expiration to 5 minutes ahead
     },
 
-});
+},{timestamps: false});
 
 module.exports=OTP; 
