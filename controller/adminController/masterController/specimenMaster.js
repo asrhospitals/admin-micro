@@ -1,4 +1,5 @@
 const SpecimenTypeMaster = require("../../../model/adminModel/masterModel/specimenTypeMaster");
+const sequelize = require("../../../db/connectDB");
 
 // ✅ Create
 const createSpecimenType = async (req, res) => {
@@ -59,7 +60,7 @@ const getSpecimenTypeById = async (req, res) => {
       return res.status(404).json({ success: false, message: "Specimen type not found" });
     }
 
-    return res.status(200).json({ success: true, data: specimen });
+    return res.status(200).json(specimen);
   } catch (error) {
     return res.status(500).json({ success: false, message: error.message });
   }
