@@ -175,6 +175,6 @@ const Investigation = sequelize.define("investigation", {
     type:DataTypes.ENUM("Yes","No"),
     allowNull:false
   }
-});
+},{timestamps:false});
 
 module.exports = Investigation;
