@@ -45,9 +45,6 @@ const Investigation = sequelize.define("investigation", {
   roletype: {
     type: DataTypes.STRING,
   },
-  reporttype: {
-    type: DataTypes.STRING,
-  },
   sampletype: {
     type: DataTypes.STRING,
   },
@@ -113,19 +110,6 @@ const Investigation = sequelize.define("investigation", {
   },
 
   ///---Test Price
-
-  walkinprice: {
-    type: DataTypes.FLOAT,
-  },
-  b2bprice: {
-    type: DataTypes.FLOAT,
-  },
-  ppprice: {
-    type: DataTypes.FLOAT,
-  },
-  govtprice: {
-    type: DataTypes.FLOAT,
-  },
   normalprice: {
     type: DataTypes.FLOAT,
   },
@@ -160,20 +144,6 @@ const Investigation = sequelize.define("investigation", {
     type: DataTypes.ARRAY(DataTypes.INTEGER),
   },
 
-  //---Barcode & Timinng
-  barcodelngt: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-  },
-  barcode: {
-    type: DataTypes.INTEGER,
-  },
-  spbarcode: {
-    type: DataTypes.STRING,
-  },
-  suffbarcode: {
-    type: DataTypes.STRING,
-  },
   tat: {
     type: DataTypes.STRING,
     allowNull: false,
@@ -205,6 +175,6 @@ const Investigation = sequelize.define("investigation", {
     type:DataTypes.ENUM("Yes","No"),
     allowNull:false
   }
-},{timestamps:false});
+});
 
 module.exports = Investigation;
