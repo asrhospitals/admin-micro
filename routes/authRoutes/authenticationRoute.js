@@ -9,6 +9,7 @@ const {
   searchUsers,
   getUserById,
   updateUsers,
+  updateRole,
 } = require("../../controller/authenticationController/authenticationController");
 const router = Router();
 
@@ -25,5 +26,7 @@ router.route("/search-users").get(searchUsers);
 // anand 
 
 router.route('/update-users/:id').put(updateUsers);
+
+router.route('/update-roles/:id').put(updateRole);
 
 module.exports = router;

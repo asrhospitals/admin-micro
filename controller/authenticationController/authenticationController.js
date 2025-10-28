@@ -308,7 +308,7 @@ const login = async (req, res) => {
         // Nodal Data
         nodalname: user.nodal ? user.nodal.nodalname : "Unknown Nodal",
         username: phlebotomistData.name,
-        first_name:user.first_name
+        first_name: user.first_name,
       });
     }
 
@@ -341,7 +341,7 @@ const login = async (req, res) => {
         nodalid: user.nodalid,
         roleType: roleType.roletype,
         nodalname: user.nodal ? user.nodal.nodalname : "Unknown Nodal",
-         first_name:user.first_name
+        first_name: user.first_name,
       });
     }
 
@@ -416,7 +416,7 @@ const login = async (req, res) => {
         nodalname: user.nodal ? user.nodal.nodalname : "Unknown Nodal",
         //Need to Get User Name as per User ID
         username: technicianData.name,
-        first_name:user.first_name
+        first_name: user.first_name,
       });
     }
   } catch (e) {
@@ -637,6 +637,31 @@ const updateUsers = async (req, res) => {
   }
 };
 
+// Update Users Role and Module
+const updateRole = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const { role, module, hospitalid, nodalid } = req.body;
+
+    const user = await User.findByPk(id);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const updateFields = { role, module, hospitalid, nodalid };
+
+    await user.update(updateFields);
+    res
+      .status(200)
+      .json({ message: "User role and module updated successfully" });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Failed to update user", err: error.message });
+  }
+};
+
 module.exports = {
   login,
   verifyOtp,
@@ -648,4 +673,5 @@ module.exports = {
   searchUsers,
   getUserById,
   updateUsers,
+  updateRole
 };
