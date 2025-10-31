@@ -97,7 +97,7 @@ const fetchProfile = async (req, res) => {
         {
           model: ProfileEntry,
           as: "profileentry",
-          attributes: ["profilename"],
+          attributes: ["profilename","profilecode"],
         },
       ],
       limit,
@@ -117,13 +117,14 @@ const fetchProfile = async (req, res) => {
                 [Op.in]: profile.investigationids
               }
             },
-            attributes: ["id", "testname"],
+            attributes: ["id", "testname","normalprice","departmentId"],
           });
         }
 
         return {
           id: profile.id,
           profilename: profile.profileentry?.profilename || null,
+          profilecode: profile.profileentry?.profilecode || null,
           investigations: investigations,
           isactive: profile.isactive,
         };

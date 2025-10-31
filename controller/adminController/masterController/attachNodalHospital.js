@@ -28,16 +28,16 @@ const addNodalHospital = async (req, res) => {
       await transaction.rollback();
       return res.status(404).json({ message: "Parent hospital not found." });
     }
-    
+
     // Check for existing relationship (prevent duplicates)
     const existingRelation = await NodalHospital.findOne({
-      where: { 
+      where: {
         nodalid: nodalid,
-        hospitalid: hospitalid 
+        hospitalid: hospitalid,
       },
       transaction,
     });
-    
+
     if (existingRelation) {
       await transaction.rollback();
       return res.status(409).json({
@@ -144,8 +144,10 @@ const getNodalHospitalById = async (req, res) => {
 const updateNodalHospital = async (req, res) => {
   const transaction = await sequelize.transaction();
   try {
-      const { nodalid, hospitalid, isactive } = req.body;
-    const updatenodal = await NodalHospital.findByPk(req.params.id,{transaction});
+    const { nodalid, hospitalid, isactive } = req.body;
+    const updatenodal = await NodalHospital.findByPk(req.params.id, {
+      transaction,
+    });
     if (!updatenodal) {
       await transaction.rollback();
       return res
@@ -158,8 +160,8 @@ const updateNodalHospital = async (req, res) => {
       return res.status(400).json({ message: "Updated data not provided" });
     }
 
-        // Check that Nodal actually exists
-   if (nodalid) {
+    // Check that Nodal actually exists
+    if (nodalid) {
       const nodalExists = await Nodal.findByPk(nodalid, {
         transaction,
       });
@@ -179,7 +181,7 @@ const updateNodalHospital = async (req, res) => {
         return res.status(404).json({ message: "Parent hospital not found." });
       }
     }
-    
+
     await updatenodal.update(req.body, { transaction });
     await transaction.commit();
     res.status(200).json({
@@ -191,9 +193,47 @@ const updateNodalHospital = async (req, res) => {
   }
 };
 
+// 5. Get All Nodal Hospitals
+const getAllNodalHospitals = async (req, res) => {
+  try {
+    const nodalHospitals = await NodalHospital.findAll({
+      include: [
+        {
+          model: Nodal,
+          as: "nodal",
+          attributes: ["nodalname", "id"],
+        },
+        {
+          model: Hospital,
+          as: "hospital",
+          attributes: ["hospitalname", "id"],
+        },
+      ],
+    });
+
+    if (!nodalHospitals || nodalHospitals.length === 0) {
+      return res.status(404).json({ message: "No Nodal Hospitals found" });
+    }
+
+    const formattedData = nodalHospitals.map((record) => ({
+      id: record.id,
+      nodalid: record.nodal?.id,
+      nodalname: record.nodal?.nodalname,
+      hospitalid: record.hospital?.id,
+      hospitalname: record.hospital?.hospitalname,
+      isactive: record.isactive,
+    }));
+
+    return res.status(200).json(formattedData);
+  } catch (e) {
+    return res.status(400).json({ message: `Something went wrong ${e}` });
+  }
+};
+
 module.exports = {
   addNodalHospital,
   getNodalHospital,
   getNodalHospitalById,
   updateNodalHospital,
+  getAllNodalHospitals,
 };
