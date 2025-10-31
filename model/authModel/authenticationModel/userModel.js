@@ -104,6 +104,12 @@ const User = sequelize.define(
       type: DataTypes.STRING, // store file path / URL
       allowNull: true,
     },
+    update_by:{
+      type: DataTypes.STRING,
+    },
+    update_date:{
+      type: DataTypes.DATEONLY,
+    },
     hospitalid: {
       type: DataTypes.INTEGER,
       allowNull: true,
