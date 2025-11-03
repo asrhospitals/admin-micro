@@ -15,7 +15,7 @@ const { addNodalInstrument, getNodalInstrument, updateNodalInstrument, getNodalI
 const { addTechnician, getTechnician, updateTechnician, getTechnicianById } = require('../../controller/adminController/masterController/technicianMaster');
 const { addRefDoctor, getRefDoc, updateRefDoc, getRefDocById } = require('../../controller/adminController/masterController/referDoctor');
 const { addProfile, getProfile, updateProfile, getProfileEntryById, getAllProfileEntry } = require('../../controller/adminController/masterController/profileentrymaster');
-const { addTest, getTest, updateNormalValues, updateInvestigation, getTestById, updateSingleResult } = require('../../controller/adminController/masterController/testMaster');
+const { addTest, getTest, updateNormalValues, updateInvestigation, getTestById, updateSingleResult, updateMandatoryFlex, updateReflexTest, updateMandatoryFlexTest } = require('../../controller/adminController/masterController/testMaster');
 const { createProfile, fetchProfile, updateProfiles, fetchProfileById } = require('../../controller/adminController/masterController/profileMaster');
 const { addDoctor, getDoctor, updateDoctor, getDoctorById } = require('../../controller/adminController/masterController/doctorRegistration');
 const { createSpecimenType, getSpecimenTypeById, getAllSpecimenTypes, updateSpecimenType, getAllSpecimen } = require('../../controller/adminController/masterController/specimenMaster');
@@ -150,7 +150,10 @@ router.route('/update-investigations/:id').put(updateInvestigation);
 router.route('/update/:investigationId/results/:resultId').put(updateSingleResult);
 // 50. Update Investigation Normal Values
 router.route('/update-normal/:resultId/normal-values/:normalValueId').put(updateNormalValues);
-
+// 51. Update Reflex Test
+router.route('/update-reflex/:resultId/reflex-tests/:reflexId').put(updateReflexTest);
+// 52. Update Mandatory Flex Test
+router.route('/update-mandatoryflex/:resultId/mandatory-flex/:mandatoryFlexId').put(updateMandatoryFlexTest);
 /// 12. ------------Lab to Lab Master-----------
 // 51. Add Lab to Lab
 router.route('/add-labtolab').post(addlabtolab);

@@ -308,6 +308,79 @@ const updateNormalValues = async (req, res) => {
   }
 };
 
+// 8. Update Reflex Test
+const updateReflexTest = async (req, res) => {
+  const transaction = await sequelize.transaction();
+  try {
+    const { resultId, reflexId } = req.params;
+    const updateData = req.body;
+
+    const result = await InvestigationResult.findByPk(resultId, {
+      transaction,
+    });
+    if (!result) {
+      await transaction.rollback();
+      return res.status(404).json({ message: "Result not found" });
+    }
+
+    const [updatedRowsCount] = await ReflexTest.update(updateData, {
+      where: {
+        id: reflexId,
+        resultId: resultId,
+      },
+      transaction,
+    });
+
+    if (updatedRowsCount === 0) {
+      await transaction.rollback();
+      return res.status(404).json({ message: "Flex value not found" });
+    }
+    await transaction.commit();
+    res.status(200).json({ message: "Flex values update successfully" });
+  } catch (err) {
+    await transaction.rollback();
+    res.status(500).json({ message: `Error saving flex values ${err}` });
+  }
+};
+
+// 9. Update Mandatory Flex Test
+
+const updateMandatoryFlexTest = async (req, res) => {
+  const transaction = await sequelize.transaction();
+  try {
+    const { resultId, mandatoryFlexId } = req.params;
+    const updateData = req.body;
+
+    const result = await InvestigationResult.findByPk(resultId, {
+      transaction,
+    });
+    if (!result) {
+      await transaction.rollback();
+      return res.status(404).json({ message: "Result not found" });
+    }
+
+    const [updatedRowsCount] = await Mandatory.update(updateData, {
+      where: {
+        id: mandatoryFlexId,
+        resultId: resultId,
+      },
+      transaction,
+    });
+
+    if (updatedRowsCount === 0) {
+      await transaction.rollback();
+      return res.status(404).json({ message: "Mandatory Flex value not found" });
+    }
+    await transaction.commit();
+    res.status(200).json({ message: "Mandatory Flex values update successfully" });
+  } catch (err) {
+    await transaction.rollback();
+    res.status(500).json({ message: `Error saving flex values ${err}` });
+  }
+};
+
+
+
 module.exports = {
   addTest,
   getTest,
@@ -315,4 +388,6 @@ module.exports = {
   updateInvestigation,
   updateNormalValues,
   updateSingleResult,
+  updateReflexTest,
+  updateMandatoryFlexTest,
 };
