@@ -249,7 +249,7 @@ const login = async (req, res) => {
         otp,
         expires_at: new Date(Date.now() + 10 * 60 * 1000),
       });
-      await sendOtp(process.env.PREDEFINED_EMAIL, otp);
+      // await sendOtp(process.env.PREDEFINED_EMAIL, otp);
 
       const roleType = await RoleType.findByPk(user.role);
 
@@ -421,8 +421,12 @@ const login = async (req, res) => {
     }
   } catch (e) {
     return res.status(403).json({
-      success: false,
-      error: e.message,
+     success: false,
+  message: "Access denied or unexpected error occurred.",
+  errorType: e.name || "UnknownError",
+  errorMessage: e.message,
+  stack: e.stack,
+  details: e.errors || null,
     });
   }
 };
