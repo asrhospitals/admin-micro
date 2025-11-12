@@ -69,16 +69,9 @@ ReflexTest.belongsTo(InvestigationResult, {
 
 
 // Profile associations
-Profile.belongsTo(ProfileEntry, { 
-  foreignKey: "profileid", 
-  as: "profileentry" 
-});
-
+Profile.belongsTo(ProfileEntry, { foreignKey: "profileid", as: "profileentry"});
 // ProfileEntry associations
-ProfileEntry.hasMany(Profile, { 
-  foreignKey: "profileid", 
-  as: "profiles" 
-});
+ProfileEntry.hasMany(Profile, { foreignKey: "profileid", as: "profiles" });
 
 
 Investigation.belongsTo(Department, { foreignKey: "departmentId" });
@@ -112,26 +105,15 @@ Phlebotomist.hasOne(User, { foreignKey: "phlebotomist_id" });
 User.belongsTo(Phlebotomist, { foreignKey: "phlebotomist_id" });
 
 // Department has many sub departments
-Department.hasMany(Subdepartment, {
-  foreignKey: "department_id",
-  as: "department",
-});
+Department.hasMany(Subdepartment, {foreignKey: "department_id",as: "department",});
 //Subdepartment belongs only departments
-Subdepartment.belongsTo(Department, {
-  foreignKey: "department_id",
-  as: "department",
-});
+Subdepartment.belongsTo(Department, {foreignKey: "department_id",as: "department",});
+
 
 // A HospitalType has many Hospitals
-HospitalType.hasMany(Hospital, {
-  foreignKey: "hospital_type_id",
-  as: "hospitals",
-});
+HospitalType.hasMany(Hospital, {foreignKey: "hospital_type_id",as: "hospitals",});
 // A Hospital belongs to a HospitalType
-Hospital.belongsTo(HospitalType, {
-  foreignKey: "hospital_type_id",
-  as: "hospitalType",
-});
+Hospital.belongsTo(HospitalType, {foreignKey: "hospital_type_id",as: "hospitalType",});
 
 // Hospital has many Users. Use a plural alias.
 Hospital.hasMany(User, {
