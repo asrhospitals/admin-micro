@@ -1,3 +1,4 @@
+const { v4: uuidv4 } = require("uuid");
 const User = require("../../model/authModel/authenticationModel/userModel");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
@@ -12,6 +13,8 @@ const Doctor = require("../../model/adminModel/masterModel/doctorRegistration");
 const RoleType = require("../../model/adminModel/masterModel/roletypeMaster");
 const UserSession = require("../../model/authModel/authenticationModel/user_session");
 const { Op } = require("sequelize");
+const UAParser = require("ua-parser-js");
+// At the top of your controller file
 
 // -----------------------------------------------------------------
 
@@ -21,30 +24,23 @@ const { Op } = require("sequelize");
  * @returns {object} { ipAddress, browserDetails }
  */
 const extractLogData = (req) => {
-  // Safely get IP address (your existing correct logic)
   const ipAddress = req.headers["x-forwarded-for"]
     ? req.headers["x-forwarded-for"].split(",")[0].trim()
     : req.ip || req.connection.remoteAddress;
 
-  // Use the raw User-Agent string for maximum detail
   const rawBrowserDetails = req.get("User-Agent") || "Unknown";
 
-  // --- New: Use the parsed details for a cleaner display ---
-  // The library gives you properties like:
-  // req.useragent.browser (e.g., 'Edge')
-  // req.useragent.version (e.g., '142.0.0.0')
-  // req.useragent.os (e.g., 'Windows 10')
+  const parser = new UAParser(rawBrowserDetails);
+  const parsed = parser.getResult();
 
-  const readableBrowserName = req.useragent
-    ? `${req.useragent.browser} ${req.useragent.version} on ${req.useragent.os}`
-    : rawBrowserDetails;
-
-  // You can choose which one to store:
+  const readableBrowserName = `${parsed.browser.name || "Unknown"} ${
+    parsed.browser.version || ""
+  } on ${parsed.os.name || "Unknown"} ${parsed.os.version || ""}`;
 
   return {
     ipAddress,
-    browserDetails: rawBrowserDetails, // Keep the raw string for forensics/accuracy
-    readableBrowserName: readableBrowserName, // Store this in a separate column if you want a clean view
+    browserDetails: rawBrowserDetails,
+    readableBrowserName,
   };
 };
 // -----------------------------------------------------------------
@@ -121,7 +117,7 @@ const createUser = async (req, res) => {
     } = req.body;
 
     const existingUser = await User.findOne({
-            where: sequelize.where(
+      where: sequelize.where(
         sequelize.fn("LOWER", sequelize.col("username")),
         sequelize.fn("LOWER", sequelize.col("first_name")),
         username.toLowerCase(),
@@ -237,6 +233,8 @@ const assignRole = async (req, res) => {
 ///////////////////////////--------------------- Login User----------------------/////////////////
 
 const login = async (req, res) => {
+  let sessionLogId = null;
+  let jwtId = uuidv4(); // <-- NEW: Generate a unique ID for the JWT (JTI)
   try {
     //1. Request By User
     const { username, password } = req.body;
@@ -297,6 +295,8 @@ const login = async (req, res) => {
         ipAddress: ipAddress,
         browserDetails: browserDetails,
         loginTime: new Date(), // This will be the default if not provided, but good to be explicit
+        // --- UPDATE: Store the generated JWT ID here ---
+        sessionId: jwtId,
       });
 
       // Store the ID to be embedded in the JWT later
@@ -349,6 +349,9 @@ const login = async (req, res) => {
           hospitalid: user.hospitalid,
           nodalid: user.nodalid,
           roleType: roleType.roletype,
+          // --- ADD SESSION ID (JTI) AND LOG DB ID TO PAYLOAD ---
+  
+          sessionLogId: sessionLogId, // <-- The primary key from the user_sessions table
         },
         process.env.JWT_SECRET
         // { expiresIn: '1h' }
@@ -497,9 +500,55 @@ const login = async (req, res) => {
   }
 };
 
+// Example Logout Function
+const logout = async (req, res) => {
+    // 1. Retrieve the sessionLogId from the authenticated user payload
+    const sessionLogId = req.user ? req.user.sessionLogId : null;
+
+    if (!sessionLogId) {
+        // This is a safety check, but should ideally not happen if middleware is working
+        console.warn('Logout attempted without a sessionLogId in token.');
+        return res.status(400).json({ message: 'Session ID not found in token payload.' });
+    }
+    
+    try {
+        // 2. Update the corresponding log entry with the current time
+        const [updatedRows] = await UserSession.update({
+            logoutTime: new Date() // Set to the current server time
+        }, {
+            where: {
+                id: sessionLogId,
+                logoutTime: null // Ensures we only update active sessions
+            }
+        });
+
+        if (updatedRows === 0) {
+            console.warn(`Logout failed for session ${sessionLogId}: session not found or already logged out.`);
+            // This is non-critical; we still proceed with clearing the token.
+        }
+        
+        // 3. Respond success. The client is responsible for deleting the JWT.
+        return res.status(200).json({
+            success: true,
+            message: 'Logged out successfully. Session time recorded.',
+            sessionLogId: sessionLogId
+        });
+
+    } catch (error) {
+        console.error('Database error recording logout:', error);
+        // Even if the DB update fails, the user should be logged out (client deletes token)
+        return res.status(200).json({
+            success: true,
+            message: 'Logged out successfully, though session log update failed.',
+        });
+    }
+};
+
 ////////////////----------------------- Verify OTP-----------///////////////////////
 
 const verifyOtp = async (req, res) => {
+  let sessionLogId = null;
+  let jwtId = uuidv4(); // <-- NEW: Generate a unique ID for the JWT (JTI)
   try {
     const { userid, otp } = req.body;
 
@@ -522,6 +571,9 @@ const verifyOtp = async (req, res) => {
         id: user.id,
         role: user.role,
         roleType: roleType ? roleType.roletype : "Unknown Role",
+        // --- ADD SESSION ID (JTI) AND LOG DB ID TO PAYLOAD ---
+        jti: jwtId, // <-- The unique session ID (JTI)
+        sessionLogId: sessionLogId, // <-- The primary key from the user_sessions table
       },
       process.env.JWT_SECRET
       // { expiresIn: '1h' }
@@ -565,14 +617,114 @@ const resendOtp = async (req, res) => {
 
 const getUserSession = async (req, res) => {
   try {
-    const getUserData = await UserSession.findAll();
-    return res.status(200).json({ message: "Data Fetched", data: getUserData });
+    // 1. Extract token from header
+    const authHeader = req.headers.authorization || req.headers.Authorization;
+    const token = authHeader?.startsWith("Bearer ")
+      ? authHeader.split(" ")[1]
+      : null;
+
+    if (!token) {
+      return res.status(401).json({ message: "Token missing" });
+    }
+
+    // 2. Verify token
+    let payload;
+    try {
+      payload = jwt.verify(token, process.env.JWT_SECRET);
+    } catch (err) {
+      return res.status(401).json({ message: "Invalid token", error: err.message });
+    }
+
+    // 3. Extract jti from token
+    const jti = payload.jti;
+    if (!jti) {
+      return res.status(400).json({ message: "Token does not contain jti" });
+    }
+
+    // 4. Fetch user session using sessionId column
+    const sessionData = await UserSession.findOne({
+      where: { sessionId: jti },
+    });
+
+    if (!sessionData) {
+      return res.status(404).json({ message: "No User Session found for this token" });
+    }
+
+    return res.status(200).json({
+      message: "Data fetched successfully",
+      data: sessionData,
+    });
   } catch (error) {
-    res.status(400).json({ message: "something went wrong", error });
+    return res.status(500).json({
+      message: "Something went wrong",
+      error: error.message,
+    });
   }
 };
 
+
+
+
+// const getUserSessionAdmin = async (req, res) => {
+//   try {
+//     // 1. Extract token from header
+//     const authHeader = req.headers.authorization || req.headers.Authorization;
+//     const token = authHeader?.startsWith("Bearer ")
+//       ? authHeader.split(" ")[1]
+//       : null;
+
+//     if (!token) {
+//       return res.status(401).json({ message: "Token missing" });
+//     }
+
+//     // 2. Verify token
+//     let payload;
+//     try {
+//       payload = jwt.verify(token, process.env.JWT_SECRET);
+//     } catch (err) {
+//       return res.status(401).json({ message: "Invalid token", error: err.message });
+//     }
+
+//     // 3. Check if user is admin (role = 1)
+//     if (payload.role !== 1) {
+//       return res.status(403).json({ message: "Access Denied: Admins only" });
+//     }
+
+//     // 4. Extract jti from token
+//     const jti = payload.jti;
+//     if (!jti) {
+//       return res.status(400).json({ message: "Token does not contain jti" });
+//     }
+
+//     // 5. Fetch user session using sessionId column
+//     const sessionData = await UserSession.findOne({
+//       where: { sessionId: jti },
+//     });
+
+//     if (!sessionData) {
+//       return res.status(404).json({ message: "No User Session found for this token" });
+//     }
+
+//     return res.status(200).json({
+//       message: "Data fetched successfully",
+//       data: sessionData,
+//     });
+
+//   } catch (error) {
+//     return res.status(500).json({
+//       message: "Something went wrong",
+//       error: error.message,
+//     });
+//   }
+// };
+
+
 /////////////--------------------------------Get All Users ------------------/////////////////////
+
+
+
+
+
 const getAllUsers = async (req, res) => {
   try {
     let page = Number(req.query.page) || 1;
@@ -754,4 +906,5 @@ module.exports = {
   updateUsers,
   updateRole,
   getUserSession,
+  logout,
 };

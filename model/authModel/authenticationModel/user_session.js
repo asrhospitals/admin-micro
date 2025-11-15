@@ -48,7 +48,7 @@ const UserSession = db.define('UserSession', {
 });
 
 // Define the association (if you have a User model)
- User.hasMany(UserSession);
- UserSession.belongsTo(User);
+UserSession.belongsTo(User, { foreignKey: 'userId' });
+User.hasMany(UserSession, { foreignKey: 'userId' });
 
 module.exports = UserSession;

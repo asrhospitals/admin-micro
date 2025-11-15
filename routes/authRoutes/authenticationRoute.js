@@ -11,6 +11,8 @@ const {
   updateUsers,
   updateRole,
   getUserSession,
+  logout,
+  getUserSessionAdmin,
 } = require("../../controller/authenticationController/authenticationController");
 const router = Router();
 
@@ -31,5 +33,9 @@ router.route('/update-users/:id').put(updateUsers);
 router.route('/update-roles/:id').put(updateRole);
 
 router.route("/get-sessions").get(getUserSession);
+
+// router.route("/get-admin-session").get(getUserSessionAdmin)
+
+router.route("/logout").post(logout);
 
 module.exports = router;
