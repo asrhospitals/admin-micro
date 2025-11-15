@@ -615,108 +615,10 @@ const resendOtp = async (req, res) => {
   }
 };
 
-const getUserSession = async (req, res) => {
-  try {
-    // 1. Extract token from header
-    const authHeader = req.headers.authorization || req.headers.Authorization;
-    const token = authHeader?.startsWith("Bearer ")
-      ? authHeader.split(" ")[1]
-      : null;
-
-    if (!token) {
-      return res.status(401).json({ message: "Token missing" });
-    }
-
-    // 2. Verify token
-    let payload;
-    try {
-      payload = jwt.verify(token, process.env.JWT_SECRET);
-    } catch (err) {
-      return res.status(401).json({ message: "Invalid token", error: err.message });
-    }
-
-    // 3. Extract jti from token
-    const jti = payload.jti;
-    if (!jti) {
-      return res.status(400).json({ message: "Token does not contain jti" });
-    }
-
-    // 4. Fetch user session using sessionId column
-    const sessionData = await UserSession.findOne({
-      where: { sessionId: jti },
-    });
-
-    if (!sessionData) {
-      return res.status(404).json({ message: "No User Session found for this token" });
-    }
-
-    return res.status(200).json({
-      message: "Data fetched successfully",
-      data: sessionData,
-    });
-  } catch (error) {
-    return res.status(500).json({
-      message: "Something went wrong",
-      error: error.message,
-    });
-  }
-};
 
 
 
 
-// const getUserSessionAdmin = async (req, res) => {
-//   try {
-//     // 1. Extract token from header
-//     const authHeader = req.headers.authorization || req.headers.Authorization;
-//     const token = authHeader?.startsWith("Bearer ")
-//       ? authHeader.split(" ")[1]
-//       : null;
-
-//     if (!token) {
-//       return res.status(401).json({ message: "Token missing" });
-//     }
-
-//     // 2. Verify token
-//     let payload;
-//     try {
-//       payload = jwt.verify(token, process.env.JWT_SECRET);
-//     } catch (err) {
-//       return res.status(401).json({ message: "Invalid token", error: err.message });
-//     }
-
-//     // 3. Check if user is admin (role = 1)
-//     if (payload.role !== 1) {
-//       return res.status(403).json({ message: "Access Denied: Admins only" });
-//     }
-
-//     // 4. Extract jti from token
-//     const jti = payload.jti;
-//     if (!jti) {
-//       return res.status(400).json({ message: "Token does not contain jti" });
-//     }
-
-//     // 5. Fetch user session using sessionId column
-//     const sessionData = await UserSession.findOne({
-//       where: { sessionId: jti },
-//     });
-
-//     if (!sessionData) {
-//       return res.status(404).json({ message: "No User Session found for this token" });
-//     }
-
-//     return res.status(200).json({
-//       message: "Data fetched successfully",
-//       data: sessionData,
-//     });
-
-//   } catch (error) {
-//     return res.status(500).json({
-//       message: "Something went wrong",
-//       error: error.message,
-//     });
-//   }
-// };
 
 
 /////////////--------------------------------Get All Users ------------------/////////////////////
