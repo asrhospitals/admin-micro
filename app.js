@@ -12,10 +12,14 @@ const sequelize = require("./db/connectDB");
 const verifyToken = require("./middlewares/authMiddileware");
 const role = require("./middlewares/roleMiddleware");
 const {checkAdmin} = require("./controller/authenticationController/authenticationController");
+const useragent = require('express-useragent');
 
 app.use(cors());
 // anand 123
 app.use(express.json());
+
+app.set('trust proxy', true);
+app.use(useragent.express());
 
 /// User Authentication Routes
 app.use("/lims/authentication", AuthRoutes);
@@ -40,7 +44,7 @@ app.get("/", async (req, res) => {
 const server = async () => {
   try {
     await sequelize.authenticate();
-    //  await sequelize.sync();
+      // await sequelize.sync();
     console.log("Database connection has been established successfully");
 
     // check admin is exist or not

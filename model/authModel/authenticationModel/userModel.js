@@ -3,9 +3,6 @@ const sequelize = require("../../../db/connectDB");
 const Hospital = require("../../adminModel/masterModel/hospitalMaster");
 const Nodal = require("../../adminModel/masterModel/nodalMaster");
 const Doctor = require("../../adminModel/masterModel/doctorRegistration");
-const Technician = require("../../adminModel/masterModel/technicianMaster");
-const Reception = require("../../adminModel/masterModel/receptionMaster");
-const Phlebotomist = require("../../adminModel/masterModel/phlebotomistMaster");
 const RoleType = require("../../adminModel/masterModel/roletypeMaster");
 
 const User = sequelize.define(
@@ -92,17 +89,18 @@ const User = sequelize.define(
       defaultValue: true,
     },
     created_by: {
-      type: DataTypes.STRING, // or FK to admin user
+      type: DataTypes.STRING, 
       allowNull: true,
     },
     created_date: {
-      type: DataTypes.DATEONLY,
-      allowNull: false,
-      defaultValue: DataTypes.NOW,
+      type: DataTypes.STRING,
     },
     image: {
-      type: DataTypes.STRING, // store file path / URL
+      type: DataTypes.STRING, 
       allowNull: true,
+    },
+    certificate:{
+      type:DataTypes.STRING
     },
     update_by:{
       type: DataTypes.STRING,
@@ -137,33 +135,12 @@ const User = sequelize.define(
       },
       onDelete: "SET NULL",
     },
-    technician_id: {
-      type: DataTypes.INTEGER,
-      allowNull: true,
-      references: {
-        model: Technician,
-        key: "id",
-      },
-      onDelete: "SET NULL",
+    nominee_name:{
+      type:DataTypes.STRING
     },
-    reception_id: {
-      type: DataTypes.INTEGER,
-      allowNull: true,
-      references: {
-        model: Reception,
-        key: "id",
-      },
-      onDelete: "SET NULL",
-    },
-    phlebotomist_id: {
-      type: DataTypes.INTEGER,
-      allowNull: true,
-      references: {
-        model: Phlebotomist,
-        key: "id",
-      },
-      onDelete: "SET NULL",
-    },
+    nominee_contact:{
+      type:DataTypes.STRING
+    }
   },
   {
     timestamps: true,

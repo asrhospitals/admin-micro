@@ -10,6 +10,7 @@ const {
   getUserById,
   updateUsers,
   updateRole,
+  getUserSession,
 } = require("../../controller/authenticationController/authenticationController");
 const router = Router();
 
@@ -28,5 +29,7 @@ router.route("/search-users").get(searchUsers);
 router.route('/update-users/:id').put(updateUsers);
 
 router.route('/update-roles/:id').put(updateRole);
+
+router.route("/get-sessions").get(getUserSession);
 
 module.exports = router;

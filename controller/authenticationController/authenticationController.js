@@ -9,11 +9,45 @@ const OTP = require("../../model/authModel/authenticationModel/otpModel");
 const Hospital = require("../../model/adminModel/masterModel/hospitalMaster");
 const Nodal = require("../../model/adminModel/masterModel/nodalMaster");
 const Doctor = require("../../model/adminModel/masterModel/doctorRegistration");
-const Phlebotomist = require("../../model/adminModel/masterModel/phlebotomistMaster");
-const Technician = require("../../model/adminModel/masterModel/technicianMaster");
-const Reception = require("../../model/adminModel/masterModel/receptionMaster");
 const RoleType = require("../../model/adminModel/masterModel/roletypeMaster");
+const UserSession = require("../../model/authModel/authenticationModel/user_session");
 const { Op } = require("sequelize");
+
+// -----------------------------------------------------------------
+
+/**
+ * Utility function to extract IP and browser details from the request.
+ * @param {object} req - Express request object
+ * @returns {object} { ipAddress, browserDetails }
+ */
+const extractLogData = (req) => {
+  // Safely get IP address (your existing correct logic)
+  const ipAddress = req.headers["x-forwarded-for"]
+    ? req.headers["x-forwarded-for"].split(",")[0].trim()
+    : req.ip || req.connection.remoteAddress;
+
+  // Use the raw User-Agent string for maximum detail
+  const rawBrowserDetails = req.get("User-Agent") || "Unknown";
+
+  // --- New: Use the parsed details for a cleaner display ---
+  // The library gives you properties like:
+  // req.useragent.browser (e.g., 'Edge')
+  // req.useragent.version (e.g., '142.0.0.0')
+  // req.useragent.os (e.g., 'Windows 10')
+
+  const readableBrowserName = req.useragent
+    ? `${req.useragent.browser} ${req.useragent.version} on ${req.useragent.os}`
+    : rawBrowserDetails;
+
+  // You can choose which one to store:
+
+  return {
+    ipAddress,
+    browserDetails: rawBrowserDetails, // Keep the raw string for forensics/accuracy
+    readableBrowserName: readableBrowserName, // Store this in a separate column if you want a clean view
+  };
+};
+// -----------------------------------------------------------------
 
 /////////////////------------------------------- Check Admin Exists----------------------////////////////
 
@@ -80,11 +114,20 @@ const createUser = async (req, res) => {
       password,
       created_by,
       image,
+      certificate,
       module,
+      nominee_contact,
+      nominee_name,
     } = req.body;
 
     const existingUser = await User.findOne({
-      where: { username, first_name, mobile_number },
+            where: sequelize.where(
+        sequelize.fn("LOWER", sequelize.col("username")),
+        sequelize.fn("LOWER", sequelize.col("first_name")),
+        username.toLowerCase(),
+        first_name.toLowerCase()
+      ),
+      where: { mobile_number },
     });
     if (existingUser) {
       return res.status(409).json({
@@ -114,6 +157,9 @@ const createUser = async (req, res) => {
       created_by,
       image,
       module,
+      nominee_contact,
+      nominee_name,
+      certificate,
     });
 
     res.status(201).json({
@@ -214,21 +260,21 @@ const login = async (req, res) => {
           as: "doctor",
           attributes: ["dname", "dditsig", "dphoto"],
         },
-        {
-          model: Phlebotomist,
-          as: "phlebotomist",
-          attributes: ["phleboname"],
-        },
-        {
-          model: Technician,
-          as: "technician",
-          attributes: ["technicianname"],
-        },
-        {
-          model: Reception,
-          as: "reception",
-          attributes: ["receptionistname"],
-        },
+        // {
+        //   model: Phlebotomist,
+        //   as: "phlebotomist",
+        //   attributes: ["phleboname"],
+        // },
+        // {
+        //   model: Technician,
+        //   as: "technician",
+        //   attributes: ["technicianname"],
+        // },
+        // {
+        //   model: Reception,
+        //   as: "reception",
+        //   attributes: ["receptionistname"],
+        // },
       ],
     });
     if (!user) {
@@ -240,6 +286,28 @@ const login = async (req, res) => {
     if (!isMatch) {
       return res.status(401).json({ message: "Invalid credentials" });
     }
+    // --- START: USER SESSION LOGGING INTEGRATION ---
+
+    const { ipAddress, browserDetails } = extractLogData(req);
+
+    try {
+      // Create the new log entry
+      const sessionLog = await UserSession.create({
+        userId: user.user_id, // Ensure this matches the column name in your UserSession model
+        ipAddress: ipAddress,
+        browserDetails: browserDetails,
+        loginTime: new Date(), // This will be the default if not provided, but good to be explicit
+      });
+
+      // Store the ID to be embedded in the JWT later
+      sessionLogId = sessionLog.id;
+    } catch (logError) {
+      console.error("Error recording login session:", logError);
+      // It is usually best to log the error and continue the login process,
+      // as logging failure shouldn't prevent a legitimate user from signing in.
+    }
+
+    // --- END: USER SESSION LOGGING INTEGRATION ---
 
     //4. Handle Login Admin Users
     if (user.role === 1) {
@@ -287,11 +355,11 @@ const login = async (req, res) => {
       );
 
       // Safely access included phleb object
-      const phlebotomistData = user.phlebotomist
-        ? {
-            name: user.phlebotomist.phleboname,
-          }
-        : {};
+      // const phlebotomistData = user.phlebotomist
+      //   ? {
+      //       name: user.phlebotomist.phleboname,
+      //     }
+      //   : {};
 
       return res.status(200).json({
         success: true,
@@ -307,8 +375,8 @@ const login = async (req, res) => {
           : "Unknown Hospital",
         // Nodal Data
         nodalname: user.nodal ? user.nodal.nodalname : "Unknown Nodal",
-        username: phlebotomistData.name,
-        first_name: user.first_name,
+        // username: phlebotomistData.name,
+        // first_name: user.first_name,
       });
     }
 
@@ -354,15 +422,15 @@ const login = async (req, res) => {
         // { expiresIn: '1h' }
       );
 
-      // Safely access included doctor object
-      const doctorData = user.doctor
-        ? {
-            name: user.doctor.dname,
-            signature: user.doctor.dditsig,
-            profileImage: user.doctor.dphoto,
-            email: user.doctor.demail,
-          }
-        : {};
+      // // Safely access included doctor object
+      // const doctorData = user.doctor
+      //   ? {
+      //       name: user.doctor.dname,
+      //       signature: user.doctor.dditsig,
+      //       profileImage: user.doctor.dphoto,
+      //       email: user.doctor.demail,
+      //     }
+      //   : {};
 
       return res.status(200).json({
         success: true,
@@ -396,12 +464,12 @@ const login = async (req, res) => {
         // { expiresIn: '1h' }
       );
 
-      // Safely access included phleb object
-      const technicianData = user.technician
-        ? {
-            name: user.technician.technicianname,
-          }
-        : {};
+      // // Safely access included phleb object
+      // const technicianData = user.technician
+      //   ? {
+      //       name: user.technician.technicianname,
+      //     }
+      //   : {};
 
       // Send response with token and user details
       return res.status(200).json({
@@ -415,18 +483,16 @@ const login = async (req, res) => {
         // Nodal Data
         nodalname: user.nodal ? user.nodal.nodalname : "Unknown Nodal",
         //Need to Get User Name as per User ID
-        username: technicianData.name,
-        first_name: user.first_name,
       });
     }
   } catch (e) {
     return res.status(403).json({
-     success: false,
-  message: "Access denied or unexpected error occurred.",
-  errorType: e.name || "UnknownError",
-  errorMessage: e.message,
-  stack: e.stack,
-  details: e.errors || null,
+      success: false,
+      message: "Access denied or unexpected error occurred.",
+      errorType: e.name || "UnknownError",
+      errorMessage: e.message,
+      stack: e.stack,
+      details: e.errors || null,
     });
   }
 };
@@ -494,6 +560,15 @@ const resendOtp = async (req, res) => {
   } catch (e) {
     console.error(e);
     res.status(500).json({ message: "Failed to resend OTP" });
+  }
+};
+
+const getUserSession = async (req, res) => {
+  try {
+    const getUserData = await UserSession.findAll();
+    return res.status(200).json({ message: "Data Fetched", data: getUserData });
+  } catch (error) {
+    res.status(400).json({ message: "something went wrong", error });
   }
 };
 
@@ -677,5 +752,6 @@ module.exports = {
   searchUsers,
   getUserById,
   updateUsers,
-  updateRole
+  updateRole,
+  getUserSession,
 };
