@@ -4,7 +4,6 @@ const app = express();
 const cors = require("cors");
 const PORT = 3001;
 const MasterRoutes = require("./routes/adminRoutes/masterRoute");
-const AuthRoutes = require("./routes/authRoutes/authenticationRoute");
 const SignatureImageUploader = require("./controller/commonImageUploader/signatureImage");
 const CertificateUploader = require("./controller/commonImageUploader/certificateImage");
 const ProfilePicture = require("./controller/commonImageUploader/profileImage");
@@ -12,20 +11,14 @@ const sequelize = require("./db/connectDB");
 const verifyToken = require("./middlewares/authMiddileware");
 const role = require("./middlewares/roleMiddleware");
 const {checkAdmin} = require("./controller/authenticationController/authenticationController");
-const useragent = require('express-useragent');
 
 app.use(cors());
-// anand 123
 app.use(express.json());
 
-app.set('trust proxy', true);
-app.use(useragent.express());
 
-/// User Authentication Routes
-app.use("/lims/authentication", AuthRoutes);
+
 
 /// All routes
-// app.use("/lims/master", verifyToken, role("admin"), MasterRoutes);
 app.use("/lims/master", verifyToken, role("admin"), MasterRoutes);
 
 // Routes to upload image
