@@ -1,30 +1,45 @@
 const jwt=require("jsonwebtoken");
 
-const verifyToken=(req,res,next)=>{
 
-    let token;
-    let authHeader=req.headers.Authorization || req.headers.authorization;
+// The name of the environment variable holding your JWT secret key
+const JWT_SECRET = process.env.JWT_SECRET; 
 
-    if(authHeader && authHeader.startsWith("Bearer")){
-        token=authHeader.split(" ")[1];
-        
+/**
+ * Middleware to verify the JWT token and attach user data to the request.
+ * The decoded token payload (e.g., { userid, role, roleType, ... }) is stored in req.user.
+ * * @param {object} req - Express request object
+ * @param {object} res - Express response object
+ * @param {function} next - Next middleware function
+ */
+const verifyToken = (req, res, next) => {
+    // 1. Check for token in the Authorization header
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1]; // Extract token from "Bearer TOKEN"
 
-        if(!token){
-            return res.status(401).json({message:"No Token, authoraization denide"})
-        }
-
-        try{
-            const decode=jwt.verify(token,process.env.JWT_SECRET);
-            req.user=decode;
-            console.log("The decoded user is :",req.user);
-            next();
-
-        }catch(err){
-            res.status(400).json({message:"Token is not valid"})
-        }
-    }else{
-        return res.status(401).json({message:"No Token, authoraization denide"})
+    if (!token) {
+        console.warn('Authentication attempt failed: No token provided.');
+        return res.status(401).json({ 
+            message: "Access Denied. Token is required.",
+            error: "UNAUTHORIZED_NO_TOKEN" 
+        });
     }
-}
+
+    // 2. Verify the token
+    jwt.verify(token, JWT_SECRET, (err, user) => {
+        if (err) {
+            console.error('Token verification failed:', err.message);
+            return res.status(403).json({ 
+                message: "Invalid Token. Access Forbidden.",
+                error: "FORBIDDEN_INVALID_TOKEN" 
+            });
+        }
+        
+        // 3. Token is valid. Attach decoded user payload to request.
+        // The payload usually contains { userid, role, roleType, ... }
+        req.user = user; 
+        
+        next();
+    });
+};
 
 module.exports=verifyToken;
