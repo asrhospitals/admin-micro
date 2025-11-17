@@ -13,37 +13,32 @@ const JWT_SECRET = process.env.JWT_SECRET;
  */
 
 
-const verifyToken = (req, res, next) => {
-    // 1. Check for token in the Authorization header
-    const authHeader = req.headers['authorization'];
+const verifyToken=(req,res,next)=>{
 
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-        console.warn('Authentication attempt failed: Invalid or missing Authorization header.');
-        return res.status(401).json({
-            message: "Access Denied. Bearer token is required.",
-            error: "UNAUTHORIZED_NO_TOKEN"
-        });
-    }
+    let token;
+    let authHeader=req.headers.Authorization || req.headers.authorization;
 
-    const token = authHeader.split(' ')[1]; // Extract token after "Bearer"
+    if(authHeader && authHeader.startsWith("Bearer")){
+        token=authHeader.split(" ")[1];
+        
 
-    // 2. Verify the token
-    jwt.verify(token, JWT_SECRET, (err, decoded) => {
-        if (err) {
-            console.error('Token verification failed:', err.message);
-            return res.status(403).json({
-                message: "Invalid or expired token. Access Forbidden.",
-                error: "FORBIDDEN_INVALID_TOKEN"
-            });
+        if(!token){
+            return res.status(401).json({message:"No Token, authoraization denide"})
         }
 
-        // 3. Token is valid. Attach decoded payload to request.
-        // Example payload: { userid, role, roleType, iat, exp }
-        req.user = decoded;
+        try{
+            const decode=jwt.verify(token,process.env.JWT_SECRET);
+            req.user=decode;
+            console.log("The decoded user is :",req.user);
+            next();
 
-        next();
-    });
-};
+        }catch(err){
+            res.status(400).json({message:"Token is not valid"})
+        }
+    }else{
+        return res.status(401).json({message:"No Token, authoraization denide"})
+    }
+}
 
 module.exports = verifyToken;
 
