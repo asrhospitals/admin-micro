@@ -8,8 +8,8 @@ const SignatureImageUploader = require("./controller/commonImageUploader/signatu
 const CertificateUploader = require("./controller/commonImageUploader/certificateImage");
 const ProfilePicture = require("./controller/commonImageUploader/profileImage");
 const sequelize = require("./db/connectDB");
-const verifyToken = require("./middlewares/authMiddileware");
-const role = require("./middlewares/roleMiddleware");
+const { authenticateToken, checkAdminRole } = require("./middlewares/authMiddileware");
+
 const {checkAdmin} = require("./controller/authenticationController/authenticationController");
 
 app.use(cors());
@@ -19,7 +19,7 @@ app.use(express.json());
 
 
 /// All routes
-app.use("/lims/master", verifyToken, role("admin"), MasterRoutes);
+app.use("/lims/master", authenticateToken, checkAdminRole, MasterRoutes);
 
 // Routes to upload image
 app.use("/lims/signature", SignatureImageUploader);
