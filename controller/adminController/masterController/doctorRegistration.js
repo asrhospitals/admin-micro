@@ -45,7 +45,7 @@ const getDoctor = async (req, res) => {
     const { count, rows } = await Doctor.findAndCountAll({
       limit: limit,
       offset: offset,
-      order: [["id", "DESC"]],
+      order: [["id", "ASC"]],
     });
 
     const totalpages = Math.ceil(count / limit);
@@ -87,14 +87,39 @@ const updateDoctor = async (req, res) => {
     if (!doctor) {
       return res
         .status(200)
-        .json({ message: `Department not found for this id ${req.params.id}`});
+        .json({ message: `Department not found for this id ${req.params.id}` });
     }
     if (Object.keys(req.body).length === 0) {
       return res.status(400).json({ message: "Update data not provide" });
     }
-    await doctor.update(req.body,{transaction});
+    await doctor.update(req.body, { transaction });
     await transaction.commit();
-    res.status(200).json({message:'Doctor updated successfully'});
+    res.status(200).json({ message: "Doctor updated successfully" });
+  } catch (e) {
+    await transaction.rollback();
+    res.status(400).json({ message: `Something went wrong ${e}` });
+  }
+};
+
+// 5. Update Doctor Status (active/pending)
+const updateDoctorStatus = async (req, res) => {
+  const transaction = await sequelize.transaction();
+  try {
+    const doctor = await Doctor.findByPk(req.params.id);
+    if (!doctor) {
+      return res
+        .status(200)
+        .json({ message: `Doctor not found for this id ${req.params.id}` });
+    }
+    const { dstatus } = req.body;
+    if (!dstatus || (dstatus !== "active" && dstatus !== "pending")) {
+      return res.status(400).json({
+        message: "Invalid status value. Allowed values are 'active' or 'pending'",
+      });
+    }
+    await doctor.update({ dstatus }, { transaction });
+    await transaction.commit();
+    res.status(200).json({ message: "Doctor status updated successfully" });
   } catch (e) {
     await transaction.rollback();
     res.status(400).json({ message: `Something went wrong ${e}` });
@@ -106,4 +131,5 @@ module.exports = {
   getDoctor,
   getDoctorById,
   updateDoctor,
+  updateDoctorStatus,
 };

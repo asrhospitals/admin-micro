@@ -1,6 +1,7 @@
 const { DataTypes } = require("sequelize");
 const sequilize = require("../../../db/connectDB");
 
+
 const Doctor = sequilize.define(
   "doctor",
   {
@@ -16,6 +17,9 @@ const Doctor = sequilize.define(
     },
     ddob: {
       type: DataTypes.DATEONLY,
+    },
+    daadhar:{
+      type: DataTypes.STRING,
     },
     dqlf: {
       type: DataTypes.STRING,
@@ -52,7 +56,7 @@ const Doctor = sequilize.define(
     },
     dstatus: {
       type: DataTypes.ENUM,
-      values: ["active", "pending"],
+      values: ["active", "pending","rejected"],
       defaultValue: "pending",
     },
   },

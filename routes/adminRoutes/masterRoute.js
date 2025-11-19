@@ -17,7 +17,7 @@ const { addRefDoctor, getRefDoc, updateRefDoc, getRefDocById } = require('../../
 const { addProfile, getProfile, updateProfile, getProfileEntryById, getAllProfileEntry } = require('../../controller/adminController/masterController/profileentrymaster');
 const { addTest, getTest, updateNormalValues, updateInvestigation, getTestById, updateSingleResult, updateMandatoryFlex, updateReflexTest, updateMandatoryFlexTest } = require('../../controller/adminController/masterController/testMaster');
 const { createProfile, fetchProfile, updateProfiles, fetchProfileById } = require('../../controller/adminController/masterController/profileMaster');
-const { addDoctor, getDoctor, updateDoctor, getDoctorById } = require('../../controller/adminController/masterController/doctorRegistration');
+const { addDoctor, getDoctor, updateDoctor, getDoctorById, updateDoctorStatus } = require('../../controller/adminController/masterController/doctorRegistration');
 const { createSpecimenType, getSpecimenTypeById, getAllSpecimenTypes, updateSpecimenType, getAllSpecimen } = require('../../controller/adminController/masterController/specimenMaster');
 const { createColor, getAllColors, getColorById, updateColor } = require('../../controller/adminController/masterController/colormaster');
 const { createKit, getAllKits, getKitById, updateKit } = require('../../controller/adminController/masterController/kitmaster');
@@ -136,6 +136,8 @@ router.route('/get-doctor').get(getDoctor);
 router.route('/get-doctor/:id').get(getDoctorById);
 // 44. Update Doctor
 router.route('/update-doctor/:id').put(updateDoctor);
+// 45. Update Doctor Status
+router.route('/update-doctor-status/:id').put(updateDoctorStatus);
 
 /// 11. ----------- Investigation Master----------
 // 45. Add Investigation
