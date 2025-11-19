@@ -9,15 +9,19 @@ const addDoctor = async (req, res) => {
     const existingDoctor = await Doctor.findOne({
       where: sequelize.where(
         sequelize.fn("LOWER", sequelize.col("dname")),
-        dname.toLowerCase()
+        sequelize.fn("LOWER", sequelize.col("demail")),
+
+
+        dname.toLowerCase(),
+        demail.toLowerCase(),
       ),
       transaction,
     });
     if (existingDoctor) {
       await transaction.rollback();
       return res.status(409).json({
-        message: "Doctor with this name already exists",
-        error: "DUPLICATE_DOCTOR_NAME",
+        message: "Doctor name or email already exists",
+        error: "DUPLICATE_DOCTOR_NAME OR EMAIL",
       });
     }
 
