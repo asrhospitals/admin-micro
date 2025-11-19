@@ -9,11 +9,9 @@ const addDoctor = async (req, res) => {
     const existingDoctor = await Doctor.findOne({
       where: sequelize.where(
         sequelize.fn("LOWER", sequelize.col("dname")),
-        sequelize.fn("LOWER", sequelize.col("demail")),
 
 
         dname.toLowerCase(),
-        demail.toLowerCase(),
       ),
       transaction,
     });
