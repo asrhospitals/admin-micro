@@ -130,14 +130,14 @@ const updateDoctorStatus = async (req, res) => {
         .status(200)
         .json({ message: `Doctor not found for this id ${req.params.id}` });
     }
-    const { dstatus,ddpt } = req.body;
+    const { dstatus,assign_ddpt } = req.body;
     if (!dstatus || (dstatus !== "active" && dstatus !== "pending")) {
       return res.status(400).json({
         message:
           "Invalid status value. Allowed values are 'active' or 'pending'",
       });
     }
-    await doctor.update({ dstatus, ddpt }, { transaction });
+    await doctor.update({ dstatus, assign_ddpt }, { transaction });
     await transaction.commit();
     res.status(200).json({ message: "Doctor status updated successfully" });
   } catch (e) {

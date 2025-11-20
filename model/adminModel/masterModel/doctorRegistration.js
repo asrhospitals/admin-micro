@@ -28,7 +28,10 @@ const Doctor = sequilize.define(
       type: DataTypes.STRING,
     },
     ddpt: {
-      type: DataTypes.ARRAY(DataTypes.STRING),  
+      type: DataTypes.STRING,  
+    },
+    assign_ddpt:{
+       type: DataTypes.ARRAY(DataTypes.STRING),
     },
     dregno: {
       type: DataTypes.STRING,
