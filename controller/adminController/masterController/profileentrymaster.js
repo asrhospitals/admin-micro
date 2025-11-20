@@ -8,30 +8,25 @@ const addProfile = async (req, res) => {
     const { profilename, profilecode } = req.body;
     // Check the Profile Name already exist or not
     const check = await ProfileEntryMaster.findOne({
-      where: sequelize.where(
-        sequelize.fn("LOWER", sequelize.col("profilename")),
-        profilename.toLowerCase()
-      ),
+      where: {
+        [Op.and]: [
+          sequelize.where(
+            sequelize.fn("LOWER", sequelize.col("profilename")),
+            profilename.toLowerCase()
+          ),
+          sequelize.where(
+            sequelize.fn("LOWER", sequelize.col("profilecode")),
+            profilecode.toLowerCase()
+          ),
+        ],
+      },
       transaction,
     });
     if (check) {
       await transaction.rollback();
       return res.status(409).json({
-        message: "Profile with this name already exists",
-        error: "DUPLICATE_PROFILE_ENTRY",
-      });
-    }
-
-    // Check Profile Code
-    const checkCode = await ProfileEntryMaster.findOne({
-      where: { profilecode },
-      transaction,
-    });
-    if (checkCode) {
-      await transaction.rollback();
-      return res.status(409).json({
-        message: "Profile code  already exists",
-        error: "DUPLICATE_PROFILE_CODE",
+        message: "Profile with this name or code already exists",
+        error: "DUPLICATE_PROFILE_ENTRY_OR_CODE",
       });
     }
     await ProfileEntryMaster.create(req.body, { transaction });
@@ -121,14 +116,19 @@ const updateProfile = async (req, res) => {
 };
 
 // 5. Profile Entry
-const getAllProfileEntry=async (req,res) => {
+const getAllProfileEntry = async (req, res) => {
   try {
-    const getAll=await ProfileEntryMaster.findAll({order:[['id','ASC']]});
+    const getAll = await ProfileEntryMaster.findAll({ order: [["id", "ASC"]] });
     res.status(200).json(getAll);
   } catch (error) {
-     res.status(400).json({ message: `Something went wrong ${error}` });
+    res.status(400).json({ message: `Something went wrong ${error}` });
   }
-  
-}
+};
 
-module.exports = { addProfile, getProfile, getProfileEntryById, updateProfile,getAllProfileEntry };
+module.exports = {
+  addProfile,
+  getProfile,
+  getProfileEntryById,
+  updateProfile,
+  getAllProfileEntry,
+};

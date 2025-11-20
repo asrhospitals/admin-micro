@@ -2,25 +2,30 @@ const ColorMaster = require("../../../model/adminModel/masterModel/colormaster")
 
 // ✅ Create
 const createColor = async (req, res) => {
+  const transaction = await sequelize.transaction();
   try {
     const { status_of_color } = req.body;
     const existingColor = await ColorMaster.findOne({
-      where: { status_of_color },
+      where: sequelize.where(
+        sequelize.fn("LOWER", sequelize.col("status_of_color")),
+        status_of_color.toLowerCase()
+      ),
+      transaction,
     });
-
     if (existingColor) {
-      return res
-        .status(409)
-        .json({
-          success: false,
-          message: "Color for this status already exists",
-        });
+      await transaction.rollback();
+      return res.status(409).json({
+        message: "Color with this status already exists",
+        error: "DUPLICATE_COLOR_STATUS",
+      });
     }
 
-    await ColorMaster.create(req.body);
+    await ColorMaster.create(req.body, { transaction });
 
+    await transaction.commit();
     return res.status(201).json({ message: "Color created successfully" });
   } catch (error) {
+    await transaction.rollback();
     return res.status(500).json({ success: false, message: error.message });
   }
 };

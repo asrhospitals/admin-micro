@@ -1,25 +1,34 @@
 const sequelize = require("../../../db/connectDB");
 const Doctor = require("../../../model/adminModel/masterModel/doctorRegistration");
+const { Op } = require("sequelize");
 
 // 1. Add Doctor
 const addDoctor = async (req, res) => {
   const transaction = await sequelize.transaction();
   try {
-    const { dname } = req.body;
+    const { dname, demail } = req.body;
+
     const existingDoctor = await Doctor.findOne({
-      where: sequelize.where(
-        sequelize.fn("LOWER", sequelize.col("dname")),
-
-
-        dname.toLowerCase(),
-      ),
+      where: {
+        [Op.and]: [
+          sequelize.where(
+            sequelize.fn("LOWER", sequelize.col("dname")),
+            dname.toLowerCase()
+          ),
+          sequelize.where(
+            sequelize.fn("LOWER", sequelize.col("demail")),
+            demail.toLowerCase()
+          ),
+        ],
+      },
       transaction,
     });
+
     if (existingDoctor) {
       await transaction.rollback();
       return res.status(409).json({
         message: "Doctor name or email already exists",
-        error: "DUPLICATE_DOCTOR_NAME OR EMAIL",
+        error: "DUPLICATE_DOCTOR_NAME_OR_EMAIL",
       });
     }
 
@@ -32,16 +41,20 @@ const addDoctor = async (req, res) => {
     });
   } catch (e) {
     await transaction.rollback();
-    res.status(400).send({ message: `Something went wrong ${e}` });
+    // res.status(400).send({ message: `Something went wrong ${e}` });
+    res.status(400).send({
+      message: "Something went wrong",
+      error: e.message,
+      stack: e.stack,
+    });
   }
 };
 
 // 2. Get doctor
-
 const getDoctor = async (req, res) => {
   try {
-    let page = Number(req.params.page) || 1;
-    let limit = Number(req.params.limit) || 10;
+    let page = Number(req.query.page) || 1;
+    let limit = Number(req.query.limit) || 10;
     let offset = (page - 1) * limit;
 
     const { count, rows } = await Doctor.findAndCountAll({
@@ -51,6 +64,10 @@ const getDoctor = async (req, res) => {
     });
 
     const totalpages = Math.ceil(count / limit);
+
+    if (!rows) {
+      return res.status(404).json({ message: "No doctors found" });
+    }
 
     res.status(200).json({
       data: rows,
@@ -116,7 +133,8 @@ const updateDoctorStatus = async (req, res) => {
     const { dstatus } = req.body;
     if (!dstatus || (dstatus !== "active" && dstatus !== "pending")) {
       return res.status(400).json({
-        message: "Invalid status value. Allowed values are 'active' or 'pending'",
+        message:
+          "Invalid status value. Allowed values are 'active' or 'pending'",
       });
     }
     await doctor.update({ dstatus }, { transaction });

@@ -14,7 +14,7 @@ const addhospital = async (req, res) => {
     });
     if (!checkHospitalType) {
       await transaction.rollback();
-      return res.status(404).json({ message: "Parent department not found." });
+      return res.status(404).json({ message: "Parent hospital type not found." });
     }
 
     const existingHospital = await Hospital.findOne({

@@ -1,6 +1,5 @@
 const Department = require("../../../model/adminModel/masterModel/departmentMaster");
 const sequelize = require("../../../db/connectDB");
-const { Op } = require("sequelize");
 
 // 1. Create Department
 const addDepartment = async (req, res) => {
