@@ -20,7 +20,7 @@ const addSubDepartment = async (req, res) => {
     }
 
     const existingSubDpt = await Subdepartment.findOne({
-       where: sequelize.where(
+      where: sequelize.where(
         sequelize.fn("LOWER", sequelize.col("subdptname")),
         subdptname.toLowerCase()
       ),
@@ -130,21 +130,28 @@ const updateSubDepartment = async (req, res) => {
 };
 
 // 5. Get All Subdepartments
-const getAllSubdepartments=async (req,res) => {
+const getAllSubdepartments = async (req, res) => {
   try {
-    const getSub=await Subdepartment.findAll({order:[['id','ASC']]});
+    const { id } = req.params;
+    const departmentExists = await Department.findByPk(id);
+    if (!departmentExists) {
+      return res.status(404).json({ message: "Department not found" });
+    }
+    const getSub = await Subdepartment.findAll({
+      where: { department_id: id },
+      attributes:["subdptname"],
+      order: [["id", "ASC"]],
+    });
     res.status(200).json(getSub);
   } catch (error) {
-     res.status(400).json({ message: `Something went wrong ${error}` });
+    res.status(400).json({ message: `Something went wrong ${error}` });
   }
-  
-}
-
+};
 
 module.exports = {
   addSubDepartment,
   getSubDepartment,
   getById,
   updateSubDepartment,
-  getAllSubdepartments
+  getAllSubdepartments,
 };

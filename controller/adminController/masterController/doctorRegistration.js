@@ -124,19 +124,22 @@ const updateDoctor = async (req, res) => {
 const updateDoctorStatus = async (req, res) => {
   const transaction = await sequelize.transaction();
   try {
+
+    // Find the doctor by ID
     const doctor = await Doctor.findByPk(req.params.id);
     if (!doctor) {
       return res
-        .status(200)
+        .status(404)
         .json({ message: `Doctor not found for this id ${req.params.id}` });
     }
+    // Validate and update status
     const { dstatus,assign_ddpt } = req.body;
-    if (!dstatus || (dstatus !== "active" && dstatus !== "pending")) {
-      return res.status(400).json({
-        message:
-          "Invalid status value. Allowed values are 'active' or 'pending'",
-      });
+    if(req.body.dstatus){
+      if (!["active", "pending", "rejected"].includes(dstatus)) {
+        return res.status(400).json({ message: "Invalid status value" });
+      }
     }
+  
     await doctor.update({ dstatus, assign_ddpt }, { transaction });
     await transaction.commit();
     res.status(200).json({ message: "Doctor status updated successfully" });

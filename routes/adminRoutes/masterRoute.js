@@ -48,7 +48,7 @@ router.route('/get-subdepartment/:id').get(getById);
 // 9. Update Sub Department
 router.route('/update-subdepartment/:id').put(updateSubDepartment);
 // 10. Get All Sub Departments
-router.route('/get-all-subdpt').get(getAllSubdepartments);
+router.route('/get-all-subdpt/:id').get(getAllSubdepartments);
  
 /// 3. ------------ Hospital Type Master----------------
 // 11. Add Hospital Type
