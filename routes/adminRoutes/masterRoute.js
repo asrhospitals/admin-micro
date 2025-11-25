@@ -8,7 +8,7 @@ const { addNodal, getNodal, updateNodal, getNodalById, getAllNodals } = require(
 const { addRole, getRole, updateRole, getRoleById, getAllRoles } = require('../../controller/adminController/masterController/roletypeMaster');
 const { addPhlebo, getPhlebo, updatePhlebo, getPhleboById } = require('../../controller/adminController/masterController/phlebotomistMaster');
 const { addReception, getReception, updateReception, getReceptionById } = require('../../controller/adminController/masterController/receptionMaster');
-const { addNodalHospital, getNodalHospital, updateNodalHospital, getNodalHospitalById } = require('../../controller/adminController/masterController/attachNodalHospital');
+const { addNodalHospital, getNodalHospital, updateNodalHospital, getNodalHospitalById, getAllNodalHospitals, getHospitalByNodal } = require('../../controller/adminController/masterController/attachNodalHospital');
 const { addlabtolab, getlabtolab, updatelabtolab, getLabById } = require('../../controller/adminController/masterController/labtolabMaster');
 const { addInstrument, getInstrument, updateInstrument, getInstrumentById, getAllInstrument } = require('../../controller/adminController/masterController/instrumentMaster');
 const { addNodalInstrument, getNodalInstrument, updateNodalInstrument, getNodalInstrumentById } = require('../../controller/adminController/masterController/attachedNodalInstrumentMaster');
@@ -17,7 +17,7 @@ const { addRefDoctor, getRefDoc, updateRefDoc, getRefDocById } = require('../../
 const { addProfile, getProfile, updateProfile, getProfileEntryById, getAllProfileEntry } = require('../../controller/adminController/masterController/profileentrymaster');
 const { addTest, getTest, updateNormalValues, updateInvestigation, getTestById, updateSingleResult, updateMandatoryFlex, updateReflexTest, updateMandatoryFlexTest } = require('../../controller/adminController/masterController/testMaster');
 const { createProfile, fetchProfile, updateProfiles, fetchProfileById } = require('../../controller/adminController/masterController/profileMaster');
-const { addDoctor, getDoctor, updateDoctor, getDoctorById, updateDoctorStatus } = require('../../controller/adminController/masterController/doctorRegistration');
+const { addDoctor, getDoctor, updateDoctor, getDoctorById, updateDoctorStatus, searchDoctor } = require('../../controller/adminController/masterController/doctorRegistration');
 const { createSpecimenType, getSpecimenTypeById, getAllSpecimenTypes, updateSpecimenType, getAllSpecimen } = require('../../controller/adminController/masterController/specimenMaster');
 const { createColor, getAllColors, getColorById, updateColor } = require('../../controller/adminController/masterController/colormaster');
 const { createKit, getAllKits, getKitById, updateKit } = require('../../controller/adminController/masterController/kitmaster');
@@ -96,6 +96,10 @@ router.route('/get-nodalhospital').get(getNodalHospital);
 router.route('/get-nodalhospital/:id').get(getNodalHospitalById);
 // 29. Update Nodal Hospitals
 router.route('/update-nodalhospital/:id').put(updateNodalHospital);
+// 30. Get Hospital by Nodal Id
+
+router.route('/get-hospital-by-nodal/:id').get(getHospitalByNodal);
+
 
 /// 7. --------------Technician Master--------
 // 30. Add Technician
@@ -138,6 +142,8 @@ router.route('/get-doctor/:id').get(getDoctorById);
 router.route('/update-doctor/:id').put(updateDoctor);
 // 45. Update Doctor Status
 router.route('/update-doctor-status/:id').put(updateDoctorStatus);
+// 46. Search Doctor By Name or Qualification
+router.route('/search-doctor').get(searchDoctor);
 
 /// 11. ----------- Investigation Master----------
 // 45. Add Investigation

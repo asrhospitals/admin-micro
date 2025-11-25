@@ -1,4 +1,5 @@
 const User = require("../../model/authModel/authenticationModel/userModel");
+const RoleType = require("../../model/adminModel/masterModel/roletypeMaster");
 const bcrypt = require("bcryptjs");
 
 const checkAdmin = async () => {

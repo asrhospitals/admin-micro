@@ -1,6 +1,16 @@
 const sequelize = require("../../../db/connectDB");
 const Doctor = require("../../../model/adminModel/masterModel/doctorRegistration");
+const User = require("../../../model/authModel/authenticationModel/userModel");
+const Hospital = require("../../../model/adminModel/masterModel/hospitalMaster");
+const Nodal = require("../../../model/adminModel/masterModel/nodalMaster");
 const { Op } = require("sequelize");
+
+// 0. Utility function to clean array
+function cleanArray(values) {
+  return values
+    .flat() // flatten nested arrays
+    .filter((v) => typeof v === "string" && v.trim() !== "");
+}
 
 // 1. Add Doctor
 const addDoctor = async (req, res) => {
@@ -61,6 +71,16 @@ const getDoctor = async (req, res) => {
       limit: limit,
       offset: offset,
       order: [["id", "ASC"]],
+      include: [
+        {
+          model: User,
+          attributes: ["user_id"],
+          include: [
+            { model: Hospital, as: "hospital", attributes: ["hospitalname"] },
+            { model: Nodal, as: "nodal", attributes: ["nodalname"] },
+          ],
+        },
+      ],
     });
 
     const totalpages = Math.ceil(count / limit);
@@ -86,7 +106,18 @@ const getDoctor = async (req, res) => {
 // 3. Get Doctor By Id
 const getDoctorById = async (req, res) => {
   try {
-    const get_by_id = await Doctor.findByPk(req.params.id);
+    const get_by_id = await Doctor.findByPk(req.params.id, {
+      include: [
+        {
+          model: User,
+          attributes: ["user_id"],
+          include: [
+            { model: Hospital, as: "hospital", attributes: ["hospitalname"] },
+            { model: Nodal, as: "nodal", attributes: ["nodalname"] },
+          ],
+        },
+      ],
+    });
     if (!get_by_id) {
       return res
         .status(404)
@@ -105,13 +136,34 @@ const updateDoctor = async (req, res) => {
     const doctor = await Doctor.findByPk(req.params.id);
     if (!doctor) {
       return res
-        .status(200)
-        .json({ message: `Department not found for this id ${req.params.id}` });
+        .status(404)
+        .json({ message: `Doctor not found for this id ${req.params.id}` });
     }
     if (Object.keys(req.body).length === 0) {
       return res.status(400).json({ message: "Update data not provide" });
     }
     await doctor.update(req.body, { transaction });
+    const user = await User.findOne({
+      where: { doctor_id: doctor.id },
+      transaction,
+    });
+    if (user) {
+      const moduleValues = cleanArray([req.body.assign_ddpt, req.body.ddpt]);
+
+      const userUpdates = {
+        first_name: req.body.dname,
+        email: req.body.demail,
+        dob: req.body.ddob,
+        username: req.body.demail,
+        password: req.body.ddob,
+        module: [doctor.assign_ddpt, doctor.ddpt].filter(Boolean),
+        hospitalid: req.body.hospitalid,
+        nodalid: req.body.nodalid,
+        module: moduleValues.length > 0 ? moduleValues : null,
+      };
+      await user.update(userUpdates, { transaction });
+    }
+
     await transaction.commit();
     res.status(200).json({ message: "Doctor updated successfully" });
   } catch (e) {
@@ -124,7 +176,6 @@ const updateDoctor = async (req, res) => {
 const updateDoctorStatus = async (req, res) => {
   const transaction = await sequelize.transaction();
   try {
-
     // Find the doctor by ID
     const doctor = await Doctor.findByPk(req.params.id);
     if (!doctor) {
@@ -133,13 +184,13 @@ const updateDoctorStatus = async (req, res) => {
         .json({ message: `Doctor not found for this id ${req.params.id}` });
     }
     // Validate and update status
-    const { dstatus,assign_ddpt } = req.body;
-    if(req.body.dstatus){
+    const { dstatus, assign_ddpt } = req.body;
+    if (req.body.dstatus) {
       if (!["active", "pending", "rejected"].includes(dstatus)) {
         return res.status(400).json({ message: "Invalid status value" });
       }
     }
-  
+
     await doctor.update({ dstatus, assign_ddpt }, { transaction });
     await transaction.commit();
     res.status(200).json({ message: "Doctor status updated successfully" });
@@ -149,10 +200,38 @@ const updateDoctorStatus = async (req, res) => {
   }
 };
 
+// 6. Search Doctor By Name or Qualification
+const searchDoctor = async (req, res) => {
+  try {
+    const { query } = req.query;
+    if (!query || query.trim() === "") {
+      return res.status(400).json({ message: "Search query cannot be empty" });
+    }
+
+    const doctors = await Doctor.findAll({
+      where: {
+        [Op.or]: [
+          { dname: { [Op.iLike]: `%${query}%` } },
+          { dqlf: { [Op.iLike]: `%${query}%` } },
+        ],
+      },
+      order: [["dname", "ASC"]],
+      limit: 10,
+    });
+    if (doctors.length === 0) {
+      return res.status(404).json({ message: "No doctors found" });
+    }
+    res.status(200).json(doctors);
+  } catch (error) {
+    res.status(400).json({ message: `Something went wrong ${error}` });
+  }
+};
+
 module.exports = {
   addDoctor,
   getDoctor,
   getDoctorById,
   updateDoctor,
   updateDoctorStatus,
+  searchDoctor,
 };

@@ -230,10 +230,39 @@ const getAllNodalHospitals = async (req, res) => {
   }
 };
 
+// 6. Get Hospital By Nodal
+
+const getHospitalByNodal = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const nodalExists = await Nodal.findByPk(id);
+    if (!nodalExists) {
+      return res.status(404).json({ message: "Nodal not found" });
+    }
+    const getHospital = await NodalHospital.findAll({
+      where: {
+        nodalid: id,
+      },
+      attributes:[],
+      include:[
+      {  model:Hospital,
+        as:"hospital",
+        attributes:["hospitalname","id"], 
+      }
+      ],
+      order: [["id", "ASC"]],
+    });
+    res.status(200).json(getHospital);
+  } catch (error) {
+    res.status(400).json({ message: `Something went wrong ${error}` });
+  }
+};
+
 module.exports = {
   addNodalHospital,
   getNodalHospital,
   getNodalHospitalById,
   updateNodalHospital,
   getAllNodalHospitals,
+  getHospitalByNodal,
 };

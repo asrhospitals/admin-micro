@@ -95,14 +95,6 @@ NodalHospital.belongsTo(Hospital, {
 Doctor.hasOne(User, { foreignKey: "doctor_id" });
 User.belongsTo(Doctor, { foreignKey: "doctor_id" });
 
-Technician.hasOne(User, { foreignKey: "technician_id" });
-User.belongsTo(Technician, { foreignKey: "technician_id" });
-
-Reception.hasOne(User, { foreignKey: "reception_id" });
-User.belongsTo(Reception, { foreignKey: "reception_id" });
-
-Phlebotomist.hasOne(User, { foreignKey: "phlebotomist_id" });
-User.belongsTo(Phlebotomist, { foreignKey: "phlebotomist_id" });
 
 // Department has many sub departments
 Department.hasMany(Subdepartment, {foreignKey: "department_id",as: "department",});

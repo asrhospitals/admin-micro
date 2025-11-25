@@ -1,6 +1,7 @@
 const Hospital = require("../../../model/adminModel/masterModel/hospitalMaster");
 const sequelize = require("../../../db/connectDB");
 const HospipatlType = require("../../../model/adminModel/masterModel/hospitalTypeMaster");
+const Nodal = require("../../../model/adminModel/masterModel/nodalMaster");
 
 // 1. Add Hospital
 const addhospital = async (req, res) => {
@@ -134,4 +135,8 @@ const getAllHospitals = async (req, res) => {
   }
 };
 
-module.exports = { addhospital, gethospital, getHospitalById, updatehospital,getAllHospitals };
+
+
+
+
+module.exports = { addhospital, gethospital, getHospitalById, updatehospital,getAllHospitals }; 

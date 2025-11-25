@@ -89,25 +89,18 @@ const User = sequelize.define(
       defaultValue: true,
     },
     created_by: {
-      type: DataTypes.STRING, 
+      type: DataTypes.STRING, // or FK to admin user
       allowNull: true,
     },
-    created_date: {
-      type: DataTypes.STRING,
-    },
+
     image: {
-      type: DataTypes.STRING, 
+      type: DataTypes.STRING, // store file path / URL
       allowNull: true,
     },
-    certificate:{
-      type:DataTypes.STRING
-    },
-    update_by:{
+    update_by: {
       type: DataTypes.STRING,
     },
-    update_date:{
-      type: DataTypes.DATEONLY,
-    },
+
     hospitalid: {
       type: DataTypes.INTEGER,
       allowNull: true,
@@ -135,16 +128,25 @@ const User = sequelize.define(
       },
       onDelete: "SET NULL",
     },
-    nominee_name:{
-      type:DataTypes.STRING
+    nominee_name: {
+      type: DataTypes.STRING,
     },
-    nominee_contact:{
-      type:DataTypes.STRING
-    }
+    nominee_contact: {
+      type: DataTypes.STRING,
+    },
+    doc_sig: {
+      type: DataTypes.STRING,
+    },
+    certificate: {
+      type: DataTypes.STRING,
+    },
   },
   {
     timestamps: true,
+    createdAt: "created_date",
+    updatedAt: "update_date",
     tableName: "users",
+    underscored: true,
   }
 );
 

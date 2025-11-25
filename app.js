@@ -8,15 +8,17 @@ const SignatureImageUploader = require("./controller/commonImageUploader/signatu
 const CertificateUploader = require("./controller/commonImageUploader/certificateImage");
 const ProfilePicture = require("./controller/commonImageUploader/profileImage");
 const sequelize = require("./db/connectDB");
-const { authenticateToken, checkAdminRole } = require("./middlewares/authMiddileware");
+const {
+  authenticateToken,
+  checkAdminRole,
+} = require("./middlewares/authMiddileware");
 
-const {checkAdmin} = require("./controller/authenticationController/authenticationController");
+const {
+  checkAdmin,
+} = require("./controller/authenticationController/authenticationController");
 
 app.use(cors());
 app.use(express.json());
-
-
-
 
 /// All routes
 app.use("/lims/master", authenticateToken, checkAdminRole, MasterRoutes);
@@ -37,7 +39,7 @@ app.get("/", async (req, res) => {
 const server = async () => {
   try {
     await sequelize.authenticate();
-      // await sequelize.sync();
+    // await sequelize.sync({alter:true});
     console.log("Database connection has been established successfully");
 
     // check admin is exist or not
