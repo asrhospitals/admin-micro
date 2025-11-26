@@ -92,8 +92,19 @@ NodalHospital.belongsTo(Hospital, {
   as: "hospital",
 });
 
+// Doctor - User one-to-one
 Doctor.hasOne(User, { foreignKey: "doctor_id" });
 User.belongsTo(Doctor, { foreignKey: "doctor_id" });
+
+// Doctor Belongs to Nodal
+Doctor.belongsTo(Nodal, { foreignKey: "nodalid", as: "nodal" });
+// Nodal has many Doctors
+Nodal.hasMany(Doctor, { foreignKey: "nodalid", as: "doctors" });
+
+// Doctor Belongs to Hospital
+Doctor.belongsTo(Hospital, { foreignKey: "hospitalid", as: "hospital" });
+// Hospital has many Doctors
+Hospital.hasMany(Doctor, { foreignKey: "hospitalid", as: "doctors" });
 
 
 // Department has many sub departments

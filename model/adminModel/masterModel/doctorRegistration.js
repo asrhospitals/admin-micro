@@ -57,6 +57,12 @@ const Doctor = sequilize.define(
     dditsig: {
       type: DataTypes.STRING,
     },
+    hospitalid:{
+      type: DataTypes.INTEGER,
+    },
+    nodalid:{
+      type: DataTypes.INTEGER,
+    },
     dstatus: {
       type: DataTypes.ENUM,
       values: ["active", "pending","rejected"],

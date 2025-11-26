@@ -73,12 +73,14 @@ const getDoctor = async (req, res) => {
       order: [["id", "ASC"]],
       include: [
         {
-          model: User,
-          attributes: ["user_id"],
-          include: [
-            { model: Hospital, as: "hospital", attributes: ["hospitalname"] },
-            { model: Nodal, as: "nodal", attributes: ["nodalname"] },
-          ],
+          model: Hospital,
+          as: "hospital",
+          attributes: ["hospitalname"],
+        },
+        {
+          model: Nodal,
+          as: "nodal",
+          attributes: ["nodalname"],
         },
       ],
     });
@@ -109,12 +111,14 @@ const getDoctorById = async (req, res) => {
     const get_by_id = await Doctor.findByPk(req.params.id, {
       include: [
         {
-          model: User,
-          attributes: ["user_id"],
-          include: [
-            { model: Hospital, as: "hospital", attributes: ["hospitalname"] },
-            { model: Nodal, as: "nodal", attributes: ["nodalname"] },
-          ],
+          model: Hospital,
+          as: "hospital",
+          attributes: ["hospitalname"],
+        },
+        {
+          model: Nodal,
+          as: "nodal",
+          attributes: ["nodalname"],
         },
       ],
     });
@@ -184,14 +188,14 @@ const updateDoctorStatus = async (req, res) => {
         .json({ message: `Doctor not found for this id ${req.params.id}` });
     }
     // Validate and update status
-    const { dstatus, assign_ddpt } = req.body;
+    const {hospitalid,nodalid, dstatus, assign_ddpt } = req.body;
     if (req.body.dstatus) {
       if (!["active", "pending", "rejected"].includes(dstatus)) {
         return res.status(400).json({ message: "Invalid status value" });
       }
     }
 
-    await doctor.update({ dstatus, assign_ddpt }, { transaction });
+    await doctor.update({hospitalid,nodalid, dstatus, assign_ddpt }, { transaction });
     await transaction.commit();
     res.status(200).json({ message: "Doctor status updated successfully" });
   } catch (e) {
@@ -212,7 +216,7 @@ const searchDoctor = async (req, res) => {
       where: {
         [Op.or]: [
           { dname: { [Op.iLike]: `%${query}%` } },
-          { dqlf: { [Op.iLike]: `%${query}%` } },
+          { dspclty: { [Op.iLike]: `%${query}%` } },
         ],
       },
       order: [["dname", "ASC"]],
