@@ -7,6 +7,7 @@ const MasterRoutes = require("./routes/adminRoutes/masterRoute");
 const SignatureImageUploader = require("./controller/commonImageUploader/signatureImage");
 const CertificateUploader = require("./controller/commonImageUploader/certificateImage");
 const ProfilePicture = require("./controller/commonImageUploader/profileImage");
+const InternshipCertificate = require("./controller/commonImageUploader/intershipCertificate");
 const sequelize = require("./db/connectDB");
 const {
   authenticateToken,
@@ -27,6 +28,7 @@ app.use("/lims/master", authenticateToken, checkAdminRole, MasterRoutes);
 app.use("/lims/signature", SignatureImageUploader);
 app.use("/lims/certificate", CertificateUploader);
 app.use("/lims/profile", ProfilePicture);
+app.use("/lims/internship-certificate",InternshipCertificate);
 
 // Test Route
 app.get("/", async (req, res) => {

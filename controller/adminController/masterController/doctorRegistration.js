@@ -51,12 +51,7 @@ const addDoctor = async (req, res) => {
     });
   } catch (e) {
     await transaction.rollback();
-    // res.status(400).send({ message: `Something went wrong ${e}` });
-    res.status(400).send({
-      message: "Something went wrong",
-      error: e.message,
-      stack: e.stack,
-    });
+    res.status(400).send({ message: `Something went wrong ${e}` });
   }
 };
 
@@ -188,14 +183,17 @@ const updateDoctorStatus = async (req, res) => {
         .json({ message: `Doctor not found for this id ${req.params.id}` });
     }
     // Validate and update status
-    const {hospitalid,nodalid, dstatus, assign_ddpt } = req.body;
+    const { hospitalid, nodalid, dstatus, assign_ddpt } = req.body;
     if (req.body.dstatus) {
       if (!["active", "pending", "rejected"].includes(dstatus)) {
         return res.status(400).json({ message: "Invalid status value" });
       }
     }
 
-    await doctor.update({hospitalid,nodalid, dstatus, assign_ddpt }, { transaction });
+    await doctor.update(
+      { hospitalid, nodalid, dstatus, assign_ddpt },
+      { transaction }
+    );
     await transaction.commit();
     res.status(200).json({ message: "Doctor status updated successfully" });
   } catch (e) {
@@ -214,13 +212,14 @@ const searchDoctor = async (req, res) => {
 
     const doctors = await Doctor.findAll({
       where: {
-        [Op.or]: [
-          { dname: { [Op.iLike]: `%${query}%` } },
-          { dspclty: { [Op.iLike]: `%${query}%` } },
+        [Op.any]: [
+          { dname: { [Op.iLike]: `${query}%` } },
+          { dspclty: { [Op.iLike]: `${query}%` } },
+          { ddpt: { [Op.iLike]: `${query}%` } },
         ],
       },
       order: [["dname", "ASC"]],
-      limit: 10,
+       limit: 50,
     });
     if (doctors.length === 0) {
       return res.status(404).json({ message: "No doctors found" });

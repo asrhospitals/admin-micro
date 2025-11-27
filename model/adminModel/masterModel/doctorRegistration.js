@@ -57,6 +57,12 @@ const Doctor = sequilize.define(
     dditsig: {
       type: DataTypes.STRING,
     },
+    dcertificate:{
+      type: DataTypes.STRING,
+    },
+    dindemnity:{
+      type: DataTypes.BOOLEAN,
+    },
     hospitalid:{
       type: DataTypes.INTEGER,
     },
