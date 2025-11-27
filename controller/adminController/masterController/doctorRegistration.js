@@ -212,12 +212,24 @@ const searchDoctor = async (req, res) => {
 
     const doctors = await Doctor.findAll({
       where: {
-        [Op.any]: [
+        [Op.or]: [
           { dname: { [Op.iLike]: `${query}%` } },
           { dspclty: { [Op.iLike]: `${query}%` } },
           { ddpt: { [Op.iLike]: `${query}%` } },
         ],
       },
+      include:[
+         {
+          model: Hospital,
+          as: "hospital",
+          attributes: ["hospitalname"],
+        },
+        {
+          model: Nodal,
+          as: "nodal",
+          attributes: ["nodalname"],
+        },
+      ],
       order: [["dname", "ASC"]],
        limit: 50,
     });
