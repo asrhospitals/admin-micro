@@ -25,7 +25,10 @@ const Doctor = sequilize.define(
       type: DataTypes.STRING,
     },
     dspclty: {
-      type: DataTypes.STRING,
+      type: DataTypes.ARRAY(DataTypes.STRING), 
+    },
+    dnb:{
+      type: DataTypes.BOOLEAN,
     },
     ddpt: {
       type: DataTypes.STRING,  
