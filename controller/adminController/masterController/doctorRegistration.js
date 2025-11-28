@@ -133,6 +133,7 @@ const updateDoctor = async (req, res) => {
   const transaction = await sequelize.transaction();
   try {
     const doctor = await Doctor.findByPk(req.params.id);
+    //
     if (!doctor) {
       return res
         .status(404)
@@ -140,6 +141,24 @@ const updateDoctor = async (req, res) => {
     }
     if (Object.keys(req.body).length === 0) {
       return res.status(400).json({ message: "Update data not provide" });
+    }
+
+    // check duplicate doctor email before update
+    if (req.body.demail && req.body.demail !== doctor.demail) {
+      const existingDoctor = await Doctor.findOne({ 
+        where: {
+          demail: req.body.demail,
+          id: { [Op.ne]: req.params.id },
+        },
+        transaction,
+      });
+      if (existingDoctor) {
+        await transaction.rollback();
+        return res.status(409).json({
+          message: "Doctor email already exists",
+          error: "DUPLICATE_DOCTOR_EMAIL",
+        });
+      }
     }
     await doctor.update(req.body, { transaction });
     const user = await User.findOne({
