@@ -29,6 +29,7 @@ const Doctor = sequilize.define(
     },
     dnb:{
       type: DataTypes.BOOLEAN,
+      allowNull:true
     },
     ddpt: {
       type: DataTypes.STRING,  
@@ -65,6 +66,7 @@ const Doctor = sequilize.define(
     },
     dindemnity:{
       type: DataTypes.BOOLEAN,
+      allowNull:true
     },
     hospitalid:{
       type: DataTypes.INTEGER,
