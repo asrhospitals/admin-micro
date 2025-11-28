@@ -145,7 +145,7 @@ const updateDoctor = async (req, res) => {
 
     // check duplicate doctor email before update
     if (req.body.demail && req.body.demail !== doctor.demail) {
-      const existingDoctor = await Doctor.findOne({ 
+      const existingDoctor = await Doctor.findOne({
         where: {
           demail: req.body.demail,
           id: { [Op.ne]: req.params.id },
@@ -233,12 +233,12 @@ const searchDoctor = async (req, res) => {
       where: {
         [Op.or]: [
           { dname: { [Op.iLike]: `${query}%` } },
-          { dspclty: { [Op.contains]: [query] } },
+          { dspclty: { [Op.any]: [sequelize.literal(`ARRAY['${query}%']`)] } },
           { ddpt: { [Op.iLike]: `${query}%` } },
         ],
       },
-      include:[
-         {
+      include: [
+        {
           model: Hospital,
           as: "hospital",
           attributes: ["hospitalname"],
@@ -250,7 +250,7 @@ const searchDoctor = async (req, res) => {
         },
       ],
       order: [["dname", "ASC"]],
-       limit: 50,
+      limit: 50,
     });
     if (doctors.length === 0) {
       return res.status(404).json({ message: "No doctors found" });
@@ -260,7 +260,6 @@ const searchDoctor = async (req, res) => {
     res.status(400).json({ message: `Something went wrong ${error}` });
   }
 };
-
 
 module.exports = {
   addDoctor,
