@@ -233,7 +233,7 @@ const searchDoctor = async (req, res) => {
       where: {
         [Op.or]: [
           { dname: { [Op.iLike]: `${query}%` } },
-          { dspclty: { [Op.iLike]: `${query}%` } },
+          { dspclty: { [Op.contains]: [query] } },
           { ddpt: { [Op.iLike]: `${query}%` } },
         ],
       },
@@ -260,6 +260,7 @@ const searchDoctor = async (req, res) => {
     res.status(400).json({ message: `Something went wrong ${error}` });
   }
 };
+
 
 module.exports = {
   addDoctor,
