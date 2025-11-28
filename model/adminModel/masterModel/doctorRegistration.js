@@ -22,7 +22,7 @@ const Doctor = sequilize.define(
       type: DataTypes.STRING,
     },
     dqlf: {
-      type: DataTypes.STRING,
+      type: DataTypes.ARRAY(DataTypes.STRING),
     },
     dspclty: {
       type: DataTypes.ARRAY(DataTypes.STRING), 
