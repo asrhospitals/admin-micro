@@ -233,7 +233,17 @@ const searchDoctor = async (req, res) => {
       where: {
         [Op.or]: [
           { dname: { [Op.iLike]: `${query}%` } },
-          { dspclty: { [Op.any]: [sequelize.literal(`ARRAY['${query}%']`)] } },
+          // { dspclty: { [Op.any]: [sequelize.literal(`ARRAY['${query}%']`)] } },
+
+          // array column: dspclty
+          sequelize.literal(`
+            EXISTS (
+              SELECT 1
+              FROM unnest("dspclty") AS s
+              WHERE LOWER(s) LIKE '${query.toLowerCase()}%'
+            )
+          `),
+
           { ddpt: { [Op.iLike]: `${query}%` } },
         ],
       },
