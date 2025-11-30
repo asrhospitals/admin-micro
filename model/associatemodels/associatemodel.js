@@ -1,15 +1,15 @@
 const Investigation = require("../adminModel/masterModel/investigation");
 const Hospital = require("../adminModel/masterModel/hospitalMaster");
-const ProfileEntry = require("../adminModel/masterModel/profileentrymaster");
-const Profile = require("../adminModel/masterModel/profileMaster");
+const ProfileEntry = require("../adminModel/masterModel/profileMaster");
+const Profile = require("../adminModel/masterModel/profileInvMaster");
 const Nodal = require("../adminModel/masterModel/nodalMaster");
 const NodalHospital = require("../adminModel/masterModel/attachNodalHospitalMaster");
 const InvestigationResult = require("../adminModel/masterModel/investigationResult");
 const NormalValue = require("../adminModel/masterModel/normalValue");
 const Doctor = require("../adminModel/masterModel/doctorRegistration");
-const Technician = require("../adminModel/masterModel/technicianMaster");
-const Reception = require("../adminModel/masterModel/receptionMaster");
-const Phlebotomist = require("../adminModel/masterModel/phlebotomistMaster");
+// const Technician = require("../adminModel/masterModel/technicianMaster");
+// const Reception = require("../adminModel/masterModel/receptionMaster");
+// const Phlebotomist = require("../adminModel/masterModel/phlebotomistMaster");
 const User = require("../authModel/authenticationModel/userModel");
 const Department = require("../adminModel/masterModel/departmentMaster");
 const Subdepartment = require("../adminModel/masterModel/subdptMaster");
@@ -92,9 +92,7 @@ NodalHospital.belongsTo(Hospital, {
   as: "hospital",
 });
 
-// Doctor - User one-to-one
-Doctor.hasOne(User, { foreignKey: "doctor_id" });
-User.belongsTo(Doctor, { foreignKey: "doctor_id" });
+
 
 // Doctor Belongs to Nodal
 Doctor.belongsTo(Nodal, { foreignKey: "nodalid", as: "nodal" });
@@ -118,29 +116,9 @@ HospitalType.hasMany(Hospital, {foreignKey: "hospital_type_id",as: "hospitals",}
 // A Hospital belongs to a HospitalType
 Hospital.belongsTo(HospitalType, {foreignKey: "hospital_type_id",as: "hospitalType",});
 
-// Hospital has many Users. Use a plural alias.
-Hospital.hasMany(User, {
-  foreignKey: "hospitalid",
-  as: "users", // Correct: use 'users'
-});
 
-// A User belongs to a Hospital. Use a singular alias.
-User.belongsTo(Hospital, {
-  foreignKey: "hospitalid",
-  as: "hospital", // Correct: use 'hospital'
-});
 
-// Nodal has many Users. Use a plural alias.
-Nodal.hasMany(User, {
-  foreignKey: "nodalid",
-  as: "users", // Correct: use 'users'
-});
 
-// A User belongs to a Nodal. Use a singular alias.
-User.belongsTo(Nodal, {
-  foreignKey: "nodalid",
-  as: "nodal", // Correct: use 'nodal'
-});
 
 // A Nodal has many Hospitals. Use a plural alias.
 Nodal.hasMany(Hospital, {
@@ -167,8 +145,7 @@ NodalInstrument.belongsTo(Instrument, {
   as: "instrument",
 });
 
-User.belongsTo(RoleType, { foreignKey: "role", as: "roleType" });
-RoleType.hasMany(User, { foreignKey: "role", as: "users" });
+
 
 // Referral Doctor & Hospital
 ReferralDoctor.belongsTo(Hospital, { foreignKey: "hospitalid", as: "hospital" });
@@ -184,9 +161,6 @@ module.exports = {
   NodalHospital,
   Profile,
   Doctor,
-  Technician,
-  Reception,
-  Phlebotomist,
   User,
   Department,
   Subdepartment,

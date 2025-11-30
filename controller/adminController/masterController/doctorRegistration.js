@@ -16,7 +16,7 @@ function cleanArray(values) {
 const addDoctor = async (req, res) => {
   const transaction = await sequelize.transaction();
   try {
-    const { dname, demail } = req.body;
+    const { dname, demail,dcnt } = req.body;
 
     const existingDoctor = await Doctor.findOne({
       where: {
@@ -29,6 +29,10 @@ const addDoctor = async (req, res) => {
             sequelize.fn("LOWER", sequelize.col("demail")),
             demail.toLowerCase()
           ),
+            sequelize.where(
+            sequelize.fn("LOWER", sequelize.col("dcnt")),
+            dcnt.toLowerCase()
+          ),
         ],
       },
       transaction,
@@ -37,8 +41,8 @@ const addDoctor = async (req, res) => {
     if (existingDoctor) {
       await transaction.rollback();
       return res.status(409).json({
-        message: "Doctor name or email already exists",
-        error: "DUPLICATE_DOCTOR_NAME_OR_EMAIL",
+        message: "Doctor name or email or contact already exists",
+        error: "DUPLICATE_DOCTOR_NAME_OR_EMAIL_OR_CONTACT",
       });
     }
 
@@ -233,8 +237,6 @@ const searchDoctor = async (req, res) => {
       where: {
         [Op.or]: [
           { dname: { [Op.iLike]: `${query}%` } },
-          // { dspclty: { [Op.any]: [sequelize.literal(`ARRAY['${query}%']`)] } },
-
           // array column: dspclty
           sequelize.literal(`
             EXISTS (

@@ -3,7 +3,6 @@ const sequelize = require("../../../db/connectDB");
 const Hospital = require("../../adminModel/masterModel/hospitalMaster");
 const Nodal = require("../../adminModel/masterModel/nodalMaster");
 const Doctor = require("../../adminModel/masterModel/doctorRegistration");
-const RoleType = require("../../adminModel/masterModel/roletypeMaster");
 
 const User = sequelize.define(
   "user",
@@ -70,18 +69,21 @@ const User = sequelize.define(
       type: DataTypes.STRING,
       allowNull: false,
     },
-    module: {
+    department: {
       type: DataTypes.ARRAY(DataTypes.STRING),
       allowNull: false,
     },
-    role: {
+    authdiscper:{
       type: DataTypes.INTEGER,
+      defaultValue:0,
+    },
+    discountauthorization:{
+      type: DataTypes.BOOLEAN,
+      defaultValue:false,
+    },
+    role: {
+      type: DataTypes.ARRAY(DataTypes.STRING),
       allowNull: true,
-      references: {
-        model: RoleType,
-        key: "id",
-      },
-      onDelete: "CASCADE",
     },
     isactive: {
       type: DataTypes.BOOLEAN,
@@ -161,5 +163,17 @@ const User = sequelize.define(
     underscored: true,
   }
 );
+
+// Associations
+// Hospital and User
+User.belongsTo(Hospital, { foreignKey: "hospitalid" });
+Hospital.hasMany(User, { foreignKey: "hospitalid" });
+// User and Nodal
+User.belongsTo(Nodal, { foreignKey: "nodalid" });
+Nodal.hasMany(User, { foreignKey: "nodalid" });
+// User and Doctor
+Doctor.hasOne(User, { foreignKey: "doctor_id" });
+User.belongsTo(Doctor, { foreignKey: "doctor_id" });
+
 
 module.exports = User;

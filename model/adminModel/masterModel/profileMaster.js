@@ -1,8 +1,8 @@
 const { DataTypes } = require("sequelize");
-const sequelize = require("../../../db/connectDB");
-const ProfileEntry = require("../../adminModel/masterModel/profileentrymaster");
+const sequalize = require("../../../db/connectDB");
 
-const Profile = sequelize.define(
+
+const ProfileMaster = sequalize.define(
   "profile_master",
   {
     id: {
@@ -10,27 +10,27 @@ const Profile = sequelize.define(
       autoIncrement: true,
       primaryKey: true,
     },
-    profileid: {
-      type: DataTypes.INTEGER,
+    profilename: {
+      type: DataTypes.STRING,
       allowNull: false,
-      references: {
-        model: ProfileEntry,
-        key: "id",
-      },
+      unique:true
     },
-    investigationids: {
-      type: DataTypes.ARRAY(DataTypes.INTEGER),
+    profilecode: {
+      type: DataTypes.STRING,
       allowNull: false,
-      
+      unique:true
+    },
+    alternativebarcode: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
     },
     isactive: {
       type: DataTypes.BOOLEAN,
-      defaultValue: true,
+      allowNull: false,
     },
   },
   {
     timestamps: false,
   }
 );
-
-module.exports = Profile;
+module.exports = ProfileMaster;

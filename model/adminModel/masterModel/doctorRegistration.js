@@ -69,10 +69,10 @@ const Doctor = sequilize.define(
       allowNull:true
     },
     hospitalid:{
-      type: DataTypes.INTEGER,
+      type: DataTypes.ARRAY(DataTypes.INTEGER),
     },
     nodalid:{
-      type: DataTypes.INTEGER,
+     type: DataTypes.ARRAY(DataTypes.INTEGER),
     },
     dstatus: {
       type: DataTypes.ENUM,
