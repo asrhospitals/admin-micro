@@ -125,17 +125,17 @@ Hospital.belongsTo(HospitalType, {
   as: "hospitalType",
 });
 
-// A Nodal has many Hospitals. Use a plural alias.
-Nodal.hasMany(Hospital, {
-  foreignKey: "nodalid",
-  as: "hospitals", // Correct: use 'hospitals'
-});
+// // A Nodal has many Hospitals. Use a plural alias.
+// Nodal.hasMany(Hospital, {
+//   foreignKey: "nodalid",
+//   as: "hospitals", // Correct: use 'hospitals'
+// });
 
-// // A Hospital belongs to a Nodal. Use a singular alias.
-Hospital.belongsTo(Nodal, {
-  foreignKey: "nodalid",
-  as: "nodal", // Correct: use 'nodal'
-});
+// // // A Hospital belongs to a Nodal. Use a singular alias.
+// Hospital.belongsTo(Nodal, {
+//   foreignKey: "nodalid",
+//   as: "nodal", // Correct: use 'nodal'
+// });
 
 NodalInstrument.belongsTo(Nodal, {
   foreignKey: "nodalid", // This should match the column name in NodalInstrument

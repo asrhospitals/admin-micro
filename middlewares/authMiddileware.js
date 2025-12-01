@@ -56,7 +56,7 @@ const checkAdminRole = async (req, res, next) => {
   // Safely retrieve and normalize the roleType from the token payload (req.user)
   // Using optional chaining (?. ) prevents crashing if req.user or req.user.roleType is undefined.
   // This is the core fix for the "Cannot read properties of undefined (reading 'roleType')" error.
-  const roleType = req.user?.role || Array.isArray(req.user?.role)
+  const roleType = req.user?.roleType || Array.isArray(req.user?.roleType)
 
   if (!roleType) {
     // If req.user is missing OR req.user.roleType is missing

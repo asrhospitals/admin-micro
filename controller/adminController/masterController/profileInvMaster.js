@@ -152,11 +152,11 @@ const fetchProfile = async (req, res) => {
 // 3. Get Profile by ID
 const fetchProfileById = async (req, res) => {
   try {
-    const profile = await Profile.findByPk(req.params.id, {
+    const profile = await ProfileInvMaster.findByPk(req.params.id, {
       include: [
         {
-          model: ProfileEntry,
-          as: "profileentry",
+          model: ProfileMaster,
+          as: "profile",
           attributes: ["profilename"],
         },
       ],
@@ -181,7 +181,7 @@ const fetchProfileById = async (req, res) => {
 
     const data = {
       id: profile.id,
-      profilename: profile.profileentry?.profilename || null,
+      profilename: profile.profile?.profilename || null,
       investigations: investigations,
       isactive: profile.isactive,
     };
