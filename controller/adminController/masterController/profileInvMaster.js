@@ -7,7 +7,6 @@ const { Op } = require("sequelize");
 
 // 1. Add Profile
 const createProfile = async (req, res) => {
-
   const transaction = await sequelize.transaction();
 
   try {
@@ -52,7 +51,7 @@ const createProfile = async (req, res) => {
     }
 
     // D. Avoid duplicate
-    const existingMappings = await Profile.findAll({
+    const existingMappings = await ProfileInvMaster.findAll({
       where: {
         profileid: profileid,
       },
@@ -91,33 +90,31 @@ const fetchProfile = async (req, res) => {
     let limit = Number(req.query.limit) || 10;
     let offset = (page - 1) * limit;
 
-    const { count, rows } = await Profile.findAndCountAll({
-  
+    const { count, rows } = await ProfileInvMaster.findAndCountAll({
       include: [
         {
-          model: ProfileEntry,
-          as: "profileentry",
-          attributes: ["profilename","profilecode"],
+          model: ProfileMaster,
+          as: "profile",
+          attributes: ["profilename", "profilecode"],
         },
       ],
-      limit,
-      offset,
+      limit: limit,
+      offset: offset,
       order: [["id", "ASC"]],
-      
     });
 
     const data = await Promise.all(
       rows.map(async (profile) => {
         let investigations = [];
-        
+
         if (profile.investigationids && profile.investigationids.length > 0) {
           investigations = await Investigation.findAll({
             where: {
               id: {
-                [Op.in]: profile.investigationids
-              }
+                [Op.in]: profile.investigationids,
+              },
             },
-            attributes: ["id", "testname","normalprice",],
+            attributes: ["id", "testname", "normalprice"],
             include: [
               {
                 model: Department,
@@ -130,8 +127,8 @@ const fetchProfile = async (req, res) => {
 
         return {
           id: profile.id,
-          profilename: profile.profileentry?.profilename || null,
-          profilecode: profile.profileentry?.profilecode || null,
+          profilename: profile.profile?.profilename || null,
+          profilecode: profile.profile?.profilecode || null,
           investigations: investigations,
           isactive: profile.isactive,
         };
@@ -152,11 +149,10 @@ const fetchProfile = async (req, res) => {
   }
 };
 
-
 // 3. Get Profile by ID
 const fetchProfileById = async (req, res) => {
   try {
-    const profile = await Profile.findByPk(req.params.id, { 
+    const profile = await Profile.findByPk(req.params.id, {
       include: [
         {
           model: ProfileEntry,
@@ -171,13 +167,13 @@ const fetchProfileById = async (req, res) => {
     }
 
     let investigations = [];
-    
+
     if (profile.investigationids && profile.investigationids.length > 0) {
       investigations = await Investigation.findAll({
         where: {
           id: {
-            [Op.in]: profile.investigationids
-          }
+            [Op.in]: profile.investigationids,
+          },
         },
         attributes: ["id", "testname"],
       });
@@ -223,4 +219,9 @@ const updateProfiles = async (req, res) => {
   }
 };
 
-module.exports = { createProfile, fetchProfile, fetchProfileById, updateProfiles };
+module.exports = {
+  createProfile,
+  fetchProfile,
+  fetchProfileById,
+  updateProfiles,
+};
