@@ -196,10 +196,10 @@ const fetchProfileById = async (req, res) => {
 const updateProfiles = async (req, res) => {
   const transaction = await sequelize.transaction();
   try {
-    const updateBody = await Profile.findByPk(req.params.id);
+    const updateBody = await ProfileInvMaster.findByPk(req.params.id);
     if (!updateBody) {
       await t.rollback();
-      return res.status(404).json({ message: "Profile not found." });
+      return res.status(404).json({ message: "Profile Entry Id not found." });
     }
 
     if (Object.keys(req.body).length === 0) {
