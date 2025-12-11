@@ -390,14 +390,39 @@ const searchInvestigations = async (req, res) => {
     const filters = {};
 
     if (q) {
+      const num = parseInt(q, 10);
+
+      // short inputs (1–2 chars) → starts-with, longer → contains
+      const short = q.length <= 2;
+      const pattern = short ? `${q}%` : `%${q}%`;
+
       filters[Op.or] = [
-        { testname: q }, // exact string match
-        { shortcode: parseInt(q, 10) }, // exact integer match
+        // case-insensitive match for text fields
+        { testname: { [Op.iLike]: pattern } },
+        // numeric matches
+        ...(isNaN(num)
+          ? []
+          : [
+              { shortcode: num },
+              { departmentId: num }, // allow searching by ID directly
+            ]),
       ];
     }
 
     const inv = await Investigation.findAll({
       where: filters,
+      include: [
+        {
+          model: Department,
+          as: "department", // alias must match your association
+          where: {
+            dptname: { [Op.iLike]: q.length <= 2 ? `${q}%` : `%${q}%` },
+          },
+          required: false, // don’t exclude rows if no department match
+        },
+      ],
+     
+      order: [["testname", "ASC"]],
     });
 
     if (inv.length === 0) {
@@ -409,6 +434,8 @@ const searchInvestigations = async (req, res) => {
     res.status(500).json({ message: `Something went wrong ${err}` });
   }
 };
+
+
 
 module.exports = {
   addTest,
