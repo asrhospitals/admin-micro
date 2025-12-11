@@ -30,6 +30,20 @@ const addTest = async (req, res) => {
       });
     }
 
+    // Check if shortcode already exists
+    const existingShortCode = await Investigation.findOne({
+      where: { shortcode: investigationData.shortcode },
+      transaction,
+    });
+
+    if (existingShortCode) {
+      await transaction.rollback();
+      return res.status(409).json({
+        message: "Test with this shortcode already exists",
+        error: "DUPLICATE_SHORT_CODE",
+      });
+    }
+
     // 1. Create The Investigation
     const investigation = await Investigation.create(investigationData, {
       transaction,
@@ -139,8 +153,8 @@ const getTest = async (req, res) => {
       limit: limit,
       offset: offset,
       distinct: true,
-      col: "id",
-      order: [["id", "ASC"]],
+      // col: "id",
+      order: [["testname"]],
     });
 
     const totalPages = Math.ceil(count / limit);
@@ -399,13 +413,8 @@ const searchInvestigations = async (req, res) => {
       filters[Op.or] = [
         // case-insensitive match for text fields
         { testname: { [Op.iLike]: pattern } },
-        // numeric matches
-        ...(isNaN(num)
-          ? []
-          : [
-              { shortcode: num },
-              { departmentId: num }, // allow searching by ID directly
-            ]),
+        // exact numeric matches only (no LIKE)
+        ...(isNaN(num) ? [] : [{ shortcode: num }]),
       ];
     }
 
@@ -414,14 +423,11 @@ const searchInvestigations = async (req, res) => {
       include: [
         {
           model: Department,
-          as: "department", // alias must match your association
-          where: {
-            dptname: { [Op.iLike]: q.length <= 2 ? `${q}%` : `%${q}%` },
-          },
-          required: false, // don’t exclude rows if no department match
+          as: "department",
+          attributes: ["dptname"],
         },
       ],
-     
+
       order: [["testname", "ASC"]],
     });
 
@@ -434,8 +440,6 @@ const searchInvestigations = async (req, res) => {
     res.status(500).json({ message: `Something went wrong ${err}` });
   }
 };
-
-
 
 module.exports = {
   addTest,

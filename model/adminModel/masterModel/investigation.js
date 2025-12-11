@@ -158,18 +158,18 @@ const Investigation = sequelize.define("investigation", {
     type: DataTypes.STRING,
   },
   status: {
-    type: DataTypes.STRING,
+    type: DataTypes.STRING(),
   },
 
   // Instructions
   instruction: {
-    type: DataTypes.STRING,
+    type: DataTypes.TEXT,
   },
   interpretation: {
-    type: DataTypes.STRING,
+    type: DataTypes.TEXT,
   },
   remark: {
-    type: DataTypes.STRING,
+    type: DataTypes.TEXT,
   },
     test_collection:{
     type:DataTypes.ENUM("Yes","No"),

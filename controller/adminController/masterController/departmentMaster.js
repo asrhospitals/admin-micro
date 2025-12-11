@@ -22,6 +22,7 @@ const addDepartment = async (req, res) => {
     }
 
     await Department.create(req.body, {
+      user: req.user.username,
       transaction,
     });
     await transaction.commit();
@@ -93,6 +94,7 @@ const updateDepartment = async (req, res) => {
     }
 
     await updateDepartment.update(req.body, {
+      user: req.user.username,
       transaction,
     });
     await transaction.commit();
@@ -106,7 +108,7 @@ const updateDepartment = async (req, res) => {
 };
 
 // 5. Get All Departments
-const getAllDepartments = async (req,res) => {
+const getAllDepartments = async (req, res) => {
   try {
     const departments = await Department.findAll({
       order: [["id", "ASC"]],
@@ -115,12 +117,12 @@ const getAllDepartments = async (req,res) => {
   } catch (err) {
     res.status(400).send({ message: `Something went wrong ${e}` });
   }
-}
+};
 
 module.exports = {
   addDepartment,
   getDepartment,
   getDepartmentById,
   updateDepartment,
-  getAllDepartments
+  getAllDepartments,
 };
