@@ -5,6 +5,7 @@ const NormalValue = require("../../../model/adminModel/masterModel/normalValue")
 const Mandatory = require("../../../model/adminModel/masterModel/mandatory");
 const ReflexTest = require("../../../model/adminModel/masterModel/reflexTest");
 const Department = require("../../../model/adminModel/masterModel/departmentMaster");
+const { Op, Sequelize } = require("sequelize");
 
 // 1. Add Test
 const addTest = async (req, res) => {
@@ -98,8 +99,6 @@ const addTest = async (req, res) => {
       message: "Internal server error",
       error: "SERVER_ERROR",
     });
-
-
   }
 };
 
@@ -369,17 +368,47 @@ const updateMandatoryFlexTest = async (req, res) => {
 
     if (updatedRowsCount === 0) {
       await transaction.rollback();
-      return res.status(404).json({ message: "Mandatory Flex value not found" });
+      return res
+        .status(404)
+        .json({ message: "Mandatory Flex value not found" });
     }
     await transaction.commit();
-    res.status(200).json({ message: "Mandatory Flex values update successfully" });
+    res
+      .status(200)
+      .json({ message: "Mandatory Flex values update successfully" });
   } catch (err) {
     await transaction.rollback();
     res.status(500).json({ message: `Error saving flex values ${err}` });
   }
 };
 
+// 10. Search Investigations
 
+const searchInvestigations = async (req, res) => {
+  try {
+    const { q } = req.query;
+    const filters = {};
+
+    if (q) {
+      filters[Op.or] = [
+        { testname: q }, // exact string match
+        { shortcode: parseInt(q, 10) }, // exact integer match
+      ];
+    }
+
+    const inv = await Investigation.findAll({
+      where: filters,
+    });
+
+    if (inv.length === 0) {
+      return res.status(404).json({ message: "No matching test found." });
+    }
+
+    res.status(200).json(inv);
+  } catch (err) {
+    res.status(500).json({ message: `Something went wrong ${err}` });
+  }
+};
 
 module.exports = {
   addTest,
@@ -390,4 +419,5 @@ module.exports = {
   updateSingleResult,
   updateReflexTest,
   updateMandatoryFlexTest,
+  searchInvestigations,
 };

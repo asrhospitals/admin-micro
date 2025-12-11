@@ -95,6 +95,7 @@ const {
   updateMandatoryFlex,
   updateReflexTest,
   updateMandatoryFlexTest,
+  searchInvestigations,
 } = require("../../controller/adminController/masterController/testMaster");
 const {
   createProfile,
@@ -284,6 +285,12 @@ router
 router
   .route("/update-mandatoryflex/:resultId/mandatory-flex/:mandatoryFlexId")
   .put(updateMandatoryFlexTest);
+
+  // 53. Search Investigation
+router.route("/search-inv").get(searchInvestigations);
+
+
+
 /// 12. ------------Lab to Lab Master-----------
 // 51. Add Lab to Lab
 router.route("/add-labtolab").post(addlabtolab);
