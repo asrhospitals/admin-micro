@@ -144,6 +144,16 @@ const Investigation = sequelize.define("investigation", {
     type: DataTypes.ARRAY(DataTypes.INTEGER),
   },
 
+  // ---- Out Sourcing 
+
+  labname: {
+    type: DataTypes.ARRAY(DataTypes.STRING),
+  },
+  outsourceprice: {
+    type: DataTypes.ARRAY(DataTypes.INTEGER),
+  },
+
+
   tat: {
     type: DataTypes.STRING,
     allowNull: false,

@@ -1,12 +1,8 @@
 function applyAdminAuditHooks(sequelize) {
   const AuditLog = sequelize.models.AuditLog;
-  if (!AuditLog) {
-    console.error("❌ AuditLog model not found. Audit hooks disabled.");
-    return;
-  }
   const models = sequelize.models;
 
-  const adminModels = ["department"];
+  const adminModels = ["department","subdepartment","hospital","hospitaltype","nodalhospital"];
 
   for (const key in models) {
     const model = models[key];

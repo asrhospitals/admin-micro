@@ -1,7 +1,6 @@
 const Hospital = require("../../../model/adminModel/masterModel/hospitalMaster");
 const sequelize = require("../../../db/connectDB");
 const HospipatlType = require("../../../model/adminModel/masterModel/hospitalTypeMaster");
-const Nodal = require("../../../model/adminModel/masterModel/nodalMaster");
 
 // 1. Add Hospital
 const addhospital = async (req, res) => {
@@ -15,7 +14,9 @@ const addhospital = async (req, res) => {
     });
     if (!checkHospitalType) {
       await transaction.rollback();
-      return res.status(404).json({ message: "Parent hospital type not found." });
+      return res
+        .status(404)
+        .json({ message: "Parent hospital type not found." });
     }
 
     const existingHospital = await Hospital.findOne({
@@ -35,6 +36,7 @@ const addhospital = async (req, res) => {
     }
 
     await Hospital.create(req.body, {
+      user: req.user.username,
       transaction,
     });
     await transaction.commit();
@@ -114,7 +116,10 @@ const updatehospital = async (req, res) => {
     if (Object.keys(req.body).length === 0) {
       return res.status(400).json({ message: "Updated data not provided" });
     }
-    await update_hospital.update(req.body, { transaction });
+    await update_hospital.update(req.body, {
+      user: req.user.username,
+      transaction,
+    });
     await transaction.commit();
     res.status(200).json({ message: "Hospital update successfully" });
   } catch (error) {
@@ -135,8 +140,10 @@ const getAllHospitals = async (req, res) => {
   }
 };
 
-
-
-
-
-module.exports = { addhospital, gethospital, getHospitalById, updatehospital,getAllHospitals }; 
+module.exports = {
+  addhospital,
+  gethospital,
+  getHospitalById,
+  updatehospital,
+  getAllHospitals,
+};

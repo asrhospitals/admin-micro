@@ -47,6 +47,7 @@ const addNodalHospital = async (req, res) => {
     }
 
     await NodalHospital.create(req.body, {
+      user:req.user.username,
       transaction,
     });
     await transaction.commit();

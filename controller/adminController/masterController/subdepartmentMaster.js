@@ -36,6 +36,7 @@ const addSubDepartment = async (req, res) => {
     }
 
     await Subdepartment.create(req.body, {
+      user:req.user.username,
       transaction,
     });
     await transaction.commit();
@@ -118,7 +119,7 @@ const updateSubDepartment = async (req, res) => {
     if (Object.keys(req.body).length === 0) {
       return res.status(400).json({ message: "Updated data not provided" });
     }
-    await updateSub.update(req.body, { transaction });
+    await updateSub.update(req.body, {  user: req.user.username,transaction });
     await transaction.commit();
     res.status(200).json({
       message: "Subdepartment updated successfully",

@@ -25,6 +25,7 @@ const addhsptltype = async (req, res) => {
     }
 
     await HospipatlType.create(req.body, {
+      user:req.user.username,
       transaction,
     });
     await transaction.commit();
@@ -38,7 +39,6 @@ const addhsptltype = async (req, res) => {
 };
 
 // 2. Get Hospital Type
-
 const gethsptltype = async (req, res) => {
   try {
     // Add Pagination
@@ -75,7 +75,6 @@ const gethsptltype = async (req, res) => {
 };
 
 // 3. Get By Id
-
 const getHospitalTypeById = async (req, res) => {
   try {
     const get_by_id = await HospipatlType.findByPk(req.params.id);
