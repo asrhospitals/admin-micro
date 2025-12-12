@@ -44,23 +44,21 @@ NormalValue.belongsTo(InvestigationResult, {
 
 // 3.InvestigationResult → Mandatory
 InvestigationResult.hasMany(Mandatory, {
-  foreignKey: "resultId",
+  foreignKey: "resultid",
   as: "mandatories",
-  onDelete: "CASCADE",
 });
 Mandatory.belongsTo(InvestigationResult, {
-  foreignKey: "resultId",
+  foreignKey: "resultid",
   as: "result",
 });
 
 // 4.InvestigationResult → ReflexTest
 InvestigationResult.hasMany(ReflexTest, {
-  foreignKey: "resultId",
+  foreignKey: "resultid",
   as: "reflexTests",
-  onDelete: "CASCADE",
 });
 ReflexTest.belongsTo(InvestigationResult, {
-  foreignKey: "resultId",
+  foreignKey: "resultid",
   as: "result",
 });
 

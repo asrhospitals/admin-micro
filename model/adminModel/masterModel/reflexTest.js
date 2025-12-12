@@ -15,7 +15,7 @@ const ReflexTest = sequelize.define("inv_reflextest", {
     type: DataTypes.ARRAY(DataTypes.STRING),
     allowNull:false
   },
-  resultId: DataTypes.INTEGER,
-},{timestamps:false});
+  resultid: DataTypes.INTEGER,
+});
 
 module.exports = ReflexTest;

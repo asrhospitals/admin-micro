@@ -14,7 +14,7 @@ const Mandatory = sequelize.define("inv_mandatory", {
   resultvalue: {
     type: DataTypes.STRING,
   },
-  resultId: DataTypes.INTEGER,
-},{timestamps:false});
+  resultid: DataTypes.INTEGER,
+});
 
 module.exports = Mandatory;
