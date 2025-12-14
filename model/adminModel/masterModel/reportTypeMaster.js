@@ -2,6 +2,11 @@ const { DataTypes } = require('sequelize');
 const sequalize=require('../../../db/connectDB');
 
 const ReportType=sequalize.define('reporttype',{
+    id:{
+        type:DataTypes.INTEGER,
+        autoIncrement:true,
+        primaryKey:true
+    },
     reporttype:{
         type:DataTypes.STRING,
         allowNull:false
@@ -22,5 +27,5 @@ const ReportType=sequalize.define('reporttype',{
         type:DataTypes.BOOLEAN,
         allowNull:false
     }
-}, {timestamps:false});
+});
 module.exports=ReportType;

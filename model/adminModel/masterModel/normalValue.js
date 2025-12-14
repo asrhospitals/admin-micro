@@ -19,7 +19,7 @@ const NormalValue = sequilize.define(
     critical_high: DataTypes.FLOAT,
     isrange_abnormal: DataTypes.BOOLEAN,
     avoid_in_report: DataTypes.BOOLEAN,
-    resultId: DataTypes.INTEGER,
+    resultid: DataTypes.INTEGER,
   },
   { timestamps: false }
 );

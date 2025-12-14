@@ -17,28 +17,27 @@ const Instrument = require("../adminModel/masterModel/instrumentMaster");
 const NodalInstrument = require("../adminModel/masterModel/attachNodalInstrumentMaster");
 const RoleType = require("../adminModel/masterModel/roletypeMaster");
 const ReferralDoctor = require("../adminModel/masterModel/referalDoctorMaster");
+const ReportType=require("../adminModel/masterModel/reportTypeMaster");
 
 // Associations
 
 // 1. Investigation → InvestigationResults
 Investigation.hasMany(InvestigationResult, {
-  foreignKey: "investigationId",
+  foreignKey: "investigationid",
   as: "results",
-  onDelete: "CASCADE",
 });
 InvestigationResult.belongsTo(Investigation, {
-  foreignKey: "investigationId",
+  foreignKey: "investigationid",
   as: "investigation",
 });
 
 // 2. InvestigationResult → NormalValues
 InvestigationResult.hasMany(NormalValue, {
-  foreignKey: "resultId",
+  foreignKey: "resultid",
   as: "normalValues",
-  onDelete: "CASCADE",
 });
 NormalValue.belongsTo(InvestigationResult, {
-  foreignKey: "resultId",
+  foreignKey: "resultid",
   as: "result",
 });
 
@@ -61,6 +60,16 @@ ReflexTest.belongsTo(InvestigationResult, {
   foreignKey: "resultid",
   as: "result",
 });
+
+// 5. Investigation → Report Type
+Investigation.belongsTo(ReportType, { foreignKey: "reportid" });
+ReportType.hasMany(Investigation, { foreignKey: "reportid" });
+
+// 6. Investigation → Department
+Investigation.belongsTo(Department, { foreignKey: "departmentId" });
+Department.hasMany(Investigation, { foreignKey: "departmentId" });
+
+
 
 // Profile associations
 ProfileInv.belongsTo(ProfileMaster, {

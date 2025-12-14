@@ -184,7 +184,15 @@ const Investigation = sequelize.define("investigation", {
     test_collection:{
     type:DataTypes.ENUM("Yes","No"),
     allowNull:false
-  }
+  },
+   reportid: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    references: {
+      model: "reporttypes", 
+      key: "id",
+    },
+  },
 },{timestamps:false});
 
 module.exports = Investigation;

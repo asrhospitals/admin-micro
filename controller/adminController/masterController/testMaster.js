@@ -6,6 +6,7 @@ const Mandatory = require("../../../model/adminModel/masterModel/mandatory");
 const ReflexTest = require("../../../model/adminModel/masterModel/reflexTest");
 const Department = require("../../../model/adminModel/masterModel/departmentMaster");
 const { Op, Sequelize } = require("sequelize");
+const ReportType = require("../../../model/adminModel/masterModel/reportTypeMaster");
 
 // 1. Add Test
 const addTest = async (req, res) => {
@@ -55,7 +56,7 @@ const addTest = async (req, res) => {
 
       // Create investigation result
       const resultRecord = await InvestigationResult.create(
-        { ...resultData, investigationId: investigation.id },
+        { ...resultData, investigationid: investigation.id },
         { transaction }
       );
 
@@ -63,7 +64,7 @@ const addTest = async (req, res) => {
       if (normalValues?.length) {
         const enrichedNormalValues = normalValues.map((nv) => ({
           ...nv,
-          resultId: resultRecord.id,
+          resultid: resultRecord.id,
         }));
         await NormalValue.bulkCreate(enrichedNormalValues, { transaction });
       }
@@ -72,7 +73,7 @@ const addTest = async (req, res) => {
       if (mandatories?.length) {
         const enrichedMandatories = mandatories.map((m) => ({
           ...m,
-          resultId: resultRecord.id,
+          resultid: resultRecord.id,
         }));
         await Mandatory.bulkCreate(enrichedMandatories, { transaction });
       }
@@ -81,7 +82,7 @@ const addTest = async (req, res) => {
       if (reflexTests?.length) {
         const enrichedReflexTests = reflexTests.map((r) => ({
           ...r,
-          resultId: resultRecord.id,
+          resultid: resultRecord.id,
         }));
         await ReflexTest.bulkCreate(enrichedReflexTests, { transaction });
       }
@@ -129,7 +130,12 @@ const getTest = async (req, res) => {
         {
           model: Department,
           as: "department",
-          attributes: ["dptname"],
+          attributes: ["dptname", "id"],
+        },
+        {
+          model: ReportType,
+          as: "reporttype",
+          attributes: ["reporttype", "id"],
         },
         {
           model: InvestigationResult,
@@ -154,7 +160,7 @@ const getTest = async (req, res) => {
       offset: offset,
       distinct: true,
       // col: "id",
-      order: [["testname"]],
+      order: [["testname","ASC"]],
     });
 
     const totalPages = Math.ceil(count / limit);
@@ -189,6 +195,17 @@ const getTestById = async (req, res) => {
 
     const test = await Investigation.findByPk(testId, {
       include: [
+        {
+          model: Department,
+          as: "department",
+          attributes: ["dptname", "id"],
+        },
+        {
+          model: ReportType,
+          as: "reporttype",
+          attributes: ["reporttype", "id"],
+        },
+
         {
           model: InvestigationResult,
           as: "results",
@@ -424,7 +441,30 @@ const searchInvestigations = async (req, res) => {
         {
           model: Department,
           as: "department",
-          attributes: ["dptname"],
+          attributes: ["dptname", "id"],
+        },
+        {
+          model: ReportType,
+          as: "reporttype",
+          attributes: ["reporttype", "id"],
+        },
+        {
+          model: InvestigationResult,
+          as: "results",
+          include: [
+            {
+              model: NormalValue,
+              as: "normalValues",
+            },
+            {
+              model: Mandatory,
+              as: "mandatories",
+            },
+            {
+              model: ReflexTest,
+              as: "reflexTests",
+            },
+          ],
         },
       ],
 
