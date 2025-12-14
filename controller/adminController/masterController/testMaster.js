@@ -130,13 +130,14 @@ const getTest = async (req, res) => {
         {
           model: Department,
           as: "department",
-          attributes: ["dptname", "id"],
+          attributes: ["id","dptname"],
         },
         {
           model: ReportType,
           as: "reporttype",
-          attributes: ["reporttype", "id"],
+          attributes: ["id","reporttype","reportdescription","entrytype","entryvalues"],
         },
+
         {
           model: InvestigationResult,
           as: "results",
@@ -198,12 +199,12 @@ const getTestById = async (req, res) => {
         {
           model: Department,
           as: "department",
-          attributes: ["dptname", "id"],
+          attributes: ["id","dptname"],
         },
         {
           model: ReportType,
           as: "reporttype",
-          attributes: ["reporttype", "id"],
+          attributes: ["id","reporttype","reportdescription","entrytype","entryvalues"],
         },
 
         {
@@ -437,17 +438,18 @@ const searchInvestigations = async (req, res) => {
 
     const inv = await Investigation.findAll({
       where: filters,
-      include: [
+       include: [
         {
           model: Department,
           as: "department",
-          attributes: ["dptname", "id"],
+          attributes: ["id","dptname"],
         },
         {
           model: ReportType,
           as: "reporttype",
-          attributes: ["reporttype", "id"],
+          attributes: ["id","reporttype","reportdescription","entrytype","entryvalues"],
         },
+
         {
           model: InvestigationResult,
           as: "results",
