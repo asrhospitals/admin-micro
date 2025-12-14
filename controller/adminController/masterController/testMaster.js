@@ -285,7 +285,7 @@ const updateSingleResult = async (req, res) => {
     const [updatedRowsCount] = await InvestigationResult.update(updateData, {
       where: {
         id: resultId,
-        investigationId: investigationId,
+        investigationid: investigationId,
       },
       transaction,
     });
@@ -322,7 +322,7 @@ const updateNormalValues = async (req, res) => {
     const [updatedRowsCount] = await NormalValue.update(updateData, {
       where: {
         id: normalValueId,
-        resultId: resultId,
+        resultid: resultId,
       },
       transaction,
     });
@@ -357,7 +357,7 @@ const updateReflexTest = async (req, res) => {
     const [updatedRowsCount] = await ReflexTest.update(updateData, {
       where: {
         id: reflexId,
-        resultId: resultId,
+        resultid: resultId,
       },
       transaction,
     });
@@ -393,7 +393,7 @@ const updateMandatoryFlexTest = async (req, res) => {
     const [updatedRowsCount] = await Mandatory.update(updateData, {
       where: {
         id: mandatoryFlexId,
-        resultId: resultId,
+        resultid: resultId,
       },
       transaction,
     });
