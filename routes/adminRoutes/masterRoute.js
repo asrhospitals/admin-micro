@@ -142,6 +142,8 @@ const {
   getBarcode,
   getAccessionDetails,
 } = require("../../controller/adminController/masterController/accession");
+const { addOutLab, getOutLab, getOutLabById, updateOutLab } = require("../../controller/adminController/masterController/outSourceLab");
+const { createFormula } = require("../../controller/formulaController/formulaController");
 
 /// 1. ---------Department Master--------------
 // 1. Add Department
@@ -419,5 +421,19 @@ router.route("/add-accession").post(addAcesstion);
 router.route("/get-barcode/:id").get(getBarcode);
 // 107. Get Assesions
 router.route("/get-accession").get(getAccessionDetails);
+
+// 24.----------------Out Source Lab Master--------------
+// 51. Add Out Lab
+router.route("/add-out-lab").post(addOutLab);
+// 52. Get Lab to Lab
+router.route("/get-out-lab").get(getOutLab);
+// 53. Get Lab to Lab By Id
+router.route("/get-out-labbyid/:id").get(getOutLabById);
+// 54. Update Lab to Lab
+router.route("/update-out-lab/:id").put(updateOutLab);
+
+
+// 25. -------------------Formula Master------------------
+router.route('/create-formula').post(createFormula);
 
 module.exports = router;

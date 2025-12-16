@@ -49,6 +49,7 @@ const server = async () => {
   try {
     await sequelize.authenticate();
       // await sequelize.sync({alter:true});
+      // await sequelize.sync();
     console.log("Database connection has been established successfully");
     // check admin is exist or not
     await checkAdmin();
