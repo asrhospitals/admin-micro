@@ -3,7 +3,7 @@ const {
   Nodal,
   Hospital,
   NodalHospital,
-} = require("../../../model/associatemodels/associatemodel");
+} = require('../../../model/associatemodels/associatemodel');
 
 // 1. Add Nodal
 const addNodalHospital = async (req, res) => {

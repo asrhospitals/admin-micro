@@ -6,44 +6,44 @@ const {
   updateDepartment,
   getDepartmentById,
   getAllDepartments,
-} = require("../../controller/adminController/masterController/departmentMaster");
+} = require("../controller/adminController/masterController/departmentMaster");
 const {
   addSubDepartment,
   getSubDepartment,
   updateSubDepartment,
   getById,
   getAllSubdepartments,
-} = require("../../controller/adminController/masterController/subdepartmentMaster");
+} = require("../controller/adminController/masterController/subdepartmentMaster");
 const {
   addhsptltype,
   gethsptltype,
   updatehsptltype,
   getHospitalTypeById,
   getAllHospitalType,
-} = require("../../controller/adminController/masterController/hospitaltypeMaster");
+} = require("../controller/adminController/masterController/hospitaltypeMaster");
 const {
   addhospital,
   gethospital,
   updatehospital,
   getHospitalById,
   getAllHospitals,
-} = require("../../controller/adminController/masterController/hospitalMaster");
+} = require("../controller/adminController/masterController/hospitalMaster");
 const {
   addNodal,
   getNodal,
   updateNodal,
   getNodalById,
   getAllNodals,
-} = require("../../controller/adminController/masterController/nodalMaster");
+} = require("../controller/adminController/masterController/nodalMaster");
 const {
   addRole,
   getRole,
   updateRole,
   getRoleById,
   getAllRoles,
-} = require("../../controller/adminController/masterController/roletypeMaster");
-// const { addPhlebo, getPhlebo, updatePhlebo, getPhleboById } = require('../../controller/adminController/masterController/phlebotomistMaster');
-// const { addReception, getReception, updateReception, getReceptionById } = require('../../controller/adminController/masterController/receptionMaster');
+} = require("../controller/adminController/masterController/roletypeMaster");
+// const { addPhlebo, getPhlebo, updatePhlebo, getPhleboById } = require('../controller/adminController/masterController/phlebotomistMaster');
+// const { addReception, getReception, updateReception, getReceptionById } = require('../controller/adminController/masterController/receptionMaster');
 const {
   addNodalHospital,
   getNodalHospital,
@@ -51,40 +51,40 @@ const {
   getNodalHospitalById,
   getAllNodalHospitals,
   getHospitalByNodal,
-} = require("../../controller/adminController/masterController/attachNodalHospital");
+} = require("../controller/adminController/masterController/attachNodalHospital");
 const {
   addlabtolab,
   getlabtolab,
   updatelabtolab,
   getLabById,
-} = require("../../controller/adminController/masterController/labtolabMaster");
+} = require("../controller/adminController/masterController/labtolabMaster");
 const {
   addInstrument,
   getInstrument,
   updateInstrument,
   getInstrumentById,
   getAllInstrument,
-} = require("../../controller/adminController/masterController/instrumentMaster");
+} = require("../controller/adminController/masterController/instrumentMaster");
 const {
   addNodalInstrument,
   getNodalInstrument,
   updateNodalInstrument,
   getNodalInstrumentById,
-} = require("../../controller/adminController/masterController/attachedNodalInstrumentMaster");
-// const { addTechnician, getTechnician, updateTechnician, getTechnicianById } = require('../../controller/adminController/masterController/technicianMaster');
+} = require("../controller/adminController/masterController/attachedNodalInstrumentMaster");
+// const { addTechnician, getTechnician, updateTechnician, getTechnicianById } = require('../controller/adminController/masterController/technicianMaster');
 const {
   addRefDoctor,
   getRefDoc,
   updateRefDoc,
   getRefDocById,
-} = require("../../controller/adminController/masterController/referDoctor");
+} = require("../controller/adminController/masterController/referDoctor");
 const {
   addProfile,
   getProfile,
   updateProfile,
   getProfileEntryById,
   getAllProfileEntry,
-} = require("../../controller/adminController/masterController/profileMaster");
+} = require("../controller/adminController/masterController/profileMaster");
 const {
   addTest,
   getTest,
@@ -96,13 +96,13 @@ const {
   updateReflexTest,
   updateMandatoryFlexTest,
   searchInvestigations,
-} = require("../../controller/adminController/masterController/testMaster");
+} = require("../controller/adminController/masterController/testMaster");
 const {
   createProfile,
   fetchProfile,
   updateProfiles,
   fetchProfileById,
-} = require("../../controller/adminController/masterController/profileInvMaster");
+} = require("../controller/adminController/masterController/profileInvMaster");
 const {
   addDoctor,
   getDoctor,
@@ -110,40 +110,40 @@ const {
   getDoctorById,
   updateDoctorStatus,
   searchDoctor,
-} = require("../../controller/adminController/masterController/doctorRegistration");
+} = require("../controller/adminController/masterController/doctorRegistration");
 const {
   createSpecimenType,
   getSpecimenTypeById,
   getAllSpecimenTypes,
   updateSpecimenType,
   getAllSpecimen,
-} = require("../../controller/adminController/masterController/specimenMaster");
+} = require("../controller/adminController/masterController/specimenMaster");
 const {
   createColor,
   getAllColors,
   getColorById,
   updateColor,
-} = require("../../controller/adminController/masterController/colormaster");
+} = require("../controller/adminController/masterController/colormaster");
 const {
   createKit,
   getAllKits,
   getKitById,
   updateKit,
-} = require("../../controller/adminController/masterController/kitmaster");
+} = require("../controller/adminController/masterController/kitmaster");
 const {
   createReportType,
   getAllReportTypes,
   getReportTypeById,
   updateReportType,
   getAllReport,
-} = require("../../controller/adminController/masterController/reportTypeMaster");
+} = require("../controller/adminController/masterController/reportTypeMaster");
 const {
   addAcesstion,
   getBarcode,
   getAccessionDetails,
-} = require("../../controller/adminController/masterController/accession");
-const { addOutLab, getOutLab, getOutLabById, updateOutLab } = require("../../controller/adminController/masterController/outSourceLab");
-const { createFormula } = require("../../controller/formulaController/formulaController");
+} = require("../controller/adminController/masterController/accession");
+const { addOutLab, getOutLab, getOutLabById, updateOutLab } = require("../controller/adminController/masterController/outSourceLab");
+const { createFormula } = require("../controller/adminController/formulaController/formulaController");
 
 /// 1. ---------Department Master--------------
 // 1. Add Department

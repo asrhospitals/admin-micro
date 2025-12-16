@@ -3,23 +3,23 @@ const express = require("express");
 const app = express();
 const cors = require("cors");
 const PORT = 3001;
-const MasterRoutes = require("./routes/adminRoutes/masterRoute");
-const SignatureImageUploader = require("./controller/commonImageUploader/signatureImage");
-const CertificateUploader = require("./controller/commonImageUploader/certificateImage");
-const ProfilePicture = require("./controller/commonImageUploader/profileImage");
-const InternshipCertificate = require("./controller/commonImageUploader/intershipCertificate");
+const MasterRoutes = require("./src/routes/masterRoute");
+const SignatureImageUploader = require("./src/controller/commonImageUploader/signatureImage");
+const CertificateUploader = require("./src/controller/commonImageUploader/certificateImage");
+const ProfilePicture = require("./src/controller/commonImageUploader/profileImage");
+const InternshipCertificate = require("./src/controller/commonImageUploader/intershipCertificate");
 // const sequelize = require("./db/connectDB");
-const sequelize=require('./model');
+const sequelize=require('./src/model');
 const {
   authenticateToken,
   checkAdminRole,
-} = require("./middlewares/authMiddileware");
+} = require("./src/middlewares/authMiddileware");
 
 const {
   checkAdmin,
-} = require("./controller/authenticationController/authenticationController");
+} = require("./src/controller/authenticationController/authenticationController");
 
-const applyAdminAuditHooks = require("./hooks/adminAuditHooks");
+const applyAdminAuditHooks = require("./src/hooks/adminAuditHooks");
 
 
 

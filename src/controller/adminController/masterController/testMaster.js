@@ -91,28 +91,36 @@ const addTest = async (req, res) => {
     await transaction.commit();
     res.status(201).json({ message: "Investigation created successfully" });
   } catch (err) {
-    await transaction.rollback();
+    // Rollback if there is an active transaction
+    if (transaction) await transaction.rollback();
+
+    // 1. Handle Known Sequelize Validation Errors (400)
     if (
       err.name === "SequelizeValidationError" ||
       err.name === "SequelizeUniqueConstraintError"
     ) {
-      // Extract detailed messages
-      const validationErrors = err.errors.map((err) => ({
-        field: err.path,
-        message: err.message,
-        value: err.value,
+      const validationErrors = err.errors.map((e) => ({
+        field: e.path,
+        message: e.message,
+        value: e.value,
+        type: e.type, // Added type (e.g., 'notNull Violation')
       }));
 
       return res.status(400).json({
-        message: "Validation error",
+        message: "Validation failed",
+        error_type: err.name,
         errors: validationErrors,
       });
     }
 
-    console.error("Error creating investigation:", err);
-    res.status(500).json({
+    // 2. Handle All Other Errors (500)
+    console.error("FULL ERROR DETAILS:", err);
+
+    return res.status(500).json({
       message: "Internal server error",
-      error: "SERVER_ERROR",
+      error_name: err.name, // e.g., 'ReferenceError' or 'DatabaseError'
+      error_details: err.message, // The actual text of the error
+      error_code: err.parent?.code || "SERVER_ERROR", // Postgres error code (e.g., '23503')
     });
   }
 };
@@ -130,12 +138,18 @@ const getTest = async (req, res) => {
         {
           model: Department,
           as: "department",
-          attributes: ["id","dptname"],
+          attributes: ["id", "dptname"],
         },
         {
           model: ReportType,
           as: "reporttype",
-          attributes: ["id","reporttype","reportdescription","entrytype","entryvalues"],
+          attributes: [
+            "id",
+            "reporttype",
+            "reportdescription",
+            "entrytype",
+            "entryvalues",
+          ],
         },
 
         {
@@ -161,7 +175,7 @@ const getTest = async (req, res) => {
       offset: offset,
       distinct: true,
       // col: "id",
-      order: [["testname","ASC"]],
+      order: [["testname", "ASC"]],
     });
 
     const totalPages = Math.ceil(count / limit);
@@ -199,12 +213,18 @@ const getTestById = async (req, res) => {
         {
           model: Department,
           as: "department",
-          attributes: ["id","dptname"],
+          attributes: ["id", "dptname"],
         },
         {
           model: ReportType,
           as: "reporttype",
-          attributes: ["id","reporttype","reportdescription","entrytype","entryvalues"],
+          attributes: [
+            "id",
+            "reporttype",
+            "reportdescription",
+            "entrytype",
+            "entryvalues",
+          ],
         },
 
         {
@@ -240,28 +260,39 @@ const getTestById = async (req, res) => {
 
 // 4. Update Investigation
 const updateInvestigation = async (req, res) => {
-  const t = await Investigation.sequelize.transaction();
+  const transaction = await sequelize.transaction();
   try {
     const { id } = req.params;
 
     if (!id) {
-      await t.rollback();
+      await transaction.rollback();
       return res.status(400).json({ message: "Investigation ID is required" });
     }
 
     // Update investigation
     await Investigation.update(req.body, {
-      where: { id },
-      transaction: t,
+      user: req.user.username,
+      transaction,
     });
-    await t.commit();
+    await transaction.commit();
     res.status(200).json({
       message: "Investigation updated successfully",
     });
   } catch (err) {
-    await t.rollback();
+    await transaction.rollback();
     res.status(500).json({
-      message: `Error updating investigation: ${err}`,
+      message: "Error updating investigation",
+      details: err.message,
+      name: err.name,
+      // Sequelize specific validation errors
+      validationErrors: err.errors
+        ? err.errors.map((e) => ({
+            field: e.path,
+            message: e.message,
+            type: e.type,
+            value: e.value,
+          }))
+        : null,
     });
   }
 };
@@ -288,6 +319,7 @@ const updateSingleResult = async (req, res) => {
         investigationid: investigationId,
       },
       transaction,
+      user: req.user.username,
     });
 
     if (updatedRowsCount === 0) {
@@ -325,6 +357,7 @@ const updateNormalValues = async (req, res) => {
         resultid: resultId,
       },
       transaction,
+      user: req.user.username,
     });
 
     if (updatedRowsCount === 0) {
@@ -360,6 +393,7 @@ const updateReflexTest = async (req, res) => {
         resultid: resultId,
       },
       transaction,
+      user: req.user.username,
     });
 
     if (updatedRowsCount === 0) {
@@ -396,6 +430,7 @@ const updateMandatoryFlexTest = async (req, res) => {
         resultid: resultId,
       },
       transaction,
+      user: req.user.username,
     });
 
     if (updatedRowsCount === 0) {
@@ -438,16 +473,22 @@ const searchInvestigations = async (req, res) => {
 
     const inv = await Investigation.findAll({
       where: filters,
-       include: [
+      include: [
         {
           model: Department,
           as: "department",
-          attributes: ["id","dptname"],
+          attributes: ["id", "dptname"],
         },
         {
           model: ReportType,
           as: "reporttype",
-          attributes: ["id","reporttype","reportdescription","entrytype","entryvalues"],
+          attributes: [
+            "id",
+            "reporttype",
+            "reportdescription",
+            "entrytype",
+            "entryvalues",
+          ],
         },
 
         {

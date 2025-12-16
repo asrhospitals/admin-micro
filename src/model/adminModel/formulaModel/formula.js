@@ -1,5 +1,5 @@
 const { DataTypes } = require("sequelize");
-const sequelize = require("../../db/connectDB");
+const sequelize = require("../../../db/connectDB");
 
 const FormulaMaster = sequelize.define(
   "formula_master",

@@ -1,12 +1,7 @@
 require('dotenv').config();
 const { Sequelize } = require("sequelize");
 
-
-
-
-
-
-
+// Stagged Database
 const sequelize = new Sequelize('labdb', 'labuser', 'labpassword', {
    host: '213.210.37.3',
    dialect: 'postgres',
