@@ -34,83 +34,123 @@ const addOutLab = async (req, res) => {
 };
 
 // 2. Get Lab to Lab
+// Helper to normalize Postgres array fields into JS arrays
+const normalizeArray = val => {
+  if (!val) return [];
+  if (Array.isArray(val)) return val;
+  if (typeof val === "string") {
+    return val.replace(/[{}]/g, "").split(",").filter(Boolean);
+  }
+  return [val];
+};
+
 const getOutLab = async (req, res) => {
   try {
+    // Pagination setup
     let page = parseInt(req.query.page) || 1;
     let limit = parseInt(req.query.limit) || 10;
     let offset = (page - 1) * limit;
 
+    // Fetch paginated OutLab records
     const { count, rows } = await OutLab.findAndCountAll({
-      limit: limit,
-      offset: offset,
+      limit,
+      offset,
       order: [["id", "ASC"]],
     });
 
-    const totalpage = Math.ceil(count / limit);
+    const totalPages = Math.ceil(count / limit);
 
-    if (!rows) {
+    if (!rows || rows.length === 0) {
       return res.status(404).json({ message: "No data found" });
     }
-      // 1. Get all unique IDs from all labs on this page
-    const allInvIds = [...new Set(rows.flatMap(lab => lab.investigationids || []))];
 
-    // 2. Fetch only ID, Name, and Price for those IDs
-    const allTests = await Investigation.findAll({
-      where: { id: { [Op.in]: allInvIds } },
-      attributes: ["id", "testname", "normalprice"],
-    });
+    // For each lab, fetch investigations that overlap with its own labname[]
+    const finalData = await Promise.all(
+      rows.map(async lab => {
+        const labJson = lab.toJSON();
+        const currentLabNames = normalizeArray(lab.labname);
 
-    // 3. Attach the test details to each lab
-    const finalData = rows.map(lab => {
-      const labJson = lab.toJSON();
-      labJson.Investigations = allTests.filter(t => 
-        lab.investigationids?.includes(t.id)
-      );
-      return labJson;
-    });
+        // Fetch investigations only for this lab's names
+        const investigations = await Investigation.findAll({
+          where: {
+            labname: {
+              [Op.overlap]: currentLabNames,
+            },
+          },
+          attributes: ["id", "testname", "outsourceprice", "labname"],
+        });
 
+        labJson.Investigations = investigations.map(inv => ({
+          id: inv.id,
+          testname: inv.testname,
+          outsourceprice: normalizeArray(inv.outsourceprice), // ensure array
+          labnames: normalizeArray(inv.labname),              // ensure array
+        }));
+
+        return labJson;
+      })
+    );
+
+    // Final response
     res.status(200).json({
       data: finalData,
       meta: {
         totalItems: count,
         itemsPerPage: limit,
         currentPage: page,
-        totalPages: totalpage,
+        totalPages,
       },
     });
   } catch (error) {
-    res.status(400).send({ message: `Something went wrong ${error}` });
+    res.status(400).json({ message: "Something went wrong", details: error.message });
   }
 };
+
+
+
+
+
+
 
 // 3. Get Lab By Id
 const getOutLabById = async (req, res) => {
   try {
+    // Step 1: Fetch the lab by ID
     const lab = await OutLab.findByPk(req.params.id);
+
     if (!lab) {
-      return res
-        .status(200)
-        .json({ message: `No lab found for this id ${req.params.id}` });
+      return res.status(404).json({ message: `No lab found for this id ${req.params.id}` });
     }
-    // 2. Fetch the actual investigation details from the Investigation table
-    // We use the array stored in the OutLab table to find them
-    let tests = [];
-    if (lab.investigationids && lab.investigationids.length > 0) {
-      tests = await Investigation.findAll({
-        where: {
-          id: { [Op.in]: lab.investigationids },
+
+    // Step 2: Extract labname[] from the lab record
+    const currentLabNames = lab.labname || [];
+
+    // Step 3: Fetch investigations where labname[] overlaps with this lab's name
+    const investigations = await Investigation.findAll({
+      where: {
+        labname: {
+          [Op.overlap]: currentLabNames, // PostgreSQL array overlap
         },
-        attributes: ["id", "testname", "normalprice"],
-      });
-    }
-    return res.status(200).json({
-      ...lab.toJSON(),
-      investigations: tests,
+      },
+      attributes: ["id", "testname", "normalprice", "labname"],
     });
+
+    // Step 4: Attach matching investigations to the lab
+    const labJson = lab.toJSON();
+    labJson.Investigations = investigations.map(inv => ({
+      id: inv.id,
+      testname: inv.testname,
+      normalprice: inv.normalprice,
+      labnames: inv.labname,
+    }));
+
+    // Final response
+    res.status(200).json({ data: labJson });
   } catch (error) {
-    res.status(400).send({ message: `Something went wrong ${error}` });
+    res.status(400).json({ message: "Something went wrong", details: error.message });
   }
 };
+
 
 // 4. Update Lab
 const updateOutLab = async (req, res) => {

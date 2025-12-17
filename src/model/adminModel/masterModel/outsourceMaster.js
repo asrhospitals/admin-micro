@@ -45,11 +45,6 @@ const OutLab = sequelize.define("out_lab", {
     type: DataTypes.BOOLEAN,
     allowNull: false,
   },
-   investigationids: {
-    type: DataTypes.ARRAY(DataTypes.INTEGER),
-    allowNull: true,
-    defaultValue: []
-  },
   credit_limit:{
     type:DataTypes.INTEGER,
     allowNull:true

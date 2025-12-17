@@ -18,6 +18,7 @@ const NodalInstrument = require("../adminModel/masterModel/attachNodalInstrument
 const RoleType = require("../adminModel/masterModel/roletypeMaster");
 const ReferralDoctor = require("../adminModel/masterModel/referalDoctorMaster");
 const ReportType=require("../adminModel/masterModel/reportTypeMaster");
+const OutLab=require('../adminModel/masterModel/outsourceMaster');
 
 // Associations
 
