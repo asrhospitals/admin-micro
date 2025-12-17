@@ -271,6 +271,7 @@ const updateInvestigation = async (req, res) => {
 
     // Update investigation
     await Investigation.update(req.body, {
+      where: { id: req.params.id },
       user: req.user.username,
       transaction,
     });
