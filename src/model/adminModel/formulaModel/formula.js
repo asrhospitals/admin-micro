@@ -1,49 +1,34 @@
 const { DataTypes } = require("sequelize");
 const sequelize = require("../../../db/connectDB");
 
-const FormulaMaster = sequelize.define(
-  "formula_master",
-  {
-    id: {
-      type: DataTypes.INTEGER,
-      primaryKey: true,
-      autoIncrement: true,
-    },
-
-    formula_key: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      unique: true,
-    },
-
-    formula_name: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-
-    description: {
-      type: DataTypes.TEXT,
-    },
-
-    formula_expression: {
-      type: DataTypes.TEXT,
-      allowNull: false,
-    },
-
-    version: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-
-    status: {
-      type: DataTypes.ENUM("ACTIVE", "INACTIVE"),
-      defaultValue: "ACTIVE",
-    },
+const DerivedTestComponent = sequelize.define("derived_test_component", {
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true,
   },
-  {
-    timestamps: true,
-    tableName: "formula_masters",
+  parenttestid: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+      model: "investigations",
+      key: "id",
+    },
+    onDelete: "CASCADE",
+  },
+  childtestid: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+      model: "investigations",
+      key: "id",
+    },
+    onDelete: "CASCADE",
+  },
+  formula: {
+    type: DataTypes.STRING, 
+    // optional: e.g. "SUM" or "Direct + Indirect"
   }
-);
+},);
 
-module.exports = FormulaMaster;
+module.exports = DerivedTestComponent;

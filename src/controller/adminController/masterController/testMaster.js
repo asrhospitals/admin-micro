@@ -5,8 +5,9 @@ const NormalValue = require("../../../model/adminModel/masterModel/normalValue")
 const Mandatory = require("../../../model/adminModel/masterModel/mandatory");
 const ReflexTest = require("../../../model/adminModel/masterModel/reflexTest");
 const Department = require("../../../model/adminModel/masterModel/departmentMaster");
-const { Op, Sequelize } = require("sequelize");
+const { Op } = require("sequelize");
 const ReportType = require("../../../model/adminModel/masterModel/reportTypeMaster");
+const DerivedTestComponent = require("../../../model/adminModel/formulaModel/formula");
 
 // 1. Add Test
 const addTest = async (req, res) => {
@@ -88,6 +89,18 @@ const addTest = async (req, res) => {
       }
     }
 
+    if (
+      investigationData.derivedtest === "Yes" &&
+      req.body.childtestids?.length
+    ) {
+      const derivedLinks = req.body.childtestids.map((childId) => ({
+        parenttestid: investigation.id,
+        childtestid: childId,
+        formula: req.body.formula || null,
+      }));
+      await DerivedTestComponent.bulkCreate(derivedLinks, { transaction });
+    }
+
     await transaction.commit();
     res.status(201).json({ message: "Investigation created successfully" });
   } catch (err) {
@@ -128,13 +141,28 @@ const addTest = async (req, res) => {
 // 2. Get Test
 const getTest = async (req, res) => {
   try {
+    // Pagination parameters
     let page = parseInt(req.query.page) || 1;
     let limit = parseInt(req.query.limit) || 10;
     let offset = (page - 1) * limit;
 
+    // Fetch investigations with pagination
     const { count, rows } = await Investigation.findAndCountAll({
       attributes: { exclude: ["departmentId"] },
       include: [
+        {
+          model: DerivedTestComponent,
+          as: "components",
+          attributes: ["parenttestid", "childtestid", "formula"],
+          include: [
+            {
+              model: Investigation,
+              as: "childTest",
+              attributes: ["id", "testname"],
+            },
+          ],
+        },
+
         {
           model: Department,
           as: "department",
@@ -144,14 +172,12 @@ const getTest = async (req, res) => {
           model: ReportType,
           as: "reporttype",
           attributes: [
-            "id",
             "reporttype",
             "reportdescription",
             "entrytype",
             "entryvalues",
           ],
         },
-
         {
           model: InvestigationResult,
           as: "results",
@@ -174,7 +200,6 @@ const getTest = async (req, res) => {
       limit: limit,
       offset: offset,
       distinct: true,
-      // col: "id",
       order: [["testname", "ASC"]],
     });
 
@@ -203,23 +228,30 @@ const getTest = async (req, res) => {
 // 3. Get Test By Test by Id
 const getTestById = async (req, res) => {
   try {
-    const testId = req.params.id;
-    if (!testId) {
+    const { id } = req.params;
+    if (!id) {
       return res.status(400).json({ message: "Test ID is required" });
     }
 
-    const test = await Investigation.findByPk(testId, {
+    const test = await Investigation.findByPk(id, {
       include: [
+        {
+          model: DerivedTestComponent,
+          as: "components",
+          attributes: ["parenttestid", "childtestid", "formula"],
+          include: [
+            { model: Investigation, as: "childTest", attributes: ["testname"] },
+          ],
+        },
         {
           model: Department,
           as: "department",
-          attributes: ["id", "dptname"],
+          attributes: ["dptname"],
         },
         {
           model: ReportType,
           as: "reporttype",
           attributes: [
-            "id",
             "reporttype",
             "reportdescription",
             "entrytype",
@@ -271,7 +303,7 @@ const updateInvestigation = async (req, res) => {
 
     // Update investigation
     await Investigation.update(req.body, {
-      where: { id: req.params.id },
+      where: { id: id },
       user: req.user.username,
       transaction,
     });
@@ -299,7 +331,6 @@ const updateInvestigation = async (req, res) => {
 };
 
 // 5. Update Results
-// Route: PUT /investigations/:investigationId/results/:resultId
 const updateSingleResult = async (req, res) => {
   const transaction = await sequelize.transaction();
   try {
@@ -336,8 +367,7 @@ const updateSingleResult = async (req, res) => {
   }
 };
 
-// 7. Update NormalValues of the Result
-
+// 6. Update NormalValues of the Result
 const updateNormalValues = async (req, res) => {
   const transaction = await sequelize.transaction();
   try {
@@ -373,7 +403,7 @@ const updateNormalValues = async (req, res) => {
   }
 };
 
-// 8. Update Reflex Test
+// 7. Update Reflex Test
 const updateReflexTest = async (req, res) => {
   const transaction = await sequelize.transaction();
   try {
@@ -409,8 +439,7 @@ const updateReflexTest = async (req, res) => {
   }
 };
 
-// 9. Update Mandatory Flex Test
-
+// 8. Update Mandatory Flex Test
 const updateMandatoryFlexTest = async (req, res) => {
   const transaction = await sequelize.transaction();
   try {
@@ -450,8 +479,7 @@ const updateMandatoryFlexTest = async (req, res) => {
   }
 };
 
-// 10. Search Investigations
-
+// 9. Search Investigations
 const searchInvestigations = async (req, res) => {
   try {
     const { q } = req.query;
@@ -484,7 +512,6 @@ const searchInvestigations = async (req, res) => {
           model: ReportType,
           as: "reporttype",
           attributes: [
-            "id",
             "reporttype",
             "reportdescription",
             "entrytype",

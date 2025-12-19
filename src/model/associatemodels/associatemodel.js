@@ -19,6 +19,7 @@ const RoleType = require("../adminModel/masterModel/roletypeMaster");
 const ReferralDoctor = require("../adminModel/masterModel/referalDoctorMaster");
 const ReportType=require("../adminModel/masterModel/reportTypeMaster");
 const OutLab=require('../adminModel/masterModel/outsourceMaster');
+const DerivedTestComponent = require("../adminModel/formulaModel/formula");
 
 // Associations
 
@@ -69,6 +70,28 @@ ReportType.hasMany(Investigation, { foreignKey: "reportid" });
 // 6. Investigation → Department
 Investigation.belongsTo(Department, { foreignKey: "departmentId" });
 Department.hasMany(Investigation, { foreignKey: "departmentId" });
+
+
+
+Investigation.hasMany(DerivedTestComponent, {
+  foreignKey: "parenttestid",
+  as: "components",
+});
+
+Investigation.hasMany(DerivedTestComponent, {
+  foreignKey: "childtestid",
+  as: "parents",
+});
+
+DerivedTestComponent.belongsTo(Investigation, {
+  foreignKey: "parenttestid",
+  as: "parentTest",
+});
+
+DerivedTestComponent.belongsTo(Investigation, {
+  foreignKey: "childtestid",
+  as: "childTest",
+});
 
 
 
@@ -184,4 +207,7 @@ module.exports = {
   NodalInstrument,
   Instrument,
   RoleType,
+  ReferralDoctor,
+  OutLab,
+  DerivedTestComponent
 };
