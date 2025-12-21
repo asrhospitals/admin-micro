@@ -143,7 +143,6 @@ const {
   getAccessionDetails,
 } = require("../controller/adminController/masterController/accession");
 const { addOutLab, getOutLab, getOutLabById, updateOutLab } = require("../controller/adminController/masterController/outSourceLab");
-const { createFormula } = require("../controller/adminController/formulaController/formulaController");
 
 /// 1. ---------Department Master--------------
 // 1. Add Department
@@ -433,7 +432,5 @@ router.route("/get-out-labbyid/:id").get(getOutLabById);
 router.route("/update-out-lab/:id").put(updateOutLab);
 
 
-// 25. -------------------Formula Master------------------
-router.route('/create-formula').post(createFormula);
 
 module.exports = router;
