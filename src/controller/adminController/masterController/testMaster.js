@@ -483,22 +483,24 @@ const updateMandatoryFlexTest = async (req, res) => {
 const searchInvestigations = async (req, res) => {
   try {
     const { q } = req.query;
-    const filters = {};
-
-    if (q) {
-      const num = parseInt(q, 10);
-
-      // short inputs (1–2 chars) → starts-with, longer → contains
-      const short = q.length <= 2;
-      const pattern = short ? `${q}%` : `%${q}%`;
-
-      filters[Op.or] = [
-        // case-insensitive match for text fields
-        { testname: { [Op.iLike]: pattern } },
-        // exact numeric matches only (no LIKE)
-        ...(isNaN(num) ? [] : [{ shortcode: num }]),
-      ];
+    if (!q) {
+      return res.status(400).json({ message: "Query parameter 'q' is required." });
     }
+
+    const num = Number(q);
+    const short = q.length <= 2;
+    const pattern = short ? `${q}%` : `%${q}%`;
+
+    const filters = {
+      [Op.or]: [
+        { testname: { [Op.iLike]: pattern } },
+        { shortname: { [Op.iLike]: pattern } },
+        { cptcode: { [Op.iLike]: pattern } },
+        { loincCode: { [Op.iLike]: pattern } }, // corrected spelling
+
+        ...(Number.isNaN(num) ? [] : [{ shortcode: num }]),
+      ],
+    };
 
     const inv = await Investigation.findAll({
       where: filters,
@@ -511,44 +513,29 @@ const searchInvestigations = async (req, res) => {
         {
           model: ReportType,
           as: "reporttype",
-          attributes: [
-            "reporttype",
-            "reportdescription",
-            "entrytype",
-            "entryvalues",
-          ],
+          attributes: ["reporttype", "reportdescription", "entrytype", "entryvalues"],
         },
-
         {
           model: InvestigationResult,
           as: "results",
           include: [
-            {
-              model: NormalValue,
-              as: "normalValues",
-            },
-            {
-              model: Mandatory,
-              as: "mandatories",
-            },
-            {
-              model: ReflexTest,
-              as: "reflexTests",
-            },
+            { model: NormalValue, as: "normalValues" },
+            { model: Mandatory, as: "mandatories" },
+            { model: ReflexTest, as: "reflexTests" },
           ],
         },
       ],
-
       order: [["testname", "ASC"]],
     });
 
-    if (inv.length === 0) {
+    if (!inv || inv.length === 0) {
       return res.status(404).json({ message: "No matching test found." });
     }
 
     res.status(200).json(inv);
   } catch (err) {
-    res.status(500).json({ message: `Something went wrong ${err}` });
+    console.error("Error searching investigations:", err);
+    res.status(500).json({ message: "Internal server error." });
   }
 };
 
