@@ -295,40 +295,66 @@ const updateInvestigation = async (req, res) => {
   const transaction = await sequelize.transaction();
   try {
     const { id } = req.params;
+    const { derivedtest, components } = req.body;
 
     if (!id) {
       await transaction.rollback();
       return res.status(400).json({ message: "Investigation ID is required" });
     }
 
-    // Update investigation
+    // 1️⃣ Update Investigation
     await Investigation.update(req.body, {
-      where: { id: id },
+      where: { id },
       user: req.user.username,
       transaction,
     });
+
+    // 2️⃣ Handle Derived Tests
+    if (derivedtest === "Yes") {
+      // Validate components
+      if (!Array.isArray(components) || components.length === 0) {
+        await transaction.rollback();
+        return res.status(400).json({ 
+          message: "Components are required when derived test is enabled" 
+        });
+      }
+
+      // Remove old mappings
+      await DerivedTestComponent.destroy({
+        where: { parenttestid: id },
+        transaction,
+      });
+
+      // Insert new mappings from components
+      const rows = components.map((component) => ({
+        parenttestid: id,
+        childtestid: component.childtestid,
+        formula: component.formula || null,
+      }));
+
+      await DerivedTestComponent.bulkCreate(rows, { transaction });
+    } else if (derivedtest === "No") {
+      // Remove all derived test mappings when disabled
+      await DerivedTestComponent.destroy({
+        where: { parenttestid: id },
+        transaction,
+      });
+    }
+
     await transaction.commit();
+
     res.status(200).json({
-      message: "Investigation updated successfully",
+      message: "Investigation & Derived Tests updated successfully",
     });
   } catch (err) {
     await transaction.rollback();
     res.status(500).json({
       message: "Error updating investigation",
-      details: err.message,
-      name: err.name,
-      // Sequelize specific validation errors
-      validationErrors: err.errors
-        ? err.errors.map((e) => ({
-            field: e.path,
-            message: e.message,
-            type: e.type,
-            value: e.value,
-          }))
-        : null,
+      error: err.message,
     });
   }
 };
+
 
 // 5. Update Results
 const updateSingleResult = async (req, res) => {
