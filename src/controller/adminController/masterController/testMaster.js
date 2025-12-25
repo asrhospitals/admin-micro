@@ -5,7 +5,7 @@ const NormalValue = require("../../../model/adminModel/masterModel/normalValue")
 const Mandatory = require("../../../model/adminModel/masterModel/mandatory");
 const ReflexTest = require("../../../model/adminModel/masterModel/reflexTest");
 const Department = require("../../../model/adminModel/masterModel/departmentMaster");
-const { Op } = require("sequelize");
+const { Op, where, fn, col, cast } = require("sequelize");
 const ReportType = require("../../../model/adminModel/masterModel/reportTypeMaster");
 const DerivedTestComponent = require("../../../model/adminModel/formulaModel/formula");
 
@@ -314,8 +314,8 @@ const updateInvestigation = async (req, res) => {
       // Validate components
       if (!Array.isArray(components) || components.length === 0) {
         await transaction.rollback();
-        return res.status(400).json({ 
-          message: "Components are required when derived test is enabled" 
+        return res.status(400).json({
+          message: "Components are required when derived test is enabled",
         });
       }
 
@@ -354,7 +354,6 @@ const updateInvestigation = async (req, res) => {
     });
   }
 };
-
 
 // 5. Update Results
 const updateSingleResult = async (req, res) => {
@@ -510,7 +509,6 @@ const searchInvestigations = async (req, res) => {
   try {
     const { q } = req.query;
     const filters = {};
-
     if (q) {
       const num = parseInt(q, 10);
 
@@ -525,8 +523,16 @@ const searchInvestigations = async (req, res) => {
         { cptcode: { [Op.iLike]: pattern } },
         { loniccode: { [Op.iLike]: pattern } },
 
-         // numeric shortcode: treat as text for starts-with
-    ...(isNaN(num) ? [] : [{ shortcode: { [Op.iLike]: `${q}%` } }]),
+        // numeric shortcode: allow both exact integer and text starts-with
+       // shortcode: allow both exact integer and starts-with pattern
+     ...(isNaN(num)
+      ? []
+      : [
+          { shortcode: num }, // exact integer match
+          where(cast(col("shortcode"), "TEXT"), { [Op.iLike]: `${q}%` }), // starts-with pattern
+        ]),
+
+
       ];
     }
 
