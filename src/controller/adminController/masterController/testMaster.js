@@ -525,8 +525,8 @@ const searchInvestigations = async (req, res) => {
         { cptcode: { [Op.iLike]: pattern } },
         { loniccode: { [Op.iLike]: pattern } },
 
-        // exact numeric matches only (no LIKE)
-        ...(isNaN(num) ? [] : [{ shortcode: num }]),
+         // numeric shortcode: treat as text for starts-with
+    ...(isNaN(num) ? [] : [{ shortcode: { [Op.iLike]: `${q}%` } }]),
       ];
     }
 
